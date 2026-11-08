@@ -13,13 +13,21 @@ export type Command =
   | { t: 'fader'; id: string; value: number }
   | { t: 'fadersDown' }
   | { t: 'faderMode'; mode: FaderMode }
+  | { t: 'saveScene'; name: string; id?: string; temp?: boolean }
+  | { t: 'renameScene'; id: string; name: string }
+  | { t: 'deleteScene'; id: string }
   // 아래 셋은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
   | { t: 'outputOnStart'; on: boolean }
 
-export function runCommand(e: Engine, c: Command, now: number) {
+/** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
+// shortcut: 정식 씬 저장·덮어쓰기·삭제도 아직 PIN 없이 됨, 편집 모드(PIN)를 만들 때 운영 모드에선 임시 씬만 허용
+export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | void {
   switch (c.t) {
+    case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'
+    case 'renameScene': e.renameScene(c.id, c.name); return 'showChanged'
+    case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
     case 'clearManual': return e.clearManual(c.ids)

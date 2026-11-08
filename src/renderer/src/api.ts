@@ -22,6 +22,7 @@ export interface State {
     onStart: boolean
   }
   frame: number[]
+  saveError: string
 }
 
 declare global {
@@ -32,6 +33,7 @@ declare global {
       listPorts(): Promise<{ path: string; manufacturer?: string }[]>
       send(cmd: Command): void
       onState(cb: (s: State) => void): () => void
+      onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void
     }
   }
 }

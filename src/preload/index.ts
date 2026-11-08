@@ -5,6 +5,11 @@ contextBridge.exposeInMainWorld('bitgil', {
   getState: () => ipcRenderer.invoke('state:get'),
   listPorts: () => ipcRenderer.invoke('ports:list'),
   send: (cmd: unknown) => ipcRenderer.send('cmd', cmd),
+  onShow: (cb: (s: unknown) => void) => {
+    const h = (_e: unknown, s: unknown) => cb(s)
+    ipcRenderer.on('show', h)
+    return () => ipcRenderer.off('show', h)
+  },
   onState: (cb: (s: unknown) => void) => {
     const h = (_e: unknown, s: unknown) => cb(s)
     ipcRenderer.on('state', h)

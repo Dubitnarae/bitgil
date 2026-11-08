@@ -40,6 +40,8 @@ export interface Scene {
   name: string
   fade_seconds: number
   values: Values
+  /** 운영 중에 저장한 임시 씬(정식 씬과 구분해 표시) */
+  temp?: boolean
 }
 
 export interface Box { id: string; label: string; x: number; z: number; w: number; d: number; h: number }

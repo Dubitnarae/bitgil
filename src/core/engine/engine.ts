@@ -127,6 +127,34 @@ export class Engine {
     this.fade = null
   }
 
+  /**
+   * 지금 미리보기 화면에 보이는 값(PREVIEW + 미리보기 페이더)을 씬으로 저장한다.
+   * id를 주면 그 씬을 덮어쓰고(이름은 그대로), 없으면 새 씬을 만든다. 저장한 씬 id를 돌려준다.
+   */
+  saveScene(name: string, opts: { id?: string; temp?: boolean } = {}): string {
+    const values = clone(this.previewOutput())
+    if (opts.id) {
+      this.scene(opts.id).values = values
+      return opts.id
+    }
+    const prefix = opts.temp ? 'T-' : 'U-'
+    const n = Math.max(0, ...this.show.scenes.filter((x) => x.id.startsWith(prefix)).map((x) => Number(x.id.slice(2)) || 0)) + 1
+    const id = prefix + String(n).padStart(2, '0')
+    this.show.scenes.push({ id, name: name.trim() || id, fade_seconds: 2, values, ...(opts.temp ? { temp: true } : {}) })
+    return id
+  }
+
+  renameScene(id: string, name: string) {
+    if (name.trim()) this.scene(id).name = name.trim()
+  }
+
+  deleteScene(id: string) {
+    this.scene(id)
+    this.show.scenes = this.show.scenes.filter((x) => x.id !== id)
+    for (const m of [this.faders, this.previewFaders, this.raised]) delete m[id]
+    if (this.show.default_scene === id) delete this.show.default_scene
+  }
+
   private only(sceneId: string): Levels {
     return Object.fromEntries(this.show.scenes.map((x) => [x.id, x.id === sceneId ? 1 : 0]))
   }

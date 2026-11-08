@@ -21,8 +21,9 @@ export default function App() {
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
     const off = window.bitgil.onState(setSt)
+    const offShow = window.bitgil.onShow(setShow) // 씬 저장·이름 바꾸기 뒤 새 쇼
     window.bitgil.getState().then((s) => setSt((cur) => cur ?? s)) // 처음 상태(이미 받았으면 그대로)
-    return off
+    return () => { off(); offShow() }
   }, [])
 
   if (!show || !st) return <div className="loading">불러오는 중…</div>

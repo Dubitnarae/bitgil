@@ -1,16 +1,28 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Show } from '../core/engine/types'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
 import { EnttecProOutput, listPorts } from './dmx/enttec'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
+import { loadShowFile, saveShowFile } from './showfile'
 
-// shortcut: 지금은 시작 데이터만 읽음, 쇼 파일 저장·열기(문서\빛길, 백업 10개)는 다음 단계
-const show: Show = JSON.parse(readFileSync(join(app.getAppPath(), 'data/starter-show.bitgil.json'), 'utf-8'))
-const engine = new Engine(show)
+// 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
+const showDir = join(app.getPath('documents'), '빛길')
+const engine = new Engine(loadShowFile(showDir, join(app.getAppPath(), 'data/starter-show.bitgil.json')))
+let saveError = ''
+
+/** 쇼(씬 목록)가 바뀌면 파일에 저장하고 화면에 새 쇼를 보낸다 */
+function showChanged() {
+  try {
+    saveShowFile(showDir, engine.show)
+    saveError = ''
+  } catch (err) {
+    saveError = `쇼 파일을 저장하지 못했습니다: ${err instanceof Error ? err.message : err}`
+    console.error(err)
+  }
+  win?.webContents.send('show', engine.show)
+}
 const output = new VirtualOutput() // 채널 모니터용, 항상 마지막 프레임을 기억
 const settings = loadSettings()
 engine.faderMode = settings.faderMode
@@ -47,7 +59,8 @@ function buildState() {
       preferred: enttec.preferred,
       onStart: settings.outputOnStart
     },
-    frame: Array.from(output.last)
+    frame: Array.from(output.last),
+    saveError
   }
 }
 
@@ -61,7 +74,7 @@ setInterval(() => {
   lastSent = json
 }, 50)
 
-ipcMain.handle('show:get', () => show)
+ipcMain.handle('show:get', () => engine.show)
 ipcMain.handle('state:get', () => buildState())
 ipcMain.handle('ports:list', () => listPorts())
 ipcMain.on('cmd', (_e, c: Command) => {
@@ -70,7 +83,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (c.t === 'output') return enttec.setEnabled(c.on)
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'outputOnStart') return saveSettings({ ...settings, outputOnStart: (settings.outputOnStart = c.on) })
-    runCommand(engine, c, Date.now())
+    if (runCommand(engine, c, Date.now()) === 'showChanged') showChanged()
     if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })
   } catch (err) { console.error(err) }
 })

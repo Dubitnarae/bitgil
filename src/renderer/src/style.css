@@ -55,5 +55,10 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .fader .name { font-size: 12px; margin-top: 2px; }
 .settings p { margin: 6px 0; }
 .settings .radio { display: block; margin: 6px 0; cursor: pointer; }
-.settings .close { float: right; padding: 2px 8px; font-size: 12px; }
+.settings .close, h3 .close { float: right; padding: 2px 8px; font-size: 12px; }
 .clear { margin-top: 6px; font-size: 12px; }
+.chips button.temp { border-style: dashed; color: #ffd23f; }
+.apply input.name, .scene-manager input.name { width: auto; flex: 1; min-width: 100px; padding: 4px 6px; }
+.scene-manager { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow: auto; }
+.scene-manager .row { display: flex; align-items: center; gap: 6px; }
+.scene-manager input.name { background: #0d0f13; color: inherit; border: 1px solid #3c414c; border-radius: 4px; }

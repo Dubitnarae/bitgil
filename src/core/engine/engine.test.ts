@@ -94,3 +94,32 @@ describe('3D 계산', () => {
     expect(s.point.y).toBeCloseTo(0.4) // 무대 위
   })
 })
+
+describe('씬 저장', () => {
+  it('미리보기에 보이는 값(페이더+손 조정)을 새 씬으로 저장한다', () => {
+    const e = new Engine(structuredClone(show))
+    e.selectScene('P1-01')
+    e.setPreview(['1-1'], 'red', 7)
+    const id = e.saveScene(' 설교 ')
+    const s = e.show.scenes.find((x) => x.id === id)!
+    expect(id).toBe('U-01')
+    expect(s.name).toBe('설교')
+    expect(s.values).toEqual(e.previewOutput())
+    expect(s.values['1-1'].red).toBe(7)
+    expect(e.saveScene('임시', { temp: true })).toBe('T-01')
+    expect(e.saveScene('')).toBe('U-02')
+  })
+  it('덮어쓰기·이름 바꾸기·삭제', () => {
+    const e = new Engine(structuredClone(show))
+    e.setPreview(['1-1'], 'red', 9)
+    e.saveScene('', { id: 'P1-02' })
+    expect(e.show.scenes.find((x) => x.id === 'P1-02')!.values).toEqual({ '1-1': { red: 9 } })
+    e.renameScene('P1-02', '찬양1')
+    e.renameScene('P1-02', '  ') // 빈 이름은 무시
+    expect(e.show.scenes.find((x) => x.id === 'P1-02')!.name).toBe('찬양1')
+    e.setFader(0, 'P1-02', 1)
+    e.deleteScene('P1-02')
+    expect(e.show.scenes.some((x) => x.id === 'P1-02')).toBe(false)
+    expect(e.faders['P1-02']).toBeUndefined()
+  })
+})
