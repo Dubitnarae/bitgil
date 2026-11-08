@@ -40,6 +40,8 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'find':
     case 'editFixture':
     case 'swapFixtures':
+    case 'editVenue':
+    case 'editFixtureType':
     case 'faderMode':
     case 'dmxPort':
     case 'outputOnStart':

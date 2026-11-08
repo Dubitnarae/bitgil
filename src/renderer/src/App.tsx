@@ -11,6 +11,7 @@ import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
 import { FindPanel } from './panels/FindPanel'
+import { VenuePanel } from './panels/VenuePanel'
 
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
@@ -54,6 +55,7 @@ export default function App() {
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
           {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
           {st.editMode && <FindPanel show={show} st={st} selected={selected} />}
+          {st.editMode && <VenuePanel show={show} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <CuePanel show={show} st={st} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />

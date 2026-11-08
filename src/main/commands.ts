@@ -1,6 +1,6 @@
 import type { Engine, FaderMode } from '../core/engine/engine'
-import type { CueStep } from '../core/engine/types'
-import { editFixture, swapFixtures, type FixtureEdit } from '../core/engine/patch'
+import type { CueStep, Venue } from '../core/engine/types'
+import { editFixture, editFixtureType, editVenue, swapFixtures, type FixtureEdit, type TypeEdit } from '../core/engine/patch'
 
 /** 화면 → 메인으로 보내는 명령 */
 export type Command =
@@ -24,6 +24,8 @@ export type Command =
   | { t: 'find'; id: string | null }
   | { t: 'editFixture'; id: string; edit: FixtureEdit }
   | { t: 'swapFixtures'; a: string; b: string }
+  | { t: 'editVenue'; venue: Venue }
+  | { t: 'editFixtureType'; id: string; edit: TypeEdit }
   // 아래 넷은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
@@ -39,6 +41,8 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
     case 'editFixture': editFixture(e.show, c.id, c.edit); return 'showChanged'
     case 'swapFixtures': swapFixtures(e.show, c.a, c.b); return 'showChanged'
+    case 'editVenue': editVenue(e.show, c.venue); return 'showChanged'
+    case 'editFixtureType': editFixtureType(e.show, c.id, c.edit); return 'showChanged'
     case 'find': return e.setFind(now, c.id)
     case 'cue': return e.loadCue(c.index)
     case 'nextCue': return e.goNextCue(now)

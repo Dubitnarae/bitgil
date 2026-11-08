@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import type { Show } from './types'
 import { Engine } from './engine'
-import { editFixture, overlaps, swapFixtures } from './patch'
+import { editFixture, editFixtureType, editVenue, overlaps, swapFixtures } from './patch'
 
 const load = (): Show => JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
 const fx = (s: Show, id: string) => s.fixtures.find((f) => f.id === id)!
@@ -65,5 +65,49 @@ describe('패치 수정', () => {
     expect(overlaps(s, '2-1')).toEqual([])
     editFixture(s, '2-2', { address: fx(s, '2-1').address + 3 })
     expect(overlaps(s, '2-1')).toEqual(['2-2'])
+  })
+})
+
+describe('공간·조명 종류 수정', () => {
+  it('공간 치수·소품을 고치고 추가·삭제한다', () => {
+    const s = load()
+    const v = structuredClone(s.venue)
+    v.room.length_x = 17
+    v.battens[0].height = 5.8
+    v.props = [...v.props.slice(1), { id: 'drum', label: '드럼', x: 2, z: 7, w: 1.5, d: 1.5, h: 1 }]
+    editVenue(s, v)
+    expect(s.venue.room.length_x).toBe(17)
+    expect(s.venue.battens[0]).toMatchObject({ id: 'RD1', height: 5.8, label: 'Apron 배튼' })
+    expect(s.venue.props.map((p) => p.id)).toEqual(['piano', 'band', 'drum'])
+    expect((s.venue as unknown as { note: string }).note).toBeTruthy() // 고치지 않은 항목은 남는다
+  })
+  it('틀린 공간 값이면 아무것도 바꾸지 않는다', () => {
+    const s = load()
+    const before = JSON.stringify(s.venue)
+    const bad = (f: (v: typeof s.venue) => void) => { const v = structuredClone(s.venue); f(v); expect(() => editVenue(s, v)).toThrow() }
+    bad((v) => { v.stage.z_to = v.stage.z_from })
+    bad((v) => { v.room.ridge_height = 1 })
+    bad((v) => { v.battens.pop() })
+    bad((v) => { v.props[1].id = v.props[0].id })
+    bad((v) => { v.seating_tiers[0].height = -1 })
+    bad((v) => { (v.room as { length_x: unknown }).length_x = '' })
+    expect(JSON.stringify(s.venue)).toBe(before)
+  })
+  it('조준점을 고치고 지운다', () => {
+    const s = load()
+    const id = s.fixtures.find((f) => f.aim)!.id
+    editFixture(s, id, { aim: { x: 8, y: 1, z: 1 } })
+    expect(fx(s, id).aim).toEqual({ x: 8, y: 1, z: 1 })
+    expect(() => editFixture(s, id, { aim: { x: 8, y: NaN, z: 1 } })).toThrow()
+    editFixture(s, id, { aim: null })
+    expect(fx(s, id).aim).toBeNull()
+  })
+  it('빛 각도·팬·틸트 범위를 고친다', () => {
+    const s = load()
+    editFixtureType(s, 'wash', { beam_deg: [8, 30], pan_deg: 540, tilt_deg: 200 })
+    expect(s.fixture_types[0]).toMatchObject({ beam_deg: [8, 30], tilt_deg: 200 })
+    expect(() => editFixtureType(s, 'wash', { beam_deg: [30, 8] })).toThrow()
+    expect(() => editFixtureType(s, 'wash', { tilt_deg: 999 })).toThrow()
+    expect(s.fixture_types[0].beam_deg).toEqual([8, 30])
   })
 })

@@ -67,6 +67,9 @@ function FixtureEditor({ show, f }: { show: Show; f: Fixture }) {
   const count = type?.channel_count ?? 1
   const [addr, setAddr] = useState(String(f.address))
   const [pos, setPos] = useState({ x: String(f.position.x), y: String(f.position.y), z: String(f.position.z) })
+  // 조준점이 없으면 조명 바로 아래 바닥을 처음 값으로
+  const aim0 = f.aim ?? { x: f.position.x, y: 0, z: f.position.z }
+  const [aim, setAim] = useState({ x: String(aim0.x), y: String(aim0.y), z: String(aim0.z) })
   const sameLine = show.fixtures.filter((o) => o.id !== f.id && (o.batten ?? '') === (f.batten ?? ''))
   const [other, setOther] = useState(sameLine[0]?.id ?? '')
   const clash = overlaps(show, f.id)
@@ -108,6 +111,16 @@ function FixtureEditor({ show, f }: { show: Show; f: Fixture }) {
         <select value={f.direction} onChange={(e) => edit({ direction: e.target.value as Fixture['direction'] })}>
           {DIRS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
         </select>
+        {f.direction === 'aimed' && <>
+          <p className="hint">조준점(빛이 닿는 곳, m){f.aim ? '' : ' — 아직 없음, 저장하면 3D 빛이 그쪽을 향합니다'}</p>
+          <div className="apply">
+            {(['x', 'y', 'z'] as const).map((k) => (
+              <label key={k}>{k} <input type="number" step={0.1} min={0} value={aim[k]} onChange={(e) => setAim({ ...aim, [k]: e.target.value })} /></label>
+            ))}
+            <button disabled={(['x', 'y', 'z'] as const).some((k) => aim[k] === '' || Number(aim[k]) < 0)}
+              onClick={() => edit({ aim: { x: Number(aim.x), y: Number(aim.y), z: Number(aim.z) } })}>조준점 저장</button>
+          </div>
+        </>}
       </div>
       <div className="group">
         <h4>다른 조명과 자리 바꾸기</h4>

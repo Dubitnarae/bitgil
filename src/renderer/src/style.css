@@ -121,4 +121,6 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 .findlist button { padding: 2px 6px; font-size: 12px; }
 .findlist button.ok { color: #7fd18b; }
 .findlist button.act { background: #6b5a1a; border-color: #ffd23f; }
-.find .apply label { display: flex; align-items: center; gap: 3px; }
+.find .apply label, .venue .apply label { display: flex; align-items: center; gap: 3px; }
+.venue .apply { flex-wrap: wrap; margin-top: 6px; }
+.venue .apply b { min-width: 34px; }
