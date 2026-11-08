@@ -30,6 +30,7 @@ export type Command =
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
   | { t: 'outputOnStart'; on: boolean }
+  | { t: 'autoUpdate'; on: boolean }
   | { t: 'remote'; on: boolean }
 
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */

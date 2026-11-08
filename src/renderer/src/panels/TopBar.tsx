@@ -7,8 +7,8 @@ interface Props { st: State; view: 'live' | 'preview'; setView: (v: 'live' | 'pr
 export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
   return (
     <header className="topbar">
-      <strong className="logo">빛길 <small className="dev">개발자 KIM YEONGDO</small></strong>
-      {st.update && <small className="dev">{st.update}</small>}
+      <strong className="logo">빛길 <small className="dev">v{st.version} · 개발자 KIM YEONGDO</small>
+        {st.update.text && <small className="update">{st.update.text}</small>}</strong>
       <button className={'blackout' + (st.blackout ? ' on' : '')} onClick={() => send({ t: 'blackout', on: !st.blackout })}>
         {st.blackout ? '블랙아웃 해제' : '블랙아웃'}
       </button>

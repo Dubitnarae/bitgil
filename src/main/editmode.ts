@@ -45,6 +45,7 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'faderMode':
     case 'dmxPort':
     case 'outputOnStart':
+    case 'autoUpdate':
     case 'remote': return false
     default: return true
   }

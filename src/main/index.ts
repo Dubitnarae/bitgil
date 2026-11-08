@@ -9,7 +9,7 @@ import { loadShowFile, saveShowFile } from './showfile'
 import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
-import { startUpdater, update } from './updater'
+import { setAutoInstall, startUpdater, update } from './updater'
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
 const showDir = join(app.getPath('documents'), '빛길')
@@ -109,7 +109,7 @@ function buildState() {
     remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
     saveError,
     version: app.getVersion(),
-    update: update.text
+    update: { text: update.text, notice: update.notice, on: settings.autoUpdate, lastCheck: settings.lastUpdateCheck }
   }
 }
 
@@ -151,6 +151,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (c.t === 'output') return enttec.setEnabled(c.on)
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
+    if (c.t === 'autoUpdate') { setAutoInstall(c.on); return saveSettings({ ...settings, autoUpdate: (settings.autoUpdate = c.on) }) }
     if (c.t === 'outputOnStart') return saveSettings({ ...settings, outputOnStart: (settings.outputOnStart = c.on) })
     if (runCommand(engine, c, Date.now()) === 'showChanged') showChanged()
     if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })
@@ -158,7 +159,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
 })
 
 app.whenReady().then(() => {
-  startUpdater()
+  startUpdater({ on: settings.autoUpdate, lastCheck: settings.lastUpdateCheck, checked: (day) => saveSettings({ ...settings, lastUpdateCheck: (settings.lastUpdateCheck = day) }) })
   win = new BrowserWindow({
     width: 1400,
     height: 860,

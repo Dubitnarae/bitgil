@@ -26,7 +26,12 @@ export interface State {
   frame: number[]
   saveError: string
   version: string
-  update: string // 자동 업데이트 상태(빈 값 = 알릴 것 없음)
+  update: {
+    text: string // 상단에 보일 상태(빈 값 = 알릴 것 없음)
+    notice: { version: string; notes: string } | null // 켤 때 찾은 새 버전
+    on: boolean // 설정: 자동 업데이트
+    lastCheck: string // 마지막 확인 날
+  }
   editMode: boolean // false = 운영 모드
   pinSet: boolean
   remote: { on: boolean; code: string; urls: string[]; error: string; clients: number }

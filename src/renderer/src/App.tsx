@@ -10,6 +10,7 @@ import { ChannelMonitor } from './panels/ChannelMonitor'
 import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
+import { UpdateNotice } from './panels/UpdateNotice'
 import { FindPanel } from './panels/FindPanel'
 import { VenuePanel } from './panels/VenuePanel'
 
@@ -67,6 +68,7 @@ export default function App() {
         {monitor && <ChannelMonitor show={show} frame={st.frame} selected={selected} />}
       </footer>
       {pin && <PinDialog mode={pin} onClose={() => setPin(null)} />}
+      <UpdateNotice st={st} />
     </div>
   )
 }
