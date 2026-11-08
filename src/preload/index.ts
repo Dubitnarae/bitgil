@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('bitgil', {
   unlock: (pin: string) => ipcRenderer.invoke('edit:unlock', pin),
   setPin: (pin: string, current?: string) => ipcRenderer.invoke('edit:setPin', pin, current),
   lock: () => ipcRenderer.invoke('edit:lock'),
+  xhdImport: () => ipcRenderer.invoke('xhd:import'),
+  xhdExport: () => ipcRenderer.invoke('xhd:export'),
   onShow: (cb: (s: unknown) => void) => {
     const h = (_e: unknown, s: unknown) => cb(s)
     ipcRenderer.on('show', h)

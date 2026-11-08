@@ -47,6 +47,8 @@ declare global {
       unlock(pin: string): Promise<boolean>
       setPin(pin: string, current?: string): Promise<boolean>
       lock(): Promise<void>
+      xhdImport(): Promise<string>
+      xhdExport(): Promise<string>
       onState(cb: (s: State) => void): () => void
       onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void
     }

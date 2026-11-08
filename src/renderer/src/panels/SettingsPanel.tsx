@@ -14,6 +14,7 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
   const [ports, setPorts] = useState<{ path: string; manufacturer?: string }[]>([])
   const refresh = () => window.bitgil.listPorts().then(setPorts, () => setPorts([]))
   useEffect(() => { refresh() }, [])
+  const [xhdMsg, setXhdMsg] = useState('')
   return (
     <section className="panel settings">
       <h3>설정 <button className="close" onClick={onClose}>닫기</button></h3>
@@ -71,6 +72,17 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         <input type="checkbox" checked={st.update.on} onChange={(e) => send({ t: 'autoUpdate', on: e.target.checked })} />
         업데이트 확인 — 하루 한 번 새 버전을 확인해 알려 줌. 설치할지는 그때 고름 (설치는 프로그램을 끌 때, 예배 중에는 안 함)
       </label>
+      </div>
+
+      <div className="group">
+      <h4>기존 콘솔 (Mini Pearl 1024 Pro) 백업 파일</h4>
+      <p className="hint">콘솔에서 USB로 저장한 .XHD 파일. 씬 번호는 콘솔 자리 그대로 P페이지-페이더 (예: P1-03)</p>
+      <button onClick={() => confirm('콘솔 백업의 씬을 불러올까요?\n같은 번호(P1-01 등) 씬은 콘솔 값으로 바뀌고, 지금 쇼는 백업 폴더에 남습니다.') && window.bitgil.xhdImport().then(setXhdMsg)}>콘솔 백업에서 씬 불러오기</button>{' '}
+      <button onClick={() => window.bitgil.xhdExport().then(setXhdMsg)}>콘솔 백업 파일로 내보내기</button>
+      <p className="hint">내보내기: 원본 백업을 고르면 그 복사본에 빛길 씬 값을 써 넣어 새 파일로 저장합니다(원본은 그대로).
+        콘솔에 이미 기록된 자리만 쓸 수 있어, 새 자리에 넣으려면 콘솔에서 그 페이더에 아무 장면이나 먼저 기록하고 백업하세요.
+        콘솔에 넣어 보는 시험은 예배가 없는 날에, 원본 백업을 꼭 따로 두고 하세요.</p>
+      {xhdMsg && <p className="hint"><b>{xhdMsg}</b></p>}
       </div>
 
       <div className="group">

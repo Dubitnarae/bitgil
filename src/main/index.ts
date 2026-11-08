@@ -1,4 +1,6 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { mergeScenes, scenesToXhd, xhdToScenes } from './xhd'
 import { join } from 'node:path'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
@@ -142,6 +144,36 @@ ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
   return true
 })
 ipcMain.handle('edit:lock', () => { edit.close(); endFind() })
+
+// 기존 콘솔(Mini Pearl 1024 Pro) 백업 파일: 편집 모드에서만. 결과 문구를 화면에 돌려준다.
+const xhdFilter = [{ name: 'Mini Pearl 백업 (.XHD)', extensions: ['XHD', 'xhd'] }]
+ipcMain.handle('xhd:import', async () => {
+  if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
+  const r = await dialog.showOpenDialog(win, { title: '콘솔 백업에서 씬 불러오기', filters: xhdFilter, properties: ['openFile'] })
+  if (r.canceled || !r.filePaths[0]) return ''
+  try {
+    const { replaced, added } = mergeScenes(engine.show, xhdToScenes(readFileSync(r.filePaths[0]), engine.show))
+    showChanged()
+    return `불러왔습니다: 새 씬 ${added}개, 같은 번호라 값을 바꾼 씬 ${replaced}개 (이전 쇼는 백업 폴더에 있음)`
+  } catch (err) { return `불러오지 못했습니다: ${err instanceof Error ? err.message : err}` }
+})
+ipcMain.handle('xhd:export', async () => {
+  if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
+  const src = await dialog.showOpenDialog(win, { title: '바탕이 될 콘솔 원본 백업 고르기 (원본은 바뀌지 않음)', filters: xhdFilter, properties: ['openFile'] })
+  if (src.canceled || !src.filePaths[0]) return ''
+  const base = src.filePaths[0]
+  const dst = await dialog.showSaveDialog(win, { title: '내보낼 파일 이름', defaultPath: base.replace(/\.xhd$/i, '') + ' 빛길.XHD', filters: xhdFilter })
+  if (dst.canceled || !dst.filePath) return ''
+  if (dst.filePath.toLowerCase() === base.toLowerCase()) return '원본 백업은 그대로 두어야 합니다. 다른 이름으로 저장해 주세요'
+  try {
+    const { buf, written, skipped, unpatched } = scenesToXhd(readFileSync(base), engine.show)
+    writeFileSync(dst.filePath + '.tmp', buf)
+    renameSync(dst.filePath + '.tmp', dst.filePath)
+    return `내보냈습니다: 씬 ${written.length}개` +
+      (skipped.length ? ` · 콘솔에 같은 자리(P페이지-페이더)가 없어 뺀 씬: ${skipped.join(', ')}` : '') +
+      (unpatched ? ` · 콘솔 패치에 없는 채널 값 ${unpatched}개는 빠짐` : '')
+  } catch (err) { return `내보내지 못했습니다: ${err instanceof Error ? err.message : err}` }
+})
 
 ipcMain.on('cmd', (_e, c: Command) => {
   try {
