@@ -34,6 +34,8 @@ input{font-size:24px;width:100%;box-sizing:border-box;padding:12px;margin:10px 0
 </div>
 <script>
 var $=function(id){return document.getElementById(id)}, st=null, es=null;
+var q=new URLSearchParams(location.search).get('code');
+if(q){localStorage.setItem('bitgil-code',q);history.replaceState(null,'','/')} // QR로 들어오면 코드를 기억하고 주소창에서 지움
 var code=localStorage.getItem('bitgil-code')||'';
 function show(login,msg){$('login').style.display=login?'block':'none';$('main').style.display=login?'none':'block';$('msg').textContent=msg||''}
 function connect(){

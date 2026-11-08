@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { State } from '../api'
 import { send } from '../api'
+import QRCode from 'qrcode'
+
+/** 폰으로 찍으면 접속 코드까지 넣어 바로 연결되는 QR */
+function RemoteQr({ url }: { url: string }) {
+  const [src, setSrc] = useState('')
+  useEffect(() => { QRCode.toDataURL(url, { width: 180, margin: 1 }).then(setSrc, () => setSrc('')) }, [url])
+  return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
+}
 
 export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose: () => void; onChangePin: () => void }) {
   const [ports, setPorts] = useState<{ path: string; manufacturer?: string }[]>([])
@@ -39,7 +47,9 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         켜기 — 폰에서 상태 보기, [다음 씬]·[기본 조명]·[블랙아웃]
       </label>
       {st.remote.on && <p className="hint">
-        폰 주소창: {st.remote.urls.join('  또는  ') || '(Wi-Fi 연결 없음)'}<br />
+        폰 카메라로 찍으면 바로 연결됩니다(코드 입력 필요 없음)
+        {st.remote.urls.map((u) => <RemoteQr key={u} url={`${u}/?code=${st.remote.code}`} />)}
+        직접 넣을 때 주소: {st.remote.urls.join('  또는  ') || '(Wi-Fi 연결 없음)'}<br />
         원격 접속 코드: <b>{st.remote.code}</b> · 지금 연결된 폰 {st.remote.clients}대
         {st.remote.error && <><br /><span style={{ color: '#ff6b6b' }}>{st.remote.error}</span></>}
       </p>}
