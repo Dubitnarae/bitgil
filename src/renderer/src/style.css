@@ -65,3 +65,4 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 10; }
 .modal .panel { width: 340px; }
 .modal input { display: block; width: 100%; margin: 6px 0; font-size: 20px; letter-spacing: 8px; text-align: center; }
+.resetview { position: absolute; right: 10px; top: 8px; }
