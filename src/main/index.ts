@@ -5,11 +5,14 @@ import type { Show } from '../core/engine/types'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
 import { runCommand, type Command } from './commands'
+import { loadSettings, saveSettings } from './settings'
 
 // shortcut: 지금은 시작 데이터만 읽음, 쇼 파일 저장·열기(문서\빛길, 백업 10개)는 다음 단계
 const show: Show = JSON.parse(readFileSync(join(app.getAppPath(), 'data/starter-show.bitgil.json'), 'utf-8'))
 const engine = new Engine(show)
 const output = new VirtualOutput()
+const settings = loadSettings()
+engine.faderMode = settings.faderMode
 let win: BrowserWindow | null = null
 
 // DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
@@ -19,9 +22,15 @@ setInterval(() => output.send(engine.frame(Date.now())), 25)
 let lastSent = ''
 setInterval(() => {
   if (!win) return
+  const now = Date.now()
   const state = {
-    live: engine.current(Date.now()),
+    live: engine.output(now),
     preview: engine.preview,
+    previewOut: engine.previewOutput(),
+    faders: engine.currentFaders(now),
+    previewFaders: engine.previewFaders,
+    faderMode: engine.faderMode,
+    pending: engine.pending,
     master: engine.master,
     blackout: engine.blackout,
     fading: engine.fading,
@@ -35,7 +44,11 @@ setInterval(() => {
 
 ipcMain.handle('show:get', () => show)
 ipcMain.on('cmd', (_e, c: Command) => {
-  try { runCommand(engine, c, Date.now()) } catch (err) { console.error(err) }
+  try {
+    runCommand(engine, c, Date.now())
+    // shortcut: 설정은 아직 PIN 없이 바꿀 수 있음, 편집 모드(PIN)를 만들 때 편집 모드에서만 허용
+    if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })
+  } catch (err) { console.error(err) }
 })
 
 app.whenReady().then(() => {

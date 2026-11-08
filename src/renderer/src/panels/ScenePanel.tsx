@@ -5,7 +5,6 @@ import { send } from '../api'
 interface Props { show: Show; st: State; fade: number; setFade: (n: number) => void }
 
 export function ScenePanel({ show, st, fade, setFade }: Props) {
-  const pending = !st.fading && JSON.stringify(st.preview) !== JSON.stringify(st.live)
   return (
     <section className="panel">
       <h3>씬</h3>
@@ -22,7 +21,7 @@ export function ScenePanel({ show, st, fade, setFade }: Props) {
         </label>
         <button onClick={() => send({ t: 'cancel' })}>취소</button>
       </div>
-      {pending && <p className="warn">적용하지 않은 변경이 있습니다.</p>}
+      {st.pending && <p className="warn">적용하지 않은 변경이 있습니다.</p>}
     </section>
   )
 }

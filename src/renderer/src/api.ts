@@ -1,9 +1,15 @@
 import type { Values } from '../../core/engine/types'
 import type { Command } from '../../main/commands'
+import type { FaderMode } from '../../core/engine/engine'
 
 export interface State {
   live: Values
   preview: Values
+  previewOut: Values
+  faders: Record<string, number>
+  previewFaders: Record<string, number>
+  faderMode: FaderMode
+  pending: boolean
   master: number
   blackout: boolean
   fading: boolean

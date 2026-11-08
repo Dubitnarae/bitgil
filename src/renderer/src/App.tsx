@@ -6,6 +6,8 @@ import { TopBar } from './panels/TopBar'
 import { FixturePanel } from './panels/FixturePanel'
 import { ScenePanel } from './panels/ScenePanel'
 import { ChannelMonitor } from './panels/ChannelMonitor'
+import { FaderPanel } from './panels/FaderPanel'
+import { SettingsPanel } from './panels/SettingsPanel'
 
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
@@ -14,6 +16,7 @@ export default function App() {
   const [view, setView] = useState<'live' | 'preview'>('preview')
   const [fade, setFade] = useState(2)
   const [monitor, setMonitor] = useState(false)
+  const [settings, setSettings] = useState(false)
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
@@ -24,13 +27,13 @@ export default function App() {
 
   const onSelect = (id: string, add: boolean) =>
     setSelected((s) => (add ? (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]) : [id]))
-  // 미리보기 화면은 전체 밝기·블랙아웃을 빼고 편집 값만 보여준다
-  const values = view === 'live' ? st.live : st.preview
+  // 미리보기 화면은 전체 밝기·블랙아웃을 빼고 편집 값(+미리보기 페이더)만 보여준다
+  const values = view === 'live' ? st.live : st.previewOut
   const master = view === 'live' ? (st.blackout ? 0 : st.master) : 1
 
   return (
     <div className="app">
-      <TopBar st={st} view={view} setView={setView} />
+      <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} />
       <main>
         <div className={'view ' + view}>
           <Stage3D show={show} values={values} master={master} selected={selected}
@@ -38,11 +41,13 @@ export default function App() {
           <span className="viewtag">{view === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>
         <aside>
+          {settings && <SettingsPanel st={st} onClose={() => setSettings(false)} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />
         </aside>
       </main>
       <footer>
+        <FaderPanel show={show} st={st} />
         <button onClick={() => setMonitor(!monitor)}>{monitor ? '채널 모니터 닫기' : '채널 모니터 열기'}</button>
         {monitor && <ChannelMonitor show={show} frame={st.frame} selected={selected} />}
       </footer>
