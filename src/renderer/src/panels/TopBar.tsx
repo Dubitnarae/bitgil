@@ -25,9 +25,23 @@ export function TopBar({ st, view, setView, onSettings }: Props) {
       </div>
       {st.fading && <span className="badge">페이드 중…</span>}
       <button onClick={onSettings}>설정</button>
-      <span className={'status' + (st.output.connected ? '' : ' bad')}>
-        {st.output.name}{st.output.connected ? ' · 연결됨' : ' · 연결 끊김'}
-      </span>
+      <OutputStatus o={st.output} />
     </header>
+  )
+}
+
+/** 실제 장비 출력: 켜기/대기 버튼 + 상태. 켰는데 연결이 안 되면 빨갛게(2초마다 다시 연결 중) */
+function OutputStatus({ o }: { o: State['output'] }) {
+  const cls = !o.enabled ? 'status idle' : o.connected ? 'status' : 'status bad'
+  const text = !o.enabled ? '출력 대기 (장비로 안 보냄)'
+    : o.connected ? `장비 출력 중 · ${o.port}`
+    : '연결 안 됨 · 다시 연결 중…'
+  return (
+    <>
+      <button className={o.enabled ? 'on' : ''} onClick={() => send({ t: 'output', on: !o.enabled })}>
+        {o.enabled ? '출력 끄기(대기)' : '출력 켜기'}
+      </button>
+      <span className={cls} title={o.error}>{text}</span>
+    </>
   )
 }

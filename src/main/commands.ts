@@ -13,6 +13,10 @@ export type Command =
   | { t: 'fader'; id: string; value: number }
   | { t: 'fadersDown' }
   | { t: 'faderMode'; mode: FaderMode }
+  // 아래 셋은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
+  | { t: 'output'; on: boolean }
+  | { t: 'dmxPort'; path: string }
+  | { t: 'outputOnStart'; on: boolean }
 
 export function runCommand(e: Engine, c: Command, now: number) {
   switch (c.t) {

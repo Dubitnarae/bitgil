@@ -17,6 +17,9 @@ button:hover { background: #343945; }
 .badge { color: #ffd23f; }
 .status { padding: 4px 8px; border-radius: 6px; background: #1f4a2c; }
 .status.bad { background: #b31f1f; }
+.status.idle { background: #4a4126; }
+.topbar button.on { background: #1f4a2c; }
+.topbar button, .topbar .status, .topbar label { white-space: nowrap; }
 main { flex: 1; display: flex; min-height: 0; }
 .view { flex: 1; position: relative; border: 2px solid transparent; }
 .view.live { border-color: #b33; }

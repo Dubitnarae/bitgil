@@ -5,9 +5,13 @@ import type { FaderMode } from '../core/engine/engine'
 
 export interface Settings {
   faderMode: FaderMode
+  /** DMX 인터페이스 포트(예: COM5). 빈 값이면 자동 찾기 */
+  dmxPort: string
+  /** 프로그램을 켜자마자 실제 장비로 출력할지(기본: 출력 대기) */
+  outputOnStart: boolean
 }
 
-const DEFAULTS: Settings = { faderMode: 'live' }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

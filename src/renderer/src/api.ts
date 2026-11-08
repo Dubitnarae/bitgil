@@ -13,7 +13,14 @@ export interface State {
   master: number
   blackout: boolean
   fading: boolean
-  output: { name: string; connected: boolean }
+  output: {
+    enabled: boolean // 출력 켜짐(false = 출력 대기)
+    connected: boolean
+    port: string // 지금 연결된 포트
+    error: string
+    preferred: string // 설정한 포트, 빈 값 = 자동
+    onStart: boolean
+  }
   frame: number[]
 }
 
@@ -22,6 +29,7 @@ declare global {
     bitgil: {
       getShow(): Promise<import('../../core/engine/types').Show>
       getState(): Promise<State>
+      listPorts(): Promise<{ path: string; manufacturer?: string }[]>
       send(cmd: Command): void
       onState(cb: (s: State) => void): () => void
     }
