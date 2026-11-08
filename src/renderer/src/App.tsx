@@ -5,6 +5,7 @@ import { Stage3D } from './3d/Stage3D'
 import { TopBar } from './panels/TopBar'
 import { FixturePanel } from './panels/FixturePanel'
 import { ScenePanel } from './panels/ScenePanel'
+import { CuePanel } from './panels/CuePanel'
 import { ChannelMonitor } from './panels/ChannelMonitor'
 import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
@@ -49,6 +50,7 @@ export default function App() {
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
           {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('set')} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
+          <CuePanel show={show} st={st} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />
         </aside>
       </main>

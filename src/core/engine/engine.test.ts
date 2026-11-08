@@ -123,3 +123,26 @@ describe('씬 저장', () => {
     expect(e.faders['P1-02']).toBeUndefined()
   })
 })
+
+describe('순서 목록', () => {
+  it('줄을 올리면 미리보기에만 그 씬, 없는 씬·이상한 페이드는 걸러진다', () => {
+    const e = new Engine(structuredClone(show))
+    const [a, b] = e.show.scenes
+    e.setCuelist([{ scene: a.id, fade: 3 }, { scene: '없음', fade: 1 }, { scene: b.id, fade: 99 }])
+    expect(e.show.cuelist).toEqual([{ scene: a.id, fade: 3 }, { scene: b.id, fade: 60 }])
+    e.loadCue(1)
+    expect(e.cue).toBe(1)
+    expect(e.previewFaders[b.id]).toBe(1)
+    expect(e.faders[b.id] ?? 0).toBe(0) // [적용] 전엔 실제 출력 그대로
+    expect(() => e.loadCue(5)).toThrow()
+  })
+  it('씬을 지우면 그 씬을 쓰던 줄도 빠지고 위치가 당겨진다', () => {
+    const e = new Engine(structuredClone(show))
+    const [a, b] = e.show.scenes
+    e.setCuelist([{ scene: a.id, fade: 2 }, { scene: b.id, fade: 2 }])
+    e.loadCue(1)
+    e.deleteScene(b.id)
+    expect(e.show.cuelist).toEqual([{ scene: a.id, fade: 2 }])
+    expect(e.cue).toBe(0)
+  })
+})

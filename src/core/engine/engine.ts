@@ -1,4 +1,4 @@
-import type { Show, Values } from './types'
+import type { CueStep, Show, Values } from './types'
 import { clone, lerpFixture } from './values'
 import { buildFrame } from './frame'
 import { layerScenes, lerpLevels, type Levels } from './faders'
@@ -19,6 +19,7 @@ export class Engine {
   faders: Levels = {} // LIVE 페이더 위치(페이드가 끝났을 때 목표)
   previewFaders: Levels = {}
   faderMode: FaderMode = 'live'
+  cue = -1 // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 아직 시작 전)
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
   private raised: Record<string, number> = {} // 페이더를 올린 순서(LTP: 나중에 올린 씬이 이김)
@@ -144,6 +145,22 @@ export class Engine {
     return id
   }
 
+  /** 순서 목록 i번째 줄을 미리보기에 올린다(씬 버튼과 같음). [적용]해야 나간다. */
+  loadCue(i: number) {
+    const step = this.show.cuelist[i]
+    if (!step) throw new Error(`순서 목록에 ${i + 1}번째 줄이 없음`)
+    this.selectScene(step.scene)
+    this.cue = i
+  }
+
+  /** 순서 목록 통째로 바꾸기(추가·삭제·순서·페이드). 없는 씬은 뺀다. */
+  setCuelist(list: CueStep[]) {
+    this.show.cuelist = list
+      .filter((c) => this.show.scenes.some((s) => s.id === c.scene))
+      .map((c) => ({ scene: c.scene, fade: Math.max(0, Math.min(60, Number(c.fade) || 0)) }))
+    this.cue = Math.min(this.cue, this.show.cuelist.length - 1)
+  }
+
   renameScene(id: string, name: string) {
     if (name.trim()) this.scene(id).name = name.trim()
   }
@@ -151,6 +168,7 @@ export class Engine {
   deleteScene(id: string) {
     this.scene(id)
     this.show.scenes = this.show.scenes.filter((x) => x.id !== id)
+    this.setCuelist(this.show.cuelist) // 지운 씬을 쓰던 순서 줄도 뺀다
     for (const m of [this.faders, this.previewFaders, this.raised]) delete m[id]
     if (this.show.default_scene === id) delete this.show.default_scene
   }

@@ -1,4 +1,5 @@
 import type { Engine, FaderMode } from '../core/engine/engine'
+import type { CueStep } from '../core/engine/types'
 
 /** 화면 → 메인으로 보내는 명령 */
 export type Command =
@@ -16,6 +17,8 @@ export type Command =
   | { t: 'saveScene'; name: string; id?: string; temp?: boolean }
   | { t: 'renameScene'; id: string; name: string }
   | { t: 'deleteScene'; id: string }
+  | { t: 'cue'; index: number }
+  | { t: 'setCuelist'; list: CueStep[] }
   // 아래 셋은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
@@ -27,6 +30,8 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'
     case 'renameScene': e.renameScene(c.id, c.name); return 'showChanged'
     case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
+    case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
+    case 'cue': return e.loadCue(c.index)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
     case 'clearManual': return e.clearManual(c.ids)

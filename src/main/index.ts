@@ -50,6 +50,7 @@ function buildState() {
     previewFaders: engine.previewFaders,
     faderMode: engine.faderMode,
     pending: engine.pending,
+    cue: engine.cue,
     master: engine.master,
     blackout: engine.blackout,
     fading: engine.fading,

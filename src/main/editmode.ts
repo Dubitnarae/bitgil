@@ -29,13 +29,14 @@ export class EditMode {
   touch(now: number) { if (this.isOpen(now)) this.open(now) }
 }
 
-/** 운영 모드에서도 되는 명령인지. 정식 씬 저장·덮어쓰기·이름·삭제와 설정은 편집 모드에서만. */
+/** 운영 모드에서도 되는 명령인지. 정식 씬 저장·덮어쓰기·이름·삭제, 순서 목록 고치기, 설정은 편집 모드에서만. */
 export function allowedInOperation(c: Command, show: Show): boolean {
   const isTemp = (id: string) => !!show.scenes.find((s) => s.id === id)?.temp
   switch (c.t) {
     case 'saveScene': return c.id ? isTemp(c.id) : !!c.temp
     case 'renameScene':
     case 'deleteScene': return isTemp(c.id)
+    case 'setCuelist':
     case 'faderMode':
     case 'dmxPort':
     case 'outputOnStart': return false

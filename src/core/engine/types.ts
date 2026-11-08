@@ -62,9 +62,12 @@ export interface Show {
   fixtures: Fixture[]
   groups: { id: string; label: string; members: string[] }[]
   scenes: Scene[]
-  cuelist: unknown[]
+  cuelist: CueStep[]
   default_scene?: string
 }
+
+/** 순서 목록 한 줄: 어떤 씬을 몇 초 페이드로 */
+export interface CueStep { scene: string; fade: number }
 
 /** 조명 id → 속성 이름 → 0~255 */
 export type Values = Record<string, Record<string, number>>

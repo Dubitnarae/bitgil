@@ -10,6 +10,7 @@ export interface State {
   previewFaders: Record<string, number>
   faderMode: FaderMode
   pending: boolean
+  cue: number // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 시작 전)
   master: number
   blackout: boolean
   fading: boolean
