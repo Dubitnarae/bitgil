@@ -11,11 +11,14 @@
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dist": "electron-vite build && electron-builder --win",
+    "release": "electron-vite build && electron-builder --win --publish always"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
+    "electron-updater": "^6.8.11",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -30,9 +33,35 @@
     "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^6.2.1",
     "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
     "electron-vite": "^6.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"
+  },
+  "repository": "https://github.com/Dubitnarae/bitgil",
+  "build": {
+    "appId": "kr.dubitnarae.bitgil",
+    "productName": "빛길",
+    "artifactName": "bitgil-setup-${version}.${ext}",
+    "files": [
+      "out/**",
+      "data/**",
+      "package.json"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "빛길"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Dubitnarae",
+      "repo": "bitgil"
+    }
   }
 }

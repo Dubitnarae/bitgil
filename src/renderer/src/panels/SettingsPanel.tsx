@@ -68,7 +68,7 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
       <h4>편집 모드 PIN</h4>
       <button onClick={onChangePin}>PIN 바꾸기</button>
       </div>
-      <p className="hint">빛길 · 개발자 KIM YEONGDO</p>
+      <p className="hint">빛길 v{st.version} · 개발자 KIM YEONGDO</p>
     </section>
   )
 }

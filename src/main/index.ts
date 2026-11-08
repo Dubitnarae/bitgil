@@ -9,6 +9,7 @@ import { loadShowFile, saveShowFile } from './showfile'
 import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
+import { startUpdater, update } from './updater'
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
 const showDir = join(app.getPath('documents'), '빛길')
@@ -106,7 +107,9 @@ function buildState() {
     editMode: edit.isOpen(now),
     pinSet: !!settings.pinHash,
     remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
-    saveError
+    saveError,
+    version: app.getVersion(),
+    update: update.text
   }
 }
 
@@ -155,6 +158,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
 })
 
 app.whenReady().then(() => {
+  startUpdater()
   win = new BrowserWindow({
     width: 1400,
     height: 860,

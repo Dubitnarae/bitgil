@@ -8,6 +8,7 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
   return (
     <header className="topbar">
       <strong className="logo">빛길 <small className="dev">개발자 KIM YEONGDO</small></strong>
+      {st.update && <small className="dev">{st.update}</small>}
       <button className={'blackout' + (st.blackout ? ' on' : '')} onClick={() => send({ t: 'blackout', on: !st.blackout })}>
         {st.blackout ? '블랙아웃 해제' : '블랙아웃'}
       </button>
