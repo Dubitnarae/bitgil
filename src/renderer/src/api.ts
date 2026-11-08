@@ -21,6 +21,7 @@ declare global {
   interface Window {
     bitgil: {
       getShow(): Promise<import('../../core/engine/types').Show>
+      getState(): Promise<State>
       send(cmd: Command): void
       onState(cb: (s: State) => void): () => void
     }

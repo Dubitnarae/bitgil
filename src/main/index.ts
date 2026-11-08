@@ -18,12 +18,9 @@ let win: BrowserWindow | null = null
 // DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
 setInterval(() => output.send(engine.frame(Date.now())), 25)
 
-// 화면에는 바뀌었을 때만 상태를 보낸다(초당 최대 20번)
-let lastSent = ''
-setInterval(() => {
-  if (!win) return
+function buildState() {
   const now = Date.now()
-  const state = {
+  return {
     live: engine.output(now),
     preview: engine.preview,
     previewOut: engine.previewOutput(),
@@ -37,12 +34,20 @@ setInterval(() => {
     output: { name: output.name, connected: output.connected },
     frame: Array.from(output.last)
   }
+}
+
+// 화면에는 바뀌었을 때만 상태를 보낸다(초당 최대 20번). 처음 상태는 화면이 준비되면 직접 가져간다(state:get).
+let lastSent = ''
+setInterval(() => {
+  if (!win) return
+  const state = buildState()
   const json = JSON.stringify(state)
   if (json !== lastSent) win.webContents.send('state', state)
   lastSent = json
 }, 50)
 
 ipcMain.handle('show:get', () => show)
+ipcMain.handle('state:get', () => buildState())
 ipcMain.on('cmd', (_e, c: Command) => {
   try {
     runCommand(engine, c, Date.now())
@@ -63,8 +68,6 @@ app.whenReady().then(() => {
   win.on('closed', () => (win = null))
   if (process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)
   else win.loadFile(join(__dirname, '../renderer/index.html'))
-  // 새 창을 열 때 이전 상태를 다시 보내도록
-  win.webContents.on('did-finish-load', () => (lastSent = ''))
 })
 
 app.on('window-all-closed', () => app.quit())

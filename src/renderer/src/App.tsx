@@ -20,7 +20,9 @@ export default function App() {
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
-    return window.bitgil.onState(setSt)
+    const off = window.bitgil.onState(setSt)
+    window.bitgil.getState().then((s) => setSt((cur) => cur ?? s)) // 처음 상태(이미 받았으면 그대로)
+    return off
   }, [])
 
   if (!show || !st) return <div className="loading">불러오는 중…</div>
