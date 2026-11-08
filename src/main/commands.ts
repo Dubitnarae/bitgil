@@ -19,10 +19,12 @@ export type Command =
   | { t: 'deleteScene'; id: string }
   | { t: 'cue'; index: number }
   | { t: 'setCuelist'; list: CueStep[] }
-  // 아래 셋은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
+  | { t: 'nextCue' }
+  // 아래 넷은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
   | { t: 'outputOnStart'; on: boolean }
+  | { t: 'remote'; on: boolean }
 
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
 export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | void {
@@ -32,6 +34,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
     case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
     case 'cue': return e.loadCue(c.index)
+    case 'nextCue': return e.goNextCue(now)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
     case 'clearManual': return e.clearManual(c.ids)

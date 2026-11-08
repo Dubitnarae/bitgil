@@ -39,7 +39,8 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'setCuelist':
     case 'faderMode':
     case 'dmxPort':
-    case 'outputOnStart': return false
+    case 'outputOnStart':
+    case 'remote': return false
     default: return true
   }
 }

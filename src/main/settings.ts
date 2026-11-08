@@ -11,9 +11,13 @@ export interface Settings {
   outputOnStart: boolean
   /** 편집 모드 PIN 해시('소금:해시'). 빈 값 = 아직 안 정함 */
   pinHash: string
+  /** 폰 원격 켜기(기본 끔: 켜면 같은 Wi-Fi에서 접속 가능) */
+  remoteOn: boolean
+  /** 폰 원격 접속 코드(6자리). 빈 값이면 처음 켤 때 만든다 */
+  remoteCode: string
 }
 
-const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '' }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '' }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

@@ -7,6 +7,8 @@ import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, saveShowFile } from './showfile'
 import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
+import { randomInt } from 'node:crypto'
+import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
 const showDir = join(app.getPath('documents'), '빛길')
@@ -32,6 +34,39 @@ const enttec = new EnttecProOutput(settings.dmxPort)
 enttec.setEnabled(settings.outputOnStart)
 let win: BrowserWindow | null = null
 const edit = new EditMode() // 시작은 항상 운영 모드
+
+// 폰 원격: 설정에서 켰을 때만 같은 Wi-Fi에 연다. 접속 코드는 처음 한 번 만든다.
+if (!settings.remoteCode) saveSettings({ ...settings, remoteCode: (settings.remoteCode = String(randomInt(1_000_000)).padStart(6, '0')) })
+let remote: ReturnType<typeof startRemote> | null = null
+let remoteError = ''
+function setRemote(on: boolean) {
+  remote?.close()
+  remote = null
+  remoteError = ''
+  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, onError: (m) => { remoteError = m; console.error(m) } })
+}
+const sceneName = (id?: string) => engine.show.scenes.find((s) => s.id === id)?.name ?? ''
+function phoneState(): PhoneState {
+  const f = engine.currentFaders(Date.now())
+  const top = Object.entries(f).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0]
+  return {
+    scene: top ? sceneName(top[0]) : '없음',
+    cue: engine.cue,
+    total: engine.show.cuelist.length,
+    next: sceneName(engine.show.cuelist[engine.cue + 1]?.scene),
+    blackout: engine.blackout,
+    master: engine.master,
+    fading: engine.fading,
+    output: enttec.enabled && enttec.connected
+  }
+}
+function phoneCmd(c: PhoneCmd) {
+  try {
+    if (c.c === 'blackout') engine.blackout = c.on
+    else runCommand(engine, { t: c.c === 'next' ? 'nextCue' : 'default' }, Date.now())
+  } catch (err) { console.error(err) }
+}
+setRemote(settings.remoteOn)
 
 // DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
 setInterval(() => {
@@ -65,6 +100,7 @@ function buildState() {
     frame: Array.from(output.last),
     editMode: edit.isOpen(now),
     pinSet: !!settings.pinHash,
+    remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
     saveError
   }
 }
@@ -106,6 +142,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     edit.touch(now)
     if (c.t === 'output') return enttec.setEnabled(c.on)
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
+    if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
     if (c.t === 'outputOnStart') return saveSettings({ ...settings, outputOnStart: (settings.outputOnStart = c.on) })
     if (runCommand(engine, c, Date.now()) === 'showChanged') showChanged()
     if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })

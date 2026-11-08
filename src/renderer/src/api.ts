@@ -26,6 +26,7 @@ export interface State {
   saveError: string
   editMode: boolean // false = 운영 모드
   pinSet: boolean
+  remote: { on: boolean; code: string; urls: string[]; error: string; clients: number }
 }
 
 declare global {

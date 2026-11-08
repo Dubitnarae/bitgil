@@ -25,7 +25,7 @@
 - Electron + Vite + React + TypeScript
 - 3D: Three.js (`@react-three/fiber`, `@react-three/drei` 사용 가능)
 - USB 통신: `serialport` (Electron 메인 프로세스). 네이티브 빌드 문제가 생기면 Electron 내장 Web Serial로 바꾼다.
-- 폰 원격: Electron 메인 프로세스 안의 작은 HTTP + WebSocket 서버
+- 폰 원격: Electron 메인 프로세스 안의 작은 HTTP 서버(포트 8130, 상태는 SSE로 보내고 버튼은 POST, 추가 라이브러리 없음). 설정에서 켰을 때만 열리고 6자리 접속 코드 필요, 5번 틀리면 1분 잠김
 - 배포: `electron-builder`(NSIS 설치 파일), 자동 업데이트: `electron-updater` + GitHub Releases(공개 저장소)
 - 테스트: Vitest. 상태 엔진(씬 병합, 페이드, RGBW 변환, 팬·틸트 계산, DMX 프레임 만들기)은 반드시 단위 테스트를 둔다.
 

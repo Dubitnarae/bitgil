@@ -136,6 +136,20 @@ describe('순서 목록', () => {
     expect(e.faders[b.id] ?? 0).toBe(0) // [적용] 전엔 실제 출력 그대로
     expect(() => e.loadCue(5)).toThrow()
   })
+  it('폰 [다음 씬]은 다음 줄을 그 줄 페이드로 바로 내보내고, 끝에서는 멈춘다', () => {
+    const e = new Engine(structuredClone(show))
+    const [a, b] = e.show.scenes
+    e.setCuelist([{ scene: a.id, fade: 0 }, { scene: b.id, fade: 4 }])
+    e.goNextCue(0)
+    expect(e.cue).toBe(0)
+    expect(e.faders[a.id]).toBe(1)
+    e.goNextCue(1000)
+    expect(e.cue).toBe(1)
+    expect(e.faders[b.id]).toBe(1)
+    expect(e.currentFaders(3000)[b.id]).toBeCloseTo(0.5) // 4초 페이드의 가운데
+    e.goNextCue(9000)
+    expect(e.cue).toBe(1)
+  })
   it('씬을 지우면 그 씬을 쓰던 줄도 빠지고 위치가 당겨진다', () => {
     const e = new Engine(structuredClone(show))
     const [a, b] = e.show.scenes

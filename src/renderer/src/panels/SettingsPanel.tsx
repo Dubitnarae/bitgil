@@ -33,6 +33,16 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         <input type="checkbox" checked={st.output.onStart} onChange={(e) => send({ t: 'outputOnStart', on: e.target.checked })} />
         프로그램을 켜면 바로 장비로 출력 (끄면 '출력 대기'로 시작 — 권장)
       </label>
+      <p>폰 원격 (같은 Wi-Fi)</p>
+      <label className="radio">
+        <input type="checkbox" checked={st.remote.on} onChange={(e) => send({ t: 'remote', on: e.target.checked })} />
+        켜기 — 폰에서 상태 보기, [다음 씬]·[기본 조명]·[블랙아웃]
+      </label>
+      {st.remote.on && <p className="hint">
+        폰 주소창: {st.remote.urls.join('  또는  ') || '(Wi-Fi 연결 없음)'}<br />
+        원격 접속 코드: <b>{st.remote.code}</b> · 지금 연결된 폰 {st.remote.clients}대
+        {st.remote.error && <><br /><span style={{ color: '#ff6b6b' }}>{st.remote.error}</span></>}
+      </p>}
       <p>편집 모드 PIN <button onClick={onChangePin}>PIN 바꾸기</button></p>
       <p className="hint">빛길 · 개발자 KIM YEONGDO</p>
     </section>
