@@ -7,3 +7,4 @@ settings.json
 !data/starter-show.bitgil.json
 *.XHD
 *.xhd
+__pycache__/
