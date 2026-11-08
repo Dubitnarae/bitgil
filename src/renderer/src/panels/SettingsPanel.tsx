@@ -67,7 +67,8 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
 
       <div className="group">
       <h4>업데이트</h4>
-      <p className="hint">지금 버전: <b>v{st.version}</b> · 마지막 확인: {st.update.lastCheck || '아직 없음'}</p>
+      <p className="hint">지금 버전: <b>v{st.version}</b> · 마지막 확인: {st.update.lastCheck || '아직 없음'}{' '}
+        <button onClick={() => send({ t: 'checkUpdate' })}>지금 확인</button>{st.update.text && <> · <b>{st.update.text}</b></>}</p>
       <label className="radio">
         <input type="checkbox" checked={st.update.on} onChange={(e) => send({ t: 'autoUpdate', on: e.target.checked })} />
         업데이트 확인 — 하루 한 번 새 버전을 확인해 알려 줌. 설치할지는 그때 고름 (설치는 프로그램을 끌 때, 예배 중에는 안 함)

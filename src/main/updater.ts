@@ -12,18 +12,41 @@ export const update = {
 }
 export type UpdateChoice = 'install' | 'later' | 'skip'
 
-export function startUpdater(opt: { on: boolean; lastCheck: string; skip: string; checked: (day: string) => void }) {
+let manual = false // [지금 확인]으로 확인 중이면 결과를 알리고, 건너뛴 버전도 다시 보여 준다
+
+export function startUpdater(opt: { on: boolean; lastCheck: string; skip: () => string; checked: (day: string) => void }) {
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = opt.on
-  if (!app.isPackaged || !opt.on || opt.lastCheck === today()) return
-  autoUpdater.on('update-not-available', () => opt.checked(today()))
+  if (!app.isPackaged) return
+  autoUpdater.on('update-not-available', () => {
+    opt.checked(today())
+    if (manual) {
+      const t = (update.text = `최신 버전입니다 (v${app.getVersion()})`)
+      setTimeout(() => { if (update.text === t) update.text = '' }, 10_000) // 상단 막대에 계속 남지 않게
+    }
+    manual = false
+  })
   autoUpdater.on('update-available', (i) => {
     opt.checked(today())
-    if (i.version !== opt.skip) update.notice = { version: i.version, notes: notesText(i.releaseNotes) }
+    if (manual || i.version !== opt.skip()) update.notice = { version: i.version, notes: notesText(i.releaseNotes) }
+    if (manual) update.text = ''
+    manual = false
   })
   autoUpdater.on('download-progress', (p) => (update.text = `새 버전 받는 중 ${Math.round(p.percent)}%`))
   autoUpdater.on('update-downloaded', (i) => (update.text = `새 버전 v${i.version} 준비됨 — 프로그램을 끄면 설치`))
-  autoUpdater.on('error', (err) => { update.text = ''; console.error('업데이트 확인 실패', err) }) // 인터넷 없어도 운영엔 영향 없음, 다음 실행 때 다시 확인
+  autoUpdater.on('error', (err) => { // 인터넷 없어도 운영엔 영향 없음, 다음 실행 때 다시 확인
+    update.text = manual ? '업데이트를 확인하지 못했습니다(인터넷 연결 확인)' : ''
+    manual = false
+    console.error('업데이트 확인 실패', err)
+  })
+  if (opt.on && opt.lastCheck !== today()) autoUpdater.checkForUpdates().catch(() => {})
+}
+
+/** 설정의 [지금 확인]: 하루 한 번 제한 없이 바로 확인 */
+export function checkNow() {
+  if (!app.isPackaged) { update.text = '설치본에서만 확인할 수 있습니다'; return }
+  manual = true
+  update.text = '업데이트 확인 중…'
   autoUpdater.checkForUpdates().catch(() => {})
 }
 

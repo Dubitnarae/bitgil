@@ -26,11 +26,12 @@ export type Command =
   | { t: 'swapFixtures'; a: string; b: string }
   | { t: 'editVenue'; venue: Venue }
   | { t: 'editFixtureType'; id: string; edit: TypeEdit }
-  // 아래 넷은 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
+  // 아래는 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
   | { t: 'outputOnStart'; on: boolean }
   | { t: 'autoUpdate'; on: boolean }
+  | { t: 'checkUpdate' } // 설정의 [지금 확인]
   | { t: 'updateChoice'; choice: import('./updater').UpdateChoice } // 운영 모드에서도 가능
   | { t: 'remote'; on: boolean }
 
