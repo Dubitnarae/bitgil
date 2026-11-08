@@ -15,13 +15,15 @@ export interface Settings {
   remoteOn: boolean
   /** 폰 원격 접속 코드(6자리). 빈 값이면 처음 켤 때 만든다 */
   remoteCode: string
-  /** 자동 업데이트(기본 켬): 하루 한 번 새 버전 확인 → 받아 두고 끌 때 설치 */
+  /** 업데이트 확인(기본 켬): 하루 한 번 새 버전을 확인해 묻는다 → 고르면 받아 두고 끌 때 설치 */
   autoUpdate: boolean
   /** 마지막으로 업데이트를 확인한 날('YYYY-MM-DD') */
   lastUpdateCheck: string
+  /** 사용자가 [이 버전 건너뛰기]를 고른 버전(그보다 새 버전이 나오면 다시 알림) */
+  skipVersion: string
 }
 
-const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '' }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '', skipVersion: '' }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

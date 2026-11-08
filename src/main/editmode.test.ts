@@ -35,6 +35,7 @@ describe('편집 모드 PIN', () => {
     expect(allowedInOperation({ t: 'renameScene', id: 'T-01', name: 'c' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'faderMode', mode: 'preview' }, show)).toBe(false)
     expect(allowedInOperation({ t: 'autoUpdate', on: false }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'updateChoice', choice: 'skip' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'setCuelist', list: [] }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editVenue', venue: {} as never }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editFixtureType', id: 'wash', edit: {} }, show)).toBe(false)

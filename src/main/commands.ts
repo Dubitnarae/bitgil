@@ -31,6 +31,7 @@ export type Command =
   | { t: 'dmxPort'; path: string }
   | { t: 'outputOnStart'; on: boolean }
   | { t: 'autoUpdate'; on: boolean }
+  | { t: 'updateChoice'; choice: import('./updater').UpdateChoice } // 운영 모드에서도 가능
   | { t: 'remote'; on: boolean }
 
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
