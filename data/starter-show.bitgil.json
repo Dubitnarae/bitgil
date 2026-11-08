@@ -1,0 +1,3120 @@
+{
+  "format": "bitgil-show",
+  "format_version": 1,
+  "name": "예배당",
+  "created": "2026-11-08",
+  "source": {
+    "console": "Mini Pearl 1024 Pro",
+    "file": "5555.XHD",
+    "note": "콘솔 USB 백업을 해독해 만든 시작 데이터. 효과만 있던 장면은 제외: P1-05, P1-06, P1-07, P2-05"
+  },
+  "venue": {
+    "units": "m",
+    "estimated": true,
+    "note": "도면(배튼 10 m 기준)과 사진으로 추정한 값. 실측 후 프로그램의 공간 설정에서 수정.",
+    "origin": "통로 바닥(FL -1,200) 높이, 왼쪽 벽(글씨 벽)과 정면 벽(무대 뒤)이 만나는 모서리",
+    "axes": {
+      "x": "왼쪽 벽 → 오른쪽 끝(사진 찍은 쪽)",
+      "y": "위",
+      "z": "정면 벽(무대) → 좌석 쪽"
+    },
+    "room": {
+      "length_x": 16.8,
+      "width_z": 12.2,
+      "eave_height": 6.0,
+      "ridge_height": 9.0,
+      "ridge_direction": "x"
+    },
+    "stage": {
+      "z_from": 0.0,
+      "z_to": 2.09,
+      "x_from": 0.0,
+      "x_to": 16.8,
+      "height": 0.4,
+      "label": "강대(무대, 나무 단)"
+    },
+    "aisle": {
+      "z_from": 2.09,
+      "z_to": 6.24,
+      "floor_height": 0.0,
+      "label": "통로 바닥 FL -1,200"
+    },
+    "seating_tiers": [
+      {
+        "z_from": 6.24,
+        "z_to": 7.5,
+        "height": 0.4
+      },
+      {
+        "z_from": 7.5,
+        "z_to": 8.8,
+        "height": 0.8
+      },
+      {
+        "z_from": 8.8,
+        "z_to": 12.2,
+        "height": 1.2,
+        "label": "FL ±0"
+      }
+    ],
+    "battens": [
+      {
+        "id": "RD1",
+        "label": "Apron 배튼",
+        "z": 2.46,
+        "x_from": 3.19,
+        "x_to": 13.26,
+        "height": 5.5
+      },
+      {
+        "id": "RD2",
+        "label": "천장 배튼 1",
+        "z": 5.56,
+        "x_from": 3.19,
+        "x_to": 13.26,
+        "height": 5.5
+      },
+      {
+        "id": "RD3",
+        "label": "천장 배튼 2",
+        "z": 8.6,
+        "x_from": 3.19,
+        "x_to": 13.26,
+        "height": 5.5
+      }
+    ],
+    "floor_pockets": [
+      {
+        "id": "RD4-a",
+        "x": 0.4,
+        "z": 0.3,
+        "label": "무대 왼쪽 구석"
+      },
+      {
+        "id": "RD4-b",
+        "x": 16.4,
+        "z": 0.3,
+        "label": "무대 오른쪽 구석"
+      },
+      {
+        "id": "RD4-c",
+        "x": 0.3,
+        "z": 5.1,
+        "label": "왼쪽 벽 가운데"
+      }
+    ],
+    "props": [
+      {
+        "id": "pulpit",
+        "label": "강대상",
+        "x": 8.4,
+        "z": 1.05,
+        "w": 0.6,
+        "d": 0.6,
+        "h": 1.1
+      },
+      {
+        "id": "piano",
+        "label": "피아노",
+        "x": 1.6,
+        "z": 0.9,
+        "w": 1.5,
+        "d": 0.6,
+        "h": 1.0
+      },
+      {
+        "id": "band",
+        "label": "밴드 자리",
+        "x": 1.4,
+        "z": 6.6,
+        "w": 0.7,
+        "d": 3.0,
+        "h": 0.0
+      }
+    ],
+    "text_panels": [
+      {
+        "fixture": "1-10",
+        "wall": "left",
+        "z_center": 4.25,
+        "y_center": 3.0,
+        "label": "글씨(위)"
+      },
+      {
+        "fixture": "1-11",
+        "wall": "left",
+        "z_center": 7.95,
+        "y_center": 3.0,
+        "label": "글씨(아래)"
+      }
+    ]
+  },
+  "fixture_types": [
+    {
+      "id": "wash",
+      "label": "무빙 워시",
+      "kind": "moving_head",
+      "channel_count": 17,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "pan",
+          "label": "Pan",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 2,
+          "attr": "pan_fine",
+          "label": "Pan fine",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 3,
+          "attr": "tilt",
+          "label": "Tilt",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 4,
+          "attr": "tilt_fine",
+          "label": "Tilt fine",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 5,
+          "attr": "pt_speed",
+          "label": "P/T Speed",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 6,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 7,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 8,
+          "attr": "red",
+          "label": "Red",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 9,
+          "attr": "green",
+          "label": "Green",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 10,
+          "attr": "blue",
+          "label": "Blue",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 11,
+          "attr": "white",
+          "label": "White",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 12,
+          "attr": "cct",
+          "label": "CCT",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        },
+        {
+          "offset": 13,
+          "attr": "macro",
+          "label": "Marco",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 14,
+          "attr": "zoom",
+          "label": "Zoom",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 50
+        },
+        {
+          "offset": 15,
+          "attr": "effect",
+          "label": "Effect",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 16,
+          "attr": "effect_rotation",
+          "label": "Effect Rot",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        },
+        {
+          "offset": 17,
+          "attr": "reset",
+          "label": "Reset",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        }
+      ],
+      "beam_deg": [
+        10,
+        40
+      ],
+      "beam_estimated": true,
+      "mount": "floor",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요).",
+      "pan_deg": 540,
+      "tilt_deg": 270,
+      "pan_tilt_estimated": true
+    },
+    {
+      "id": "8ch",
+      "label": "RGBW 조명 8ch",
+      "kind": "par",
+      "channel_count": 8,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 2,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 3,
+          "attr": "color_macro",
+          "label": "Colour",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 4,
+          "attr": "speed",
+          "label": "Speed",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 100
+        },
+        {
+          "offset": 5,
+          "attr": "red",
+          "label": "Red",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 6,
+          "attr": "green",
+          "label": "Green",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 7,
+          "attr": "blue",
+          "label": "Blue",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 8,
+          "attr": "white",
+          "label": "White",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        }
+      ],
+      "beam_deg": [
+        25,
+        25
+      ],
+      "beam_estimated": true,
+      "mount": "floor",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요)."
+    },
+    {
+      "id": "200W1S_5",
+      "label": "백색 200W 줌",
+      "kind": "spot_white",
+      "channel_count": 5,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 2,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 255
+        },
+        {
+          "offset": 3,
+          "attr": "zoom",
+          "label": "Zoom",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 128
+        },
+        {
+          "offset": 4,
+          "attr": "dimmer_mode",
+          "label": "DIM MODE",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 5,
+          "attr": "id",
+          "label": "ID",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        }
+      ],
+      "beam_deg": [
+        15,
+        45
+      ],
+      "beam_estimated": true,
+      "mount": "ceiling",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요)."
+    },
+    {
+      "id": "200W4S_12",
+      "label": "RGBW 200W 줌·글씨 판",
+      "kind": "spot_rgbw_gobo",
+      "channel_count": 12,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 2,
+          "attr": "red",
+          "label": "Red",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 3,
+          "attr": "green",
+          "label": "Green",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 4,
+          "attr": "blue",
+          "label": "Blue",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 5,
+          "attr": "white",
+          "label": "White",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 6,
+          "attr": "color_macro",
+          "label": "Color&CTO",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        },
+        {
+          "offset": 7,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        },
+        {
+          "offset": 8,
+          "attr": "zoom",
+          "label": "Zoom",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 9,
+          "attr": "auto",
+          "label": "AUTO",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 0
+        },
+        {
+          "offset": 10,
+          "attr": "auto_speed",
+          "label": "AUTO SP",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 11,
+          "attr": "dimmer_mode",
+          "label": "DIM Mod",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 127
+        },
+        {
+          "offset": 12,
+          "attr": "id",
+          "label": "ID",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        }
+      ],
+      "beam_deg": [
+        15,
+        45
+      ],
+      "beam_estimated": true,
+      "mount": "ceiling",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요)."
+    },
+    {
+      "id": "OV_300W_3",
+      "label": "백색 300W",
+      "kind": "flood_white",
+      "channel_count": 3,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 2,
+          "attr": "dimmer_fine",
+          "label": "Dimmer fine",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 3,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 255
+        }
+      ],
+      "beam_deg": [
+        40,
+        40
+      ],
+      "beam_estimated": true,
+      "mount": "ceiling",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요)."
+    },
+    {
+      "id": "11ch",
+      "label": "RGBW 조명 11ch",
+      "kind": "par",
+      "channel_count": 11,
+      "channels": [
+        {
+          "offset": 1,
+          "attr": "red",
+          "label": "Red",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 2,
+          "attr": "green",
+          "label": "Green",
+          "mix": "LTP",
+          "fade": false,
+          "locate": 255
+        },
+        {
+          "offset": 3,
+          "attr": "blue",
+          "label": "Blue",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 4,
+          "attr": "white",
+          "label": "White",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 5,
+          "attr": "dimmer",
+          "label": "Dimmer",
+          "mix": "HTP",
+          "fade": true,
+          "locate": 255
+        },
+        {
+          "offset": 6,
+          "attr": "color_macro",
+          "label": "Colour Macro",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 7,
+          "attr": "cto",
+          "label": "Reserve CTO",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 8,
+          "attr": "shutter",
+          "label": "Shutter",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 9,
+          "attr": "auto",
+          "label": "Auto",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 10,
+          "attr": "auto_speed",
+          "label": "Auto speed",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        },
+        {
+          "offset": 11,
+          "attr": "dimmer_mode",
+          "label": "Dimmer mode",
+          "mix": "LTP",
+          "fade": true,
+          "locate": 0
+        }
+      ],
+      "beam_deg": [
+        25,
+        25
+      ],
+      "beam_estimated": true,
+      "mount": "ceiling",
+      "model": null,
+      "note": "채널표는 콘솔 라이브러리에서 해독. 빛 각도·모델명은 임시값. locate는 콘솔 Locate 값(의미는 실물 확인 필요)."
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "1-1",
+      "fixture_page": 1,
+      "fixture_button": 1,
+      "address": 1,
+      "universe": 1,
+      "type": "wash",
+      "position": {
+        "x": 5.56,
+        "y": 0.4,
+        "z": 0.41
+      },
+      "mount": "floor",
+      "direction": "pan_tilt",
+      "aim": null,
+      "batten": null,
+      "verified": true,
+      "evidence": "DMX 001 바닥(사용자 스케치)"
+    },
+    {
+      "id": "1-2",
+      "fixture_page": 1,
+      "fixture_button": 2,
+      "address": 18,
+      "universe": 1,
+      "type": "wash",
+      "position": {
+        "x": 10.38,
+        "y": 0.4,
+        "z": 0.41
+      },
+      "mount": "floor",
+      "direction": "pan_tilt",
+      "aim": null,
+      "batten": null,
+      "verified": true,
+      "evidence": "DMX 018 바닥(사용자 스케치)"
+    },
+    {
+      "id": "1-3",
+      "fixture_page": 1,
+      "fixture_button": 3,
+      "address": 35,
+      "universe": 1,
+      "type": "8ch",
+      "position": {
+        "x": 0.41,
+        "y": 0.0,
+        "z": 5.12
+      },
+      "mount": "floor",
+      "direction": "up",
+      "aim": null,
+      "batten": null,
+      "verified": true,
+      "evidence": "DMX 035 바닥(사용자 스케치)"
+    },
+    {
+      "id": "1-4",
+      "fixture_page": 1,
+      "fixture_button": 4,
+      "address": 43,
+      "universe": 1,
+      "type": "8ch",
+      "position": {
+        "x": 0.78,
+        "y": 0.4,
+        "z": 0.44
+      },
+      "mount": "floor",
+      "direction": "up",
+      "aim": null,
+      "batten": null,
+      "verified": true,
+      "evidence": "DMX 043 바닥(사용자 스케치)"
+    },
+    {
+      "id": "1-5",
+      "fixture_page": 1,
+      "fixture_button": 5,
+      "address": 51,
+      "universe": 1,
+      "type": "8ch",
+      "position": {
+        "x": 16.06,
+        "y": 0.4,
+        "z": 0.41
+      },
+      "mount": "floor",
+      "direction": "up",
+      "aim": null,
+      "batten": null,
+      "verified": true,
+      "evidence": "DMX 051 바닥(사용자 스케치)"
+    },
+    {
+      "id": "1-6",
+      "fixture_page": 1,
+      "fixture_button": 6,
+      "address": 64,
+      "universe": 1,
+      "type": "200W1S_5",
+      "position": {
+        "x": 4.7,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 4.7,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-7",
+      "fixture_page": 1,
+      "fixture_button": 7,
+      "address": 69,
+      "universe": 1,
+      "type": "200W1S_5",
+      "position": {
+        "x": 6.54,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 6.54,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-8",
+      "fixture_page": 1,
+      "fixture_button": 8,
+      "address": 74,
+      "universe": 1,
+      "type": "200W1S_5",
+      "position": {
+        "x": 10.69,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 10.69,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-9",
+      "fixture_page": 1,
+      "fixture_button": 9,
+      "address": 79,
+      "universe": 1,
+      "type": "200W1S_5",
+      "position": {
+        "x": 12.2,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 12.2,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-10",
+      "fixture_page": 1,
+      "fixture_button": 10,
+      "address": 84,
+      "universe": 1,
+      "type": "200W4S_12",
+      "position": {
+        "x": 3.47,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 0.0,
+        "y": 3.0,
+        "z": 4.25
+      },
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "글씨 판 장착, 왼쪽 벽 위 글씨"
+    },
+    {
+      "id": "1-11",
+      "fixture_page": 1,
+      "fixture_button": 11,
+      "address": 96,
+      "universe": 1,
+      "type": "200W4S_12",
+      "position": {
+        "x": 3.43,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 0.0,
+        "y": 3.0,
+        "z": 7.95
+      },
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "글씨 판 장착, 왼쪽 벽 아래 글씨"
+    },
+    {
+      "id": "1-12",
+      "fixture_page": 1,
+      "fixture_button": 12,
+      "address": 108,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 7.05,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-13",
+      "fixture_page": 1,
+      "fixture_button": 13,
+      "address": 111,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 4.07,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 2.84,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-14",
+      "fixture_page": 1,
+      "fixture_button": 14,
+      "address": 114,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 9.38,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 9.38,
+        "y": 1.9,
+        "z": 1.2
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-15",
+      "fixture_page": 1,
+      "fixture_button": 15,
+      "address": 117,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 8.22,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 8.4,
+        "y": 1.9,
+        "z": 1.05
+      },
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진 2번(1-15만 켜짐)으로 위치 확인, 강대상을 비춤"
+    },
+    {
+      "id": "2-1",
+      "fixture_page": 2,
+      "fixture_button": 1,
+      "address": 151,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 3.58,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-2",
+      "fixture_page": 2,
+      "fixture_button": 2,
+      "address": 162,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 5.13,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-3",
+      "fixture_page": 2,
+      "fixture_button": 3,
+      "address": 173,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 6.99,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-4",
+      "fixture_page": 2,
+      "fixture_button": 4,
+      "address": 184,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 8.4,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-5",
+      "fixture_page": 2,
+      "fixture_button": 5,
+      "address": 195,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 10.24,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-6",
+      "fixture_page": 2,
+      "fixture_button": 6,
+      "address": 206,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 11.73,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-7",
+      "fixture_page": 2,
+      "fixture_button": 7,
+      "address": 217,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 12.92,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-8",
+      "fixture_page": 2,
+      "fixture_button": 8,
+      "address": 228,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 4.03,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-9",
+      "fixture_page": 2,
+      "fixture_button": 9,
+      "address": 239,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 4.5,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-10",
+      "fixture_page": 2,
+      "fixture_button": 10,
+      "address": 250,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 5.42,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-11",
+      "fixture_page": 2,
+      "fixture_button": 11,
+      "address": 261,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 7.19,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-12",
+      "fixture_page": 2,
+      "fixture_button": 12,
+      "address": 272,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 9.38,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-13",
+      "fixture_page": 2,
+      "fixture_button": 13,
+      "address": 283,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 11.47,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-14",
+      "fixture_page": 2,
+      "fixture_button": 14,
+      "address": 294,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 12.98,
+        "y": 5.2,
+        "z": 8.61
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD3",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-1",
+      "fixture_page": 3,
+      "fixture_button": 1,
+      "address": 305,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 8.83,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 9.44,
+        "y": 0.8,
+        "z": 8.17
+      },
+      "batten": "RD2",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-2",
+      "fixture_page": 3,
+      "fixture_button": 2,
+      "address": 316,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 4.29,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-3",
+      "fixture_page": 3,
+      "fixture_button": 3,
+      "address": 327,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 5.99,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-4",
+      "fixture_page": 3,
+      "fixture_button": 4,
+      "address": 338,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 7.6,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-5",
+      "fixture_page": 3,
+      "fixture_button": 5,
+      "address": 349,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 9.44,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-6",
+      "fixture_page": 3,
+      "fixture_button": 6,
+      "address": 360,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 11.04,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "3-7",
+      "fixture_page": 3,
+      "fixture_button": 7,
+      "address": 371,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 12.84,
+        "y": 5.2,
+        "z": 2.46
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD1",
+      "verified": false,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    }
+  ],
+  "groups": [
+    {
+      "id": "front",
+      "label": "정면 조명",
+      "members": [
+        "1-6",
+        "1-7",
+        "1-8",
+        "1-9"
+      ]
+    },
+    {
+      "id": "text",
+      "label": "글씨 조명",
+      "members": [
+        "1-10",
+        "1-11"
+      ]
+    },
+    {
+      "id": "pulpit",
+      "label": "강대상 조명",
+      "members": [
+        "1-15"
+      ]
+    },
+    {
+      "id": "floor_up",
+      "label": "바닥 업라이트",
+      "members": [
+        "1-1",
+        "1-2",
+        "1-3",
+        "1-4",
+        "1-5"
+      ]
+    },
+    {
+      "id": "moving",
+      "label": "무빙 워시",
+      "members": [
+        "1-1",
+        "1-2"
+      ]
+    },
+    {
+      "id": "RD1",
+      "label": "RD1 배튼",
+      "members": [
+        "1-10",
+        "1-12",
+        "3-2",
+        "3-3",
+        "3-4",
+        "3-5",
+        "3-6",
+        "3-7"
+      ]
+    },
+    {
+      "id": "RD2",
+      "label": "RD2 배튼",
+      "members": [
+        "1-6",
+        "1-7",
+        "1-8",
+        "1-9",
+        "1-13",
+        "1-14",
+        "2-1",
+        "2-2",
+        "2-3",
+        "2-4",
+        "2-5",
+        "2-6",
+        "2-7",
+        "3-1"
+      ]
+    },
+    {
+      "id": "RD3",
+      "label": "RD3 배튼",
+      "members": [
+        "1-11",
+        "1-15",
+        "2-8",
+        "2-9",
+        "2-10",
+        "2-11",
+        "2-12",
+        "2-13",
+        "2-14"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "P1-01",
+      "name": "P1-01",
+      "source": "콘솔 Replay Page 1 페이더 1",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-1": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 176,
+          "blue": 0,
+          "white": 159,
+          "zoom": 0
+        },
+        "1-2": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 176,
+          "blue": 0,
+          "white": 159,
+          "zoom": 0
+        },
+        "1-3": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 110,
+          "blue": 0,
+          "white": 49
+        },
+        "1-4": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 110,
+          "blue": 0,
+          "white": 49
+        },
+        "1-5": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 110,
+          "blue": 0,
+          "white": 49
+        },
+        "1-6": {
+          "dimmer": 255,
+          "shutter": 0,
+          "zoom": 113
+        },
+        "1-7": {
+          "dimmer": 255,
+          "shutter": 0,
+          "zoom": 100
+        },
+        "1-8": {
+          "dimmer": 255,
+          "shutter": 0,
+          "zoom": 101
+        },
+        "1-9": {
+          "dimmer": 255,
+          "shutter": 0,
+          "zoom": 100
+        },
+        "1-10": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 40,
+          "blue": 93,
+          "white": 255,
+          "zoom": 0
+        },
+        "1-11": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 40,
+          "blue": 93,
+          "white": 255,
+          "zoom": 0
+        },
+        "1-12": {
+          "dimmer": 255,
+          "dimmer_fine": 255,
+          "shutter": 0
+        },
+        "1-13": {
+          "dimmer": 255,
+          "dimmer_fine": 255,
+          "shutter": 0
+        },
+        "2-1": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-2": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-3": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-8": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-9": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-10": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-11": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-12": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-13": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "2-14": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 20
+        },
+        "3-1": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        },
+        "3-3": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        },
+        "3-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        },
+        "3-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        },
+        "3-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        },
+        "3-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 30
+        }
+      }
+    },
+    {
+      "id": "P1-02",
+      "name": "P1-02",
+      "source": "콘솔 Replay Page 1 페이더 2",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-15": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        }
+      }
+    },
+    {
+      "id": "P1-03",
+      "name": "P1-03",
+      "source": "콘솔 Replay Page 1 페이더 3",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-1": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-2": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-3": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-4": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-5": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-6": {
+          "dimmer": 255,
+          "zoom": 113
+        },
+        "1-7": {
+          "dimmer": 255,
+          "zoom": 100
+        },
+        "1-8": {
+          "dimmer": 255,
+          "zoom": 101
+        },
+        "1-9": {
+          "dimmer": 255,
+          "zoom": 100
+        },
+        "1-10": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-11": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-12": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "1-13": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "2-1": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-2": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-3": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-8": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-9": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-10": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-11": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-12": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-13": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-14": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-1": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-3": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        }
+      }
+    },
+    {
+      "id": "P1-04",
+      "name": "P1-04",
+      "source": "콘솔 Replay Page 1 페이더 4",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-12": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "1-13": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        }
+      }
+    },
+    {
+      "id": "P1-08",
+      "name": "P1-08",
+      "source": "콘솔 Replay Page 1 페이더 8",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-1": {
+          "dimmer": 255,
+          "shutter": 89,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255
+        },
+        "1-2": {
+          "dimmer": 255,
+          "shutter": 89,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255
+        },
+        "1-3": {
+          "dimmer": 255,
+          "shutter": 222,
+          "color_macro": 0,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255
+        },
+        "1-4": {
+          "dimmer": 255,
+          "shutter": 222,
+          "color_macro": 0,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255
+        },
+        "1-5": {
+          "dimmer": 255,
+          "shutter": 222,
+          "color_macro": 0,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255
+        },
+        "1-6": {
+          "dimmer": 255,
+          "shutter": 241
+        },
+        "1-7": {
+          "dimmer": 255,
+          "shutter": 241
+        },
+        "1-8": {
+          "dimmer": 255,
+          "shutter": 241
+        },
+        "1-9": {
+          "dimmer": 255,
+          "shutter": 241
+        },
+        "1-10": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "shutter": 237
+        },
+        "1-11": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "shutter": 237
+        },
+        "2-1": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-2": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-3": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-4": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-5": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-6": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-7": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-8": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-9": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-10": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-11": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-12": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-13": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "2-14": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-1": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-2": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-3": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-4": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-5": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-6": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        },
+        "3-7": {
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 255,
+          "dimmer": 255,
+          "shutter": 236
+        }
+      }
+    },
+    {
+      "id": "P1-09",
+      "name": "P1-09",
+      "source": "콘솔 Replay Page 1 페이더 9",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-1": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-2": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-3": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-4": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-5": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-6": {
+          "dimmer": 3,
+          "zoom": 113
+        },
+        "1-7": {
+          "dimmer": 3,
+          "zoom": 100
+        },
+        "1-8": {
+          "dimmer": 3,
+          "zoom": 101
+        },
+        "1-9": {
+          "dimmer": 3,
+          "zoom": 100
+        },
+        "1-10": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-11": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-12": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "1-13": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "2-1": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-2": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-3": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-8": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-9": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-10": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-11": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-12": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-13": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "2-14": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-1": {
+          "red": 0,
+          "green": 0,
+          "blue": 255,
+          "white": 0,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-3": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        },
+        "3-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 104
+        }
+      }
+    },
+    {
+      "id": "P1-10",
+      "name": "P1-10",
+      "source": "콘솔 Replay Page 1 페이더 10",
+      "fade_seconds": 2.0,
+      "values": {
+        "2-1": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-2": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-3": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-8": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-9": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-10": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-11": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-12": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-13": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-14": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-3": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        }
+      }
+    },
+    {
+      "id": "P2-01",
+      "name": "P2-01",
+      "source": "콘솔 Replay Page 2 페이더 1",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-6": {
+          "dimmer": 255
+        },
+        "1-7": {
+          "dimmer": 255
+        },
+        "1-8": {
+          "dimmer": 255
+        },
+        "1-9": {
+          "dimmer": 255
+        }
+      }
+    },
+    {
+      "id": "P2-02",
+      "name": "P2-02",
+      "source": "콘솔 Replay Page 2 페이더 2",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-15": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        }
+      }
+    },
+    {
+      "id": "P2-04",
+      "name": "P2-04",
+      "source": "콘솔 Replay Page 2 페이더 4",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-12": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        },
+        "1-13": {
+          "dimmer": 255,
+          "dimmer_fine": 255
+        }
+      }
+    },
+    {
+      "id": "P2-09",
+      "name": "P2-09",
+      "source": "콘솔 Replay Page 2 페이더 9",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-1": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-2": {
+          "tilt": 142,
+          "tilt_fine": 98,
+          "dimmer": 255,
+          "shutter": 255,
+          "red": 255,
+          "green": 216,
+          "blue": 255,
+          "white": 0,
+          "zoom": 0
+        },
+        "1-3": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-4": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-5": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 221,
+          "blue": 180,
+          "white": 0
+        },
+        "1-6": {
+          "dimmer": 3,
+          "zoom": 113
+        },
+        "1-7": {
+          "dimmer": 3,
+          "zoom": 100
+        },
+        "1-8": {
+          "dimmer": 3,
+          "zoom": 101
+        },
+        "1-9": {
+          "dimmer": 3,
+          "zoom": 100
+        },
+        "1-10": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-11": {
+          "dimmer": 255,
+          "red": 255,
+          "green": 255,
+          "blue": 255,
+          "white": 0
+        },
+        "1-12": {
+          "dimmer": 0,
+          "dimmer_fine": 0
+        },
+        "1-13": {
+          "dimmer": 0,
+          "dimmer_fine": 0
+        },
+        "2-1": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-2": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-3": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-8": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-9": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-10": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-11": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-12": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-13": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "2-14": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-1": {
+          "red": 0,
+          "green": 0,
+          "blue": 255,
+          "white": 0,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-3": {
+          "red": 255,
+          "green": 87,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-4": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-5": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-6": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        },
+        "3-7": {
+          "red": 255,
+          "green": 88,
+          "blue": 25,
+          "white": 0,
+          "dimmer": 0
+        }
+      }
+    },
+    {
+      "id": "P2-10",
+      "name": "P2-10",
+      "source": "콘솔 Replay Page 2 페이더 10",
+      "fade_seconds": 2.0,
+      "values": {
+        "2-1": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-2": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-3": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-8": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-9": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-10": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-11": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-12": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-13": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "2-14": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-2": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-3": {
+          "red": 255,
+          "green": 127,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-4": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-5": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-6": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        },
+        "3-7": {
+          "red": 255,
+          "green": 128,
+          "blue": 56,
+          "white": 255,
+          "dimmer": 255
+        }
+      }
+    },
+    {
+      "id": "P3-01",
+      "name": "P3-01",
+      "source": "콘솔 Replay Page 3 페이더 1",
+      "fade_seconds": 2.0,
+      "values": {
+        "1-6": {
+          "dimmer": 255
+        },
+        "1-7": {
+          "dimmer": 255
+        },
+        "1-8": {
+          "dimmer": 255
+        },
+        "1-9": {
+          "dimmer": 255
+        }
+      }
+    }
+  ],
+  "cuelist": []
+}

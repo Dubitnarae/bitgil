@@ -1,0 +1,9 @@
+node_modules/
+out/
+dist/
+# 공개 저장소: 설정·PIN·사용자 쇼 파일은 절대 올리지 않는다
+settings.json
+*.bitgil.json
+!data/starter-show.bitgil.json
+*.XHD
+*.xhd

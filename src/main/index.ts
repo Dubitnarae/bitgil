@@ -1,0 +1,57 @@
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { Show } from '../core/engine/types'
+import { Engine } from '../core/engine/engine'
+import { VirtualOutput } from './dmx/output'
+import { runCommand, type Command } from './commands'
+
+// shortcut: 지금은 시작 데이터만 읽음, 쇼 파일 저장·열기(문서\빛길, 백업 10개)는 다음 단계
+const show: Show = JSON.parse(readFileSync(join(app.getAppPath(), 'data/starter-show.bitgil.json'), 'utf-8'))
+const engine = new Engine(show)
+const output = new VirtualOutput()
+let win: BrowserWindow | null = null
+
+// DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
+setInterval(() => output.send(engine.frame(Date.now())), 25)
+
+// 화면에는 바뀌었을 때만 상태를 보낸다(초당 최대 20번)
+let lastSent = ''
+setInterval(() => {
+  if (!win) return
+  const state = {
+    live: engine.current(Date.now()),
+    preview: engine.preview,
+    master: engine.master,
+    blackout: engine.blackout,
+    fading: engine.fading,
+    output: { name: output.name, connected: output.connected },
+    frame: Array.from(output.last)
+  }
+  const json = JSON.stringify(state)
+  if (json !== lastSent) win.webContents.send('state', state)
+  lastSent = json
+}, 50)
+
+ipcMain.handle('show:get', () => show)
+ipcMain.on('cmd', (_e, c: Command) => {
+  try { runCommand(engine, c, Date.now()) } catch (err) { console.error(err) }
+})
+
+app.whenReady().then(() => {
+  win = new BrowserWindow({
+    width: 1400,
+    height: 860,
+    title: '빛길',
+    backgroundColor: '#111318',
+    webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false }
+  })
+  win.removeMenu()
+  win.on('closed', () => (win = null))
+  if (process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)
+  else win.loadFile(join(__dirname, '../renderer/index.html'))
+  // 새 창을 열 때 이전 상태를 다시 보내도록
+  win.webContents.on('did-finish-load', () => (lastSent = ''))
+})
+
+app.on('window-all-closed', () => app.quit())
