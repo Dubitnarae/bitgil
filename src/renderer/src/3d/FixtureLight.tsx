@@ -4,6 +4,7 @@ import { AdditiveBlending, Quaternion, Vector3 } from 'three'
 import type { Fixture, FixtureType, Venue } from '../../../core/engine/types'
 import { beamAngle, beamDirection, beamHit, fixtureColor } from '../../../core/engine/visual'
 import { beamMaterial } from './beamMaterial'
+import { FixtureBody, floorLift, shapeOf } from './FixtureBody'
 
 interface Props {
   fixture: Fixture
@@ -26,11 +27,13 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
   const mat = useMemo(beamMaterial, [])
   const c = fixtureColor(type, values, master)
   const d = beamDirection(f, type, values)
-  const hit = beamHit(venue, f.position, d)
+  const shape = shapeOf(type)
+  const p0 = { ...f.position, y: f.position.y + (f.mount === 'floor' ? floorLift(shape) : 0) }
+  const hit = beamHit(venue, p0, d)
   const len = hit.distance
   const radius = len * Math.tan(((beamAngle(type, values) / 2) * Math.PI) / 180)
   const dir = new Vector3(d.x, d.y, d.z)
-  const pos = new Vector3(f.position.x, f.position.y, f.position.z)
+  const pos = new Vector3(p0.x, p0.y, p0.z)
   const coneQ = new Quaternion().setFromUnitVectors(UP, dir.clone().negate()) // 원뿔 꼭짓점이 조명 쪽
   const poolQ = new Quaternion().setFromUnitVectors(Z, new Vector3(hit.normal.x, hit.normal.y, hit.normal.z))
   const on = c.intensity > 0.01 && c.r + c.g + c.b > 0.01
@@ -45,18 +48,15 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
           <sphereGeometry args={[0.32, 8, 8]} />
           <meshBasicMaterial visible={false} />
         </mesh>
-        <mesh>
-          <boxGeometry args={[0.28, 0.22, 0.28]} />
-          <meshBasicMaterial color={on ? color.map((x) => 0.25 + x * c.intensity * 0.75) as [number, number, number] : '#3a3d45'} />
-        </mesh>
+        <FixtureBody shape={shape} dir={dir} mount={f.mount} lens={on ? `rgb(${color.map((x) => Math.round(255 * (0.25 + x * c.intensity * 0.75))).join(',')})` : '#1b1d22'} />
         {selected && (
           <mesh>
-            <boxGeometry args={[0.42, 0.36, 0.42]} />
+            <boxGeometry args={[0.55, 0.55, 0.55]} />
             <meshBasicMaterial color="#ffd23f" wireframe />
           </mesh>
         )}
         {!f.verified && <Line points={RING} color="#9aa3b5" dashed dashSize={0.08} gapSize={0.06} lineWidth={1} />}
-        <Html center position={[0, f.mount === 'floor' ? -0.35 : 0.35, 0]} className={'label' + (selected ? ' sel' : '')}>{f.id}</Html>
+        <Html center position={[0, f.mount === 'floor' ? -0.5 : 0.4, 0]} className={'label' + (selected ? ' sel' : '')}>{f.id}</Html>
       </group>
       {on && (
         <>
