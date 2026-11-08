@@ -42,11 +42,14 @@ describe('페이드', () => {
     e.cancel()
     expect(e.preview).toEqual({})
   })
-  it('기본 조명은 PREVIEW를 거치지 않고 LIVE로 간다', () => {
+  it('기본 조명은 PREVIEW를 거치지 않고 LIVE로 간다(그 씬 페이더 100%, 수동 값 지움)', () => {
     const e = new Engine(show)
+    e.setPreview(['1-3'], 'dimmer', 5)
+    e.apply(0, 0)
     e.goScene(0, 'P1-01')
-    expect(e.current(10_000)['1-3'].dimmer).toBe(255)
-    expect(e.preview['1-3'].dimmer).toBe(255)
+    expect(e.output(10_000)['1-3'].dimmer).toBe(255)
+    expect(e.faders['P1-01']).toBe(1)
+    expect(e.pending).toBe(false)
   })
 })
 

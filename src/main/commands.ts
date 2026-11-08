@@ -3,7 +3,8 @@ import type { Engine, FaderMode } from '../core/engine/engine'
 /** 화면 → 메인으로 보내는 명령 */
 export type Command =
   | { t: 'set'; ids: string[]; attr: string; value: number }
-  | { t: 'loadScene'; id: string }
+  | { t: 'selectScene'; id: string }
+  | { t: 'clearManual'; ids?: string[] }
   | { t: 'apply'; fade: number }
   | { t: 'cancel' }
   | { t: 'blackout'; on: boolean }
@@ -16,7 +17,8 @@ export type Command =
 export function runCommand(e: Engine, c: Command, now: number) {
   switch (c.t) {
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
-    case 'loadScene': return e.loadSceneToPreview(c.id)
+    case 'selectScene': return e.selectScene(c.id)
+    case 'clearManual': return e.clearManual(c.ids)
     case 'apply': return e.apply(now, c.fade)
     case 'cancel': return e.cancel()
     case 'blackout': e.blackout = c.on; return

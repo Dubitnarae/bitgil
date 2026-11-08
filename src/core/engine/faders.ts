@@ -1,13 +1,14 @@
 import type { Show, Values } from './types'
-import { clone, value16 } from './values'
+import { merge, value16 } from './values'
 
 /** 씬 id → 페이더 위치(0~1) */
 export type Levels = Record<string, number>
 
 /**
- * 씬 페이더를 기본 값(base) 위에 겹친다. 콘솔과 같은 규칙:
+ * 씬 페이더를 겹친 뒤, 손으로 조정한 값(base)을 맨 위에 올린다. 콘솔과 같은 규칙:
  * - HTP 채널(밝기): 씬 값 × 페이더 위치, 여러 개가 겹치면 큰 값
  * - LTP 채널(색·팬·틸트 등): 페이더가 0보다 크면 씬 값, 나중에 올린 씬이 이긴다
+ * - 손으로 조정한 값은 씬보다 우선(콘솔의 프로그래머처럼). 조정한 채널만 덮는다.
  * order: 씬 id → 올린 순서 번호(클수록 나중)
  */
 export function layerScenes(show: Show, base: Values, levels: Levels, order: Record<string, number>): Values {
@@ -17,7 +18,7 @@ export function layerScenes(show: Show, base: Values, levels: Levels, order: Rec
   if (!active.length) return base
   const types = new Map(show.fixture_types.map((t) => [t.id, t]))
   const fixtures = new Map(show.fixtures.map((f) => [f.id, f]))
-  const out = clone(base)
+  const out: Values = {}
   for (const s of active) {
     const level = levels[s.id]
     for (const [fid, attrs] of Object.entries(s.values)) {
@@ -39,7 +40,7 @@ export function layerScenes(show: Show, base: Values, levels: Levels, order: Rec
       }
     }
   }
-  return out
+  return merge(out, base)
 }
 
 /** 페이더 위치를 from → to 로 t만큼 진행 */

@@ -53,3 +53,4 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .settings p { margin: 6px 0; }
 .settings .radio { display: block; margin: 6px 0; cursor: pointer; }
 .settings .close { float: right; padding: 2px 8px; font-size: 12px; }
+.clear { margin-top: 6px; font-size: 12px; }

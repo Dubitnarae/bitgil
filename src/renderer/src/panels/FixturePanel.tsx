@@ -25,17 +25,22 @@ export function FixturePanel({ show, st, selected, setSelected }: Props) {
         <button onClick={() => setSelected(show.fixtures.map((f) => f.id))}>전체</button>
         <button onClick={() => setSelected([])}>선택 해제</button>
       </div>
+      <button className="clear" onClick={() => send({ t: 'clearManual', ids: selected })}
+        title="손으로 조정한 값을 지우고 씬 페이더 값으로 돌아갑니다(미리보기, [적용] 필요)">
+        {selected.length ? '선택 조명 수동 조정 지우기' : '수동 조정 모두 지우기'}
+      </button>
       <p className="hint">
         {selected.length ? `선택: ${selected.join(', ')}` : '3D 화면에서 조명을 누르세요 (Shift·Ctrl+클릭 = 여러 개)'}
       </p>
       {selected.length > 0 && ATTRS.map(([a, label]) => {
         const ids = selected.filter((id) => hasAttr(id, a))
         if (!ids.length) return null
-        const v = st.preview[ids[0]]?.[a] ?? 0
+        const v = st.previewOut[ids[0]]?.[a] ?? 0
+        const manual = st.preview[ids[0]]?.[a] !== undefined
         const set = (value: number) => send({ t: 'set', ids, attr: a, value })
         return (
           <label key={a} className="slider">
-            <span>{label}</span>
+            <span title={manual ? '손으로 조정한 값(씬보다 우선)' : '씬에서 온 값'}>{label}{manual ? ' ✎' : ''}</span>
             <input type="range" min={0} max={255} value={v} onChange={(e) => set(Number(e.target.value))} />
             <input type="number" min={0} max={255} value={v} onChange={(e) => set(Number(e.target.value))} />
           </label>

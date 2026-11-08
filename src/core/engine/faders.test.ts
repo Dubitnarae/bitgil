@@ -24,6 +24,10 @@ describe('씬 페이더 겹치기', () => {
     expect(layerScenes(show, {}, { A: 1, B: 1 }, { A: 1, B: 2 })['2-1'].red).toBe(10)
     expect(layerScenes(show, {}, { A: 1, B: 1 }, { A: 2, B: 1 })['2-1'].red).toBe(255)
   })
+  it('손으로 조정한 값은 씬보다 우선, 조정한 채널만', () => {
+    const v = layerScenes(show, { '2-1': { dimmer: 30 } }, { A: 1 }, { A: 1 })
+    expect(v['2-1']).toEqual({ dimmer: 30, red: 255 })
+  })
   it('페이더 0인 씬은 영향 없음, 기본 값은 유지', () => {
     const v = layerScenes(show, { '2-1': { dimmer: 30, red: 7 } }, { A: 0 }, {})
     expect(v['2-1']).toEqual({ dimmer: 30, red: 7 })
@@ -31,6 +35,24 @@ describe('씬 페이더 겹치기', () => {
 })
 
 describe('페이더 반영 방식', () => {
+  it('씬 버튼 → [적용]: 그 씬 페이더 100%, 나머지 0', () => {
+    const e = new Engine(show)
+    e.setFader(0, 'B', 1)
+    e.selectScene('A')
+    expect(e.faders.A ?? 0).toBe(0) // 적용 전에는 그대로
+    expect(e.pending).toBe(true)
+    e.apply(0, 0)
+    expect(e.faders).toEqual({ A: 1, B: 0 })
+    expect(e.output(0)['2-1'].red).toBe(255)
+  })
+  it('수동 조정 지우기', () => {
+    const e = new Engine(show)
+    e.setPreview(['2-1', '1-12'], 'dimmer', 9)
+    e.clearManual(['2-1'])
+    expect(Object.keys(e.preview)).toEqual(['1-12'])
+    e.clearManual()
+    expect(e.preview).toEqual({})
+  })
   it('바로 반영 모드: 움직이면 즉시 출력', () => {
     const e = new Engine(show)
     e.setFader(0, 'A', 0.5)

@@ -1,5 +1,5 @@
 import type { Show, Values } from './types'
-import { clone, lerpFixture, merge } from './values'
+import { clone, lerpFixture } from './values'
 import { buildFrame } from './frame'
 import { layerScenes, lerpLevels, type Levels } from './faders'
 
@@ -84,9 +84,18 @@ export class Engine {
     for (const id of ids) this.preview[id] = { ...this.preview[id], [attr]: v }
   }
 
-  loadSceneToPreview(sceneId: string) {
-    const s = this.scene(sceneId)
-    this.preview = merge(this.preview, s.values)
+  /** 씬 버튼: 미리보기에서 그 씬 페이더만 100%, 나머지는 0. [적용]해야 나간다. */
+  selectScene(sceneId: string) {
+    this.scene(sceneId)
+    if (!(this.previewFaders[sceneId] > 0)) this.raised[sceneId] = ++this.tick
+    this.previewFaders = this.only(sceneId)
+  }
+
+  /** 손으로 조정한 값 지우기(미리보기). ids가 없으면 전부. */
+  clearManual(ids?: string[]) {
+    if (!ids?.length) { this.preview = {}; return }
+    this.preview = clone(this.preview)
+    for (const id of ids) delete this.preview[id]
   }
 
   apply(now: number, fadeSeconds: number) {
@@ -102,11 +111,24 @@ export class Engine {
     this.previewFaders = { ...this.faders }
   }
 
-  /** 기본 조명: PREVIEW를 거치지 않고 바로 LIVE로. 편집 중이던 PREVIEW도 같이 맞춘다. */
+  /**
+   * 기본 조명: PREVIEW를 거치지 않고 바로 LIVE로. 그 씬 페이더만 100%, 손으로 조정한 값은 모두 지운다.
+   */
+  // shortcut: 손으로 조정한 값은 페이드 없이 바로 사라짐, 튀는 게 거슬리면 화면 출력값 기준 페이드로 바꿈
   goScene(now: number, sceneId: string) {
     const s = this.scene(sceneId)
-    this.fadeTo(now, merge(this.live, s.values), s.fade_seconds)
-    this.preview = clone(this.live)
+    if (!(this.faders[sceneId] > 0)) this.raised[sceneId] = ++this.tick
+    const from = this.currentFaders(now)
+    this.faders = this.only(sceneId)
+    this.previewFaders = { ...this.faders }
+    this.faderFade = s.fade_seconds > 0 ? { from: { ...from }, start: now, ms: s.fade_seconds * 1000 } : null
+    this.live = {}
+    this.preview = {}
+    this.fade = null
+  }
+
+  private only(sceneId: string): Levels {
+    return Object.fromEntries(this.show.scenes.map((x) => [x.id, x.id === sceneId ? 1 : 0]))
   }
 
   private fadeTo(now: number, target: Values, seconds: number) {
