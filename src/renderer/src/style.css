@@ -55,6 +55,8 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .fader .pct { font-size: 11px; color: #ffd23f; }
 .fader .name { font-size: 12px; margin-top: 2px; }
 .settings p { margin: 6px 0; }
+.settings .group { background: #1c1f27; border: 1px solid #2a2e37; border-left: 3px solid #4d8dff; border-radius: 6px; padding: 8px 10px; margin: 10px 0; }
+.settings .group h4 { margin: 0 0 6px; padding-bottom: 5px; border-bottom: 1px solid #2a2e37; color: #8fb6ff; font-size: inherit; }
 .settings .radio { display: block; margin: 6px 0; cursor: pointer; }
 .settings .close, h3 .close { float: right; padding: 2px 8px; font-size: 12px; }
 .clear { margin-top: 6px; font-size: 12px; }

@@ -17,7 +17,9 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
   return (
     <section className="panel settings">
       <h3>설정 <button className="close" onClick={onClose}>닫기</button></h3>
-      <p>씬 페이더를 움직이면</p>
+      <div className="group">
+      <h4>씬 페이더</h4>
+      <p className="hint">페이더를 움직이면</p>
       <label className="radio">
         <input type="radio" checked={st.faderMode === 'live'} onChange={() => send({ t: 'faderMode', mode: 'live' })} />
         바로 반영 — 움직이는 즉시 실제 조명이 따라온다 (콘솔과 같음)
@@ -27,7 +29,11 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         미리보기 후 반영 — 미리보기 화면에서 보고 [적용]을 눌러야 나간다
       </label>
 
-      <p>DMX 인터페이스 포트</p>
+      </div>
+
+      <div className="group">
+      <h4>DMX 출력 (USB 인터페이스)</h4>
+      <p className="hint">포트</p>
       <label className="radio">
         <select value={st.output.preferred} onChange={(e) => send({ t: 'dmxPort', path: e.target.value })}>
           <option value="">자동 찾기 (FTDI·ENTTEC·DMXking)</option>
@@ -41,7 +47,10 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         <input type="checkbox" checked={st.output.onStart} onChange={(e) => send({ t: 'outputOnStart', on: e.target.checked })} />
         프로그램을 켜면 바로 장비로 출력 (끄면 '출력 대기'로 시작 — 권장)
       </label>
-      <p>폰 원격 (같은 Wi-Fi)</p>
+      </div>
+
+      <div className="group">
+      <h4>폰 원격 (같은 Wi-Fi)</h4>
       <label className="radio">
         <input type="checkbox" checked={st.remote.on} onChange={(e) => send({ t: 'remote', on: e.target.checked })} />
         켜기 — 폰에서 상태 보기, [다음 씬]·[기본 조명]·[블랙아웃]
@@ -53,7 +62,12 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         원격 접속 코드: <b>{st.remote.code}</b> · 지금 연결된 폰 {st.remote.clients}대
         {st.remote.error && <><br /><span style={{ color: '#ff6b6b' }}>{st.remote.error}</span></>}
       </p>}
-      <p>편집 모드 PIN <button onClick={onChangePin}>PIN 바꾸기</button></p>
+      </div>
+
+      <div className="group">
+      <h4>편집 모드 PIN</h4>
+      <button onClick={onChangePin}>PIN 바꾸기</button>
+      </div>
       <p className="hint">빛길 · 개발자 KIM YEONGDO</p>
     </section>
   )
