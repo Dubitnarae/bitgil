@@ -36,7 +36,7 @@ declare global {
       listPorts(): Promise<{ path: string; manufacturer?: string }[]>
       send(cmd: Command): void
       unlock(pin: string): Promise<boolean>
-      setPin(pin: string): Promise<boolean>
+      setPin(pin: string, current?: string): Promise<boolean>
       lock(): Promise<void>
       onState(cb: (s: State) => void): () => void
       onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void

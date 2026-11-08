@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('bitgil', {
   listPorts: () => ipcRenderer.invoke('ports:list'),
   send: (cmd: unknown) => ipcRenderer.send('cmd', cmd),
   unlock: (pin: string) => ipcRenderer.invoke('edit:unlock', pin),
-  setPin: (pin: string) => ipcRenderer.invoke('edit:setPin', pin),
+  setPin: (pin: string, current?: string) => ipcRenderer.invoke('edit:setPin', pin, current),
   lock: () => ipcRenderer.invoke('edit:lock'),
   onShow: (cb: (s: unknown) => void) => {
     const h = (_e: unknown, s: unknown) => cb(s)

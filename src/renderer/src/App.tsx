@@ -19,7 +19,7 @@ export default function App() {
   const [fade, setFade] = useState(2)
   const [monitor, setMonitor] = useState(false)
   const [settings, setSettings] = useState(false)
-  const [pin, setPin] = useState<'unlock' | 'set' | null>(null)
+  const [pin, setPin] = useState<'unlock' | 'set' | 'change' | null>(null)
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
@@ -48,7 +48,7 @@ export default function App() {
         </div>
         <aside>
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
-          {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('set')} />}
+          {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <CuePanel show={show} st={st} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />

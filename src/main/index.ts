@@ -88,10 +88,11 @@ ipcMain.handle('edit:unlock', (_e, pin: string) => {
   edit.open(Date.now())
   return true
 })
-ipcMain.handle('edit:setPin', (_e, pin: string) => {
+ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
   pin = String(pin)
-  // PIN 바꾸기는 편집 모드에서만(처음 정할 때는 예외)
-  if (!isPin(pin) || (settings.pinHash && !edit.isOpen(Date.now()))) return false
+  // PIN 바꾸기는 편집 모드에서 현재 PIN까지 맞아야 한다(처음 정할 때는 예외)
+  if (!isPin(pin)) return false
+  if (settings.pinHash && (!edit.isOpen(Date.now()) || !checkPin(String(current ?? ''), settings.pinHash))) return false
   saveSettings({ ...settings, pinHash: (settings.pinHash = hashPin(pin)) })
   edit.open(Date.now())
   return true
