@@ -32,6 +32,7 @@ input{font-size:24px;width:100%;box-sizing:border-box;padding:12px;margin:10px 0
   <button id="def">기본 조명</button>
   <button id="bo">블랙아웃</button>
 </div>
+<p style="color:#7d8596;font-size:12px;text-align:center">빛길 · 개발자 KIM YEONGDO</p>
 <script>
 var $=function(id){return document.getElementById(id)}, st=null, es=null;
 var q=new URLSearchParams(location.search).get('code');
