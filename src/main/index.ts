@@ -75,8 +75,12 @@ setInterval(() => {
   enttec.send(frame)
 }, 25)
 
+/** 편집 모드가 닫히면(직접 닫기·10분 경과) 조명 찾기도 끝내고 원래 조명으로 돌아간다 */
+function endFind() { if (engine.find) engine.setFind(Date.now(), null) }
+
 function buildState() {
   const now = Date.now()
+  if (!edit.isOpen(now)) endFind()
   return {
     live: engine.output(now),
     preview: engine.preview,
@@ -86,6 +90,7 @@ function buildState() {
     faderMode: engine.faderMode,
     pending: engine.pending,
     cue: engine.cue,
+    find: engine.find,
     master: engine.master,
     blackout: engine.blackout,
     fading: engine.fading,
@@ -133,7 +138,7 @@ ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
   edit.open(Date.now())
   return true
 })
-ipcMain.handle('edit:lock', () => edit.close())
+ipcMain.handle('edit:lock', () => { edit.close(); endFind() })
 
 ipcMain.on('cmd', (_e, c: Command) => {
   try {

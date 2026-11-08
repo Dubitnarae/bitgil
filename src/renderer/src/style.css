@@ -116,3 +116,9 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 ::-webkit-scrollbar-thumb { background: #3c414c; border-radius: 5px; border: 2px solid #15181d; }
 ::-webkit-scrollbar-thumb:hover { background: #4d5361; }
 .settings .radio button { flex: none; white-space: nowrap; }
+.panel.find { background: #1a1f2a; border-left: 3px solid #ffd23f; }
+.findlist { margin: 8px 0; }
+.findlist button { padding: 2px 6px; font-size: 12px; }
+.findlist button.ok { color: #7fd18b; }
+.findlist button.act { background: #6b5a1a; border-color: #ffd23f; }
+.find .apply label { display: flex; align-items: center; gap: 3px; }

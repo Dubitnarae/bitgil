@@ -11,8 +11,9 @@ export function buildFrame(show: Show, values: Values, master = 1, blackout = fa
   const m = blackout ? 0 : Math.min(1, Math.max(0, master))
   for (const f of show.fixtures) {
     const type = types.get(f.type)
-    if (!type) continue
-    const v = values[f.id] ?? {}
+    const v = values[f.id]
+    // 값이 없는 조명은 건드리지 않는다(프레임은 0으로 시작). 주소가 겹쳐도 켜진 조명이 꺼진 조명에 덮이지 않게.
+    if (!type || !v) continue
     const dim = Math.round(value16(v, 'dimmer') * m)
     for (const c of type.channels) {
       const ch = f.address + c.offset - 1

@@ -20,6 +20,8 @@ export class Engine {
   previewFaders: Levels = {}
   faderMode: FaderMode = 'live'
   cue = -1 // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 아직 시작 전)
+  find: string | null = null // 조명 찾기: 이 조명만 Locate 값으로 켜고 나머지는 끈다(바로 LIVE)
+  private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
   private raised: Record<string, number> = {} // 페이더를 올린 순서(LTP: 나중에 올린 씬이 이김)
@@ -30,7 +32,7 @@ export class Engine {
     this.types = new Map(show.fixture_types.map((t) => [t.id, t]))
   }
 
-  get fading() { return this.fade !== null || this.faderFade !== null }
+  get fading() { return this.fade !== null || this.faderFade !== null || this.findReturn !== null }
 
   /** [적용]하지 않은 변경이 있는지 */
   get pending() {
@@ -43,10 +45,14 @@ export class Engine {
     if (!this.fade) return this.live
     const t = this.fade.ms <= 0 ? 1 : (now - this.fade.start) / this.fade.ms
     if (t >= 1) { this.fade = null; return this.live }
+    return this.lerpValues(this.fade.from, this.live, t)
+  }
+
+  private lerpValues(from: Values, to: Values, t: number): Values {
     const out: Values = {}
     for (const f of this.show.fixtures) {
       const type = this.types.get(f.type)
-      if (type && (this.fade.from[f.id] || this.live[f.id])) out[f.id] = lerpFixture(type, this.fade.from[f.id], this.live[f.id], t)
+      if (type && (from[f.id] || to[f.id])) out[f.id] = lerpFixture(type, from[f.id], to[f.id], t)
     }
     return out
   }
@@ -59,13 +65,39 @@ export class Engine {
     return lerpLevels(this.faderFade.from, this.faders, t)
   }
 
-  /** 실제로 나가는 값 (LIVE + 씬 페이더) */
-  output(now: number): Values { return layerScenes(this.show, this.current(now), this.currentFaders(now), this.raised) }
+  /** 실제로 나가는 값 (LIVE + 씬 페이더). 조명 찾기 중이면 찾는 조명만, 끝난 직후 2초는 원래 상태로 페이드. */
+  output(now: number): Values {
+    if (this.find) return this.findValues()
+    const out = layerScenes(this.show, this.current(now), this.currentFaders(now), this.raised)
+    const r = this.findReturn
+    if (!r) return out
+    const t = (now - r.start) / r.ms
+    if (t >= 1) { this.findReturn = null; return out }
+    // 원래 상태에 없는 값은 '유지'가 아니라 0(꺼짐)으로 내려가야 한다
+    const to: Values = { ...out }
+    for (const [id, v] of Object.entries(r.from)) to[id] = { ...Object.fromEntries(Object.keys(v).map((k) => [k, 0])), ...out[id] }
+    return this.lerpValues(r.from, to, t)
+  }
+
+  /** 조명 찾기 시작·바꾸기(id) 또는 끝내기(null). 끝내면 들어가기 전 조명 상태로 2초 페이드. */
+  setFind(now: number, id: string | null) {
+    if (id && !this.show.fixtures.some((f) => f.id === id)) throw new Error(`조명을 찾을 수 없음: ${id}`)
+    if (!id && this.find) this.findReturn = { from: this.findValues(), start: now, ms: 2000 }
+    this.find = id
+  }
+
+  private findValues(): Values {
+    const f = this.show.fixtures.find((x) => x.id === this.find)
+    const type = f && this.types.get(f.type)
+    if (!f || !type) return {}
+    return { [f.id]: Object.fromEntries(type.channels.filter((c) => c.locate !== undefined).map((c) => [c.attr, c.locate!])) }
+  }
 
   /** 미리보기 화면에 보일 값 (PREVIEW + 미리보기 페이더) */
   previewOutput(): Values { return layerScenes(this.show, this.preview, this.previewFaders, this.raised) }
 
-  frame(now: number) { return buildFrame(this.show, this.output(now), this.master, this.blackout) }
+  // 찾기 중에는 전체 밝기를 무시(0%여도 보여야 함). 블랙아웃은 그대로 우선.
+  frame(now: number) { return buildFrame(this.show, this.output(now), this.find ? 1 : this.master, this.blackout) }
 
   /** 씬 페이더 움직이기. 바로 반영 모드면 LIVE와 미리보기를 같이, 아니면 미리보기만. */
   setFader(now: number, sceneId: string, level: number) {
