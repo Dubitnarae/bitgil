@@ -3,6 +3,7 @@
   "productName": "빛길",
   "version": "0.1.0",
   "description": "교회 3D 조명 제어 프로그램",
+  "author": "KIM YEONGDO",
   "main": "out/main/index.js",
   "private": true,
   "scripts": {

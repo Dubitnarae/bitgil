@@ -33,6 +33,7 @@ export function SettingsPanel({ st, onClose }: { st: State; onClose: () => void 
         <input type="checkbox" checked={st.output.onStart} onChange={(e) => send({ t: 'outputOnStart', on: e.target.checked })} />
         프로그램을 켜면 바로 장비로 출력 (끄면 '출력 대기'로 시작 — 권장)
       </label>
+      <p className="hint">빛길 · 개발자 KIM YEONGDO</p>
     </section>
   )
 }
