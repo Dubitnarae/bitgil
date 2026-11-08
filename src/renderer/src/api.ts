@@ -23,6 +23,8 @@ export interface State {
   }
   frame: number[]
   saveError: string
+  editMode: boolean // false = 운영 모드
+  pinSet: boolean
 }
 
 declare global {
@@ -32,6 +34,9 @@ declare global {
       getState(): Promise<State>
       listPorts(): Promise<{ path: string; manufacturer?: string }[]>
       send(cmd: Command): void
+      unlock(pin: string): Promise<boolean>
+      setPin(pin: string): Promise<boolean>
+      lock(): Promise<void>
       onState(cb: (s: State) => void): () => void
       onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void
     }

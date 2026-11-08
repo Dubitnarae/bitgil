@@ -22,7 +22,6 @@ export type Command =
   | { t: 'outputOnStart'; on: boolean }
 
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
-// shortcut: 정식 씬 저장·덮어쓰기·삭제도 아직 PIN 없이 됨, 편집 모드(PIN)를 만들 때 운영 모드에선 임시 씬만 허용
 export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | void {
   switch (c.t) {
     case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'

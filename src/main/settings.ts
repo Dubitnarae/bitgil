@@ -9,9 +9,11 @@ export interface Settings {
   dmxPort: string
   /** 프로그램을 켜자마자 실제 장비로 출력할지(기본: 출력 대기) */
   outputOnStart: boolean
+  /** 편집 모드 PIN 해시('소금:해시'). 빈 값 = 아직 안 정함 */
+  pinHash: string
 }
 
-const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '' }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

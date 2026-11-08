@@ -34,11 +34,12 @@ export function ScenePanel({ show, st, fade, setFade }: Props) {
       <p className="hint">지금 미리보기 화면에 보이는 조명을 씬으로 저장합니다.</p>
       <div className="apply">
         <input className="name" placeholder="씬 이름 (예: 설교)" value={name} onChange={(e) => setName(e.target.value)} />
-        <button onClick={() => save(false)}>새 씬으로 저장</button>
+        {st.editMode && <button onClick={() => save(false)}>새 씬으로 저장</button>}
         <button onClick={() => save(true)}>임시 씬으로 저장</button>
       </div>
       {st.saveError && <p className="warn">{st.saveError}</p>}
-      {manage && <SceneManager show={show} />}
+      {!st.editMode && <p className="hint">운영 모드: 임시 씬만 저장·고칠 수 있습니다. 정식 씬은 [편집 모드]에서.</p>}
+      {manage && <SceneManager show={show} edit={st.editMode} />}
     </section>
   )
 }

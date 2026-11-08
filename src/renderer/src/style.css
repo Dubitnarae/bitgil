@@ -62,3 +62,6 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .scene-manager { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow: auto; }
 .scene-manager .row { display: flex; align-items: center; gap: 6px; }
 .scene-manager input.name { background: #0d0f13; color: inherit; border: 1px solid #3c414c; border-radius: 4px; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal .panel { width: 340px; }
+.modal input { display: block; width: 100%; margin: 6px 0; font-size: 20px; letter-spacing: 8px; text-align: center; }

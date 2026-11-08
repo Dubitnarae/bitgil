@@ -8,6 +8,7 @@ import { ScenePanel } from './panels/ScenePanel'
 import { ChannelMonitor } from './panels/ChannelMonitor'
 import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
+import { PinDialog } from './panels/PinDialog'
 
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
@@ -17,6 +18,7 @@ export default function App() {
   const [fade, setFade] = useState(2)
   const [monitor, setMonitor] = useState(false)
   const [settings, setSettings] = useState(false)
+  const [pin, setPin] = useState<'unlock' | 'set' | null>(null)
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
@@ -36,7 +38,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} />
+      <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} />
       <main>
         <div className={'view ' + view}>
           <Stage3D show={show} values={values} master={master} selected={selected}
@@ -44,7 +46,8 @@ export default function App() {
           <span className="viewtag">{view === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>
         <aside>
-          {settings && <SettingsPanel st={st} onClose={() => setSettings(false)} />}
+          {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
+          {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('set')} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />
         </aside>
@@ -54,6 +57,7 @@ export default function App() {
         <button onClick={() => setMonitor(!monitor)}>{monitor ? '채널 모니터 닫기' : '채널 모니터 열기'}</button>
         {monitor && <ChannelMonitor show={show} frame={st.frame} selected={selected} />}
       </footer>
+      {pin && <PinDialog mode={pin} onClose={() => setPin(null)} />}
     </div>
   )
 }

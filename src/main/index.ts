@@ -6,6 +6,7 @@ import { EnttecProOutput, listPorts } from './dmx/enttec'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, saveShowFile } from './showfile'
+import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
 const showDir = join(app.getPath('documents'), '빛길')
@@ -30,6 +31,7 @@ engine.faderMode = settings.faderMode
 const enttec = new EnttecProOutput(settings.dmxPort)
 enttec.setEnabled(settings.outputOnStart)
 let win: BrowserWindow | null = null
+const edit = new EditMode() // 시작은 항상 운영 모드
 
 // DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
 setInterval(() => {
@@ -60,6 +62,8 @@ function buildState() {
       onStart: settings.outputOnStart
     },
     frame: Array.from(output.last),
+    editMode: edit.isOpen(now),
+    pinSet: !!settings.pinHash,
     saveError
   }
 }
@@ -77,9 +81,27 @@ setInterval(() => {
 ipcMain.handle('show:get', () => engine.show)
 ipcMain.handle('state:get', () => buildState())
 ipcMain.handle('ports:list', () => listPorts())
+// 편집 모드: PIN이 맞으면 연다. PIN이 아직 없으면 처음 정한 PIN으로 연다.
+ipcMain.handle('edit:unlock', (_e, pin: string) => {
+  if (!settings.pinHash || !checkPin(String(pin), settings.pinHash)) return false
+  edit.open(Date.now())
+  return true
+})
+ipcMain.handle('edit:setPin', (_e, pin: string) => {
+  pin = String(pin)
+  // PIN 바꾸기는 편집 모드에서만(처음 정할 때는 예외)
+  if (!isPin(pin) || (settings.pinHash && !edit.isOpen(Date.now()))) return false
+  saveSettings({ ...settings, pinHash: (settings.pinHash = hashPin(pin)) })
+  edit.open(Date.now())
+  return true
+})
+ipcMain.handle('edit:lock', () => edit.close())
+
 ipcMain.on('cmd', (_e, c: Command) => {
   try {
-    // shortcut: 설정은 아직 PIN 없이 바꿀 수 있음, 편집 모드(PIN)를 만들 때 편집 모드에서만 허용
+    const now = Date.now()
+    if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
+    edit.touch(now)
     if (c.t === 'output') return enttec.setEnabled(c.on)
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'outputOnStart') return saveSettings({ ...settings, outputOnStart: (settings.outputOnStart = c.on) })
