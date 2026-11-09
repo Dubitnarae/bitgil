@@ -12,12 +12,15 @@ export function pickPort(ports: PortInfo[], preferred: string): string | undefin
 
 export const listPorts = (): Promise<PortInfo[]> => SerialPort.list()
 
+/** 인터페이스 종류. pro = Enttec DMX USB Pro 호환(장비가 DMX 신호를 만듦), open = FTDI 칩만 있는 Open DMX 호환(Lixada 등, 컴퓨터가 신호 시간을 맞춤) */
+export type DmxType = 'pro' | 'open'
+
 /**
- * Enttec DMX USB Pro 실제 출력. 출력이 켜졌을 때만 포트를 열고 보낸다.
+ * USB-DMX 실제 출력. 출력이 켜졌을 때만 포트를 열고 보낸다.
  * 끊기면 connected=false, 2초마다 다시 연결한다. 연결되면 다음 send(현재 LIVE 프레임)부터 나간다.
  */
-export class EnttecProOutput implements DmxOutput {
-  readonly name = 'Enttec 출력'
+export class UsbDmxOutput implements DmxOutput {
+  readonly name = 'USB-DMX 출력'
   connected = false
   enabled = false
   path = ''
@@ -26,7 +29,7 @@ export class EnttecProOutput implements DmxOutput {
   private opening = false
   private busy = false
 
-  constructor(public preferred = '') {
+  constructor(public preferred = '', public type: DmxType = 'pro') {
     setInterval(() => { if (this.enabled && !this.connected) void this.connect() }, 2000)
   }
 
@@ -42,11 +45,21 @@ export class EnttecProOutput implements DmxOutput {
     if (this.enabled) void this.connect()
   }
 
+  setType(type: DmxType) {
+    this.type = type
+    this.close()
+    if (this.enabled) void this.connect()
+  }
+
   send(frame: Uint8Array) {
     // 앞 전송이 아직 안 끝났으면 건너뛴다(장비가 막혔을 때 쌓이지 않게)
-    if (!this.enabled || !this.connected || !this.port || this.busy) return
+    const port = this.port
+    if (!this.enabled || !this.connected || !port || this.busy) return
     this.busy = true
-    this.port.write(Buffer.from(enttecPacket(frame)), () => { this.busy = false })
+    const done = () => { this.busy = false }
+    if (this.type === 'pro') return void port.write(Buffer.from(enttecPacket(frame)), done)
+    // Open DMX: 브레이크(선을 잠깐 0으로, USB 왕복 시간만큼 → 88µs 이상) → 시작 코드 0 + 512채널
+    port.set({ brk: true }, () => port.set({ brk: false }, () => port.write(Buffer.concat([Buffer.of(0), Buffer.from(frame)]), done)))
   }
 
   private async connect() {
@@ -55,7 +68,10 @@ export class EnttecProOutput implements DmxOutput {
     try {
       const path = pickPort(await listPorts(), this.preferred)
       if (!path) throw new Error(this.preferred ? `${this.preferred} 포트가 없습니다` : 'DMX 인터페이스를 찾지 못했습니다')
-      const port = new SerialPort({ path, baudRate: 115200, autoOpen: false })
+      // Pro 는 속도 값이 의미 없음. Open DMX 는 DMX 규격 그대로 250000bps, 8비트, 정지 비트 2
+      const port = new SerialPort(this.type === 'pro'
+        ? { path, baudRate: 115200, autoOpen: false }
+        : { path, baudRate: 250000, dataBits: 8, stopBits: 2, parity: 'none', autoOpen: false })
       await new Promise<void>((ok, fail) => port.open((err) => (err ? fail(err) : ok())))
       if (!this.enabled) { port.close(); return } // 여는 사이에 출력을 끈 경우
       port.on('close', () => this.lost(port, '연결이 끊겼습니다'))

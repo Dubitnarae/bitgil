@@ -38,12 +38,14 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'deleteScene': return isTemp(c.id)
     case 'setCuelist':
     case 'find':
+    case 'chTest':
     case 'editFixture':
     case 'swapFixtures':
     case 'editVenue':
     case 'editFixtureType':
     case 'faderMode':
     case 'dmxPort':
+    case 'dmxType':
     case 'outputOnStart':
     case 'autoUpdate':
     case 'remote': return false

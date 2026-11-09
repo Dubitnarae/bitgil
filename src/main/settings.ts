@@ -3,11 +3,14 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { join } from 'node:path'
 import type { FaderMode } from '../core/engine/engine'
 import type { QualitySetting } from './quality'
+import type { DmxType } from './dmx/enttec'
 
 export interface Settings {
   faderMode: FaderMode
   /** DMX 인터페이스 포트(예: COM5). 빈 값이면 자동 찾기 */
   dmxPort: string
+  /** 인터페이스 종류: pro(Enttec Pro 호환, 기본) 또는 open(Open DMX·Lixada 등 FTDI) */
+  dmxType: DmxType
   /** 프로그램을 켜자마자 실제 장비로 출력할지(기본: 출력 대기) */
   outputOnStart: boolean
   /** 편집 모드 PIN 해시('소금:해시'). 빈 값 = 아직 안 정함 */
@@ -26,7 +29,7 @@ export interface Settings {
   quality: QualitySetting
 }
 
-const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '', skipVersion: '', quality: 'auto' }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', dmxType: 'pro', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '', skipVersion: '', quality: 'auto' }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

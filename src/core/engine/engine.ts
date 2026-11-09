@@ -21,6 +21,7 @@ export class Engine {
   faderMode: FaderMode = 'live'
   cue = -1 // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 아직 시작 전)
   find: string | null = null // 조명 찾기: 이 조명만 Locate 값으로 켜고 나머지는 끈다(바로 LIVE)
+  chTest: { ch: number; value: number } | null = null // 채널 시험: 이 DMX 채널 하나만 이 값으로 내보낸다(나머지 0)
   private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
@@ -97,7 +98,20 @@ export class Engine {
   previewOutput(): Values { return layerScenes(this.show, this.preview, this.previewFaders, this.raised) }
 
   // 찾기 중에는 전체 밝기를 무시(0%여도 보여야 함). 블랙아웃은 그대로 우선.
-  frame(now: number) { return buildFrame(this.show, this.output(now), this.find ? 1 : this.master, this.blackout) }
+  frame(now: number) {
+    if (this.chTest) {
+      const f = new Uint8Array(512)
+      if (!this.blackout) f[this.chTest.ch - 1] = this.chTest.value
+      return f
+    }
+    return buildFrame(this.show, this.output(now), this.find ? 1 : this.master, this.blackout)
+  }
+
+  /** 채널 시험 시작·바꾸기 또는 끝내기(null). 끝내면 바로 원래 출력으로 돌아간다. */
+  setChTest(t: { ch: number; value: number } | null) {
+    if (t && !(Number.isInteger(t.ch) && t.ch >= 1 && t.ch <= 512)) throw new Error(`채널 번호는 1~512: ${t.ch}`)
+    this.chTest = t && { ch: t.ch, value: Math.max(0, Math.min(255, Math.round(t.value))) }
+  }
 
   /** 씬 페이더 움직이기. 바로 반영 모드면 LIVE와 미리보기를 같이, 아니면 미리보기만. */
   setFader(now: number, sceneId: string, level: number) {

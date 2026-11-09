@@ -22,6 +22,7 @@ export type Command =
   | { t: 'setCuelist'; list: CueStep[] }
   | { t: 'nextCue' }
   | { t: 'find'; id: string | null }
+  | { t: 'chTest'; ch: number | null; value?: number }
   | { t: 'editFixture'; id: string; edit: FixtureEdit }
   | { t: 'swapFixtures'; a: string; b: string }
   | { t: 'editVenue'; venue: Venue }
@@ -29,6 +30,7 @@ export type Command =
   // 아래는 엔진이 아니라 출력·설정 명령(메인 index.ts 에서 처리)
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
+  | { t: 'dmxType'; type: import('./dmx/enttec').DmxType }
   | { t: 'outputOnStart'; on: boolean }
   | { t: 'autoUpdate'; on: boolean }
   | { t: 'checkUpdate' } // 설정의 [지금 확인]
@@ -48,6 +50,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'editVenue': editVenue(e.show, c.venue); return 'showChanged'
     case 'editFixtureType': editFixtureType(e.show, c.id, c.edit); return 'showChanged'
     case 'find': return e.setFind(now, c.id)
+    case 'chTest': return e.setChTest(c.ch === null ? null : { ch: c.ch, value: c.value ?? 255 })
     case 'cue': return e.loadCue(c.index)
     case 'nextCue': return e.goNextCue(now)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)

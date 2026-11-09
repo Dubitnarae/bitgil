@@ -4,7 +4,7 @@ import { mergeScenes, scenesToXhd, xhdToScenes } from './xhd'
 import { join } from 'node:path'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
-import { EnttecProOutput, listPorts } from './dmx/enttec'
+import { UsbDmxOutput, listPorts } from './dmx/enttec'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, saveShowFile } from './showfile'
@@ -35,7 +35,7 @@ const output = new VirtualOutput() // 채널 모니터용, 항상 마지막 프�
 const settings = loadSettings()
 engine.faderMode = settings.faderMode
 // 시작 기본은 '출력 대기'(장비로 안 보냄). 설정에서 '시작할 때 바로 출력'을 켰을 때만 바로 내보낸다.
-const enttec = new EnttecProOutput(settings.dmxPort)
+const enttec = new UsbDmxOutput(settings.dmxPort, settings.dmxType)
 enttec.setEnabled(settings.outputOnStart)
 let win: BrowserWindow | null = null
 const edit = new EditMode() // 시작은 항상 운영 모드
@@ -81,7 +81,7 @@ setInterval(() => {
 }, 25)
 
 /** 편집 모드가 닫히면(직접 닫기·10분 경과) 조명 찾기도 끝내고 원래 조명으로 돌아간다 */
-function endFind() { if (engine.find) engine.setFind(Date.now(), null) }
+function endFind() { if (engine.find) engine.setFind(Date.now(), null); engine.setChTest(null) }
 
 const quality = () => resolveQuality(settings.quality, cpus().length, totalmem() / 1024 ** 3)
 
@@ -98,6 +98,7 @@ function buildState() {
     pending: engine.pending,
     cue: engine.cue,
     find: engine.find,
+    chTest: engine.chTest,
     master: engine.master,
     blackout: engine.blackout,
     fading: engine.fading,
@@ -107,6 +108,7 @@ function buildState() {
       port: enttec.path,
       error: enttec.error,
       preferred: enttec.preferred,
+      type: enttec.type,
       onStart: settings.outputOnStart
     },
     frame: Array.from(output.last),
@@ -189,6 +191,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
     edit.touch(now)
     if (c.t === 'output') return enttec.setEnabled(c.on)
+    if (c.t === 'dmxType') { enttec.setType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
     if (c.t === 'checkUpdate') return checkNow()

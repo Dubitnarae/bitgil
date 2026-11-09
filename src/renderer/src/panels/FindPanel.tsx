@@ -138,3 +138,36 @@ function FixtureEditor({ show, f }: { show: Show; f: Fixture }) {
     </div>
   )
 }
+
+/** 채널 시험(편집 모드 전용): DMX 채널 하나만 바로 내보내 주소·배선을 확인한다. 나머지 채널은 모두 0. */
+export function ChannelTest({ st }: { st: State }) {
+  const [ch, setCh] = useState(1)
+  const [value, setValue] = useState(255)
+  const t = st.chTest
+  const go = (c: number, v = value) => send({ t: 'chTest', ch: ((c - 1 + 512) % 512) + 1, value: v })
+  if (!t) return (
+    <section className="panel">
+      <h3>채널 시험</h3>
+      <p className="hint">DMX 채널 하나만 바로 켜고 나머지는 모두 끕니다(실제 조명이 바로 바뀝니다).
+        밝기 채널이 따로 있는 조명은 그 채널만으로는 안 켜질 수 있습니다 — 그때는 위 조명 찾기를 쓰세요.</p>
+      <div className="apply">
+        <label>채널 <input type="number" min={1} max={512} value={ch} onChange={(e) => setCh(Number(e.target.value))} /></label>
+        <button className="go" onClick={() => go(ch)}>시험 시작</button>
+      </div>
+    </section>
+  )
+  return (
+    <section className="panel find">
+      <h3>채널 시험 · 지금 켜진 채널 <span className="badge">{t.ch}</span>
+        <button className="close" onClick={() => { setCh(t.ch); send({ t: 'chTest', ch: null }) }}>시험 끝</button></h3>
+      {!st.output.enabled && <p className="warn">출력 대기 중이라 실제 조명은 안 켜집니다. 위 [출력 켜기]를 누르세요.</p>}
+      {st.blackout && <p className="warn">블랙아웃 중이라 0으로 나갑니다.</p>}
+      <div className="apply">
+        <button onClick={() => go(t.ch - 1)}>◀ 이전</button>
+        <button onClick={() => go(t.ch + 1)}>다음 ▶</button>
+        <label>값 <input type="range" min={0} max={255} value={t.value}
+          onChange={(e) => { const v = Number(e.target.value); setValue(v); go(t.ch, v) }} /> {t.value}</label>
+      </div>
+    </section>
+  )
+}

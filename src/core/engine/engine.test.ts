@@ -160,3 +160,21 @@ describe('순서 목록', () => {
     expect(e.cue).toBe(0)
   })
 })
+
+describe('채널 시험', () => {
+  it('그 채널 하나만 내보내고, 블랙아웃이면 0, 끝내면 원래 출력', () => {
+    const e = new Engine(structuredClone(show))
+    e.goScene(0, show.scenes[0].id)
+    const normal = e.frame(10_000)
+    e.setChTest({ ch: 5, value: 300 })
+    const f = e.frame(10_000)
+    expect(f[4]).toBe(255)
+    expect(f.reduce((a, b) => a + b, 0)).toBe(255)
+    e.blackout = true
+    expect(e.frame(10_000)[4]).toBe(0)
+    e.blackout = false
+    e.setChTest(null)
+    expect(e.frame(10_000)).toEqual(normal)
+  })
+  it('1~512 밖 채널은 거부', () => expect(() => new Engine(show).setChTest({ ch: 513, value: 1 })).toThrow())
+})

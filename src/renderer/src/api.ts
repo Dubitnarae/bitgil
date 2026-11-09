@@ -12,6 +12,7 @@ export interface State {
   pending: boolean
   cue: number // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 시작 전)
   find: string | null // 조명 찾기 중인 조명(null = 찾기 아님)
+  chTest: { ch: number; value: number } | null // 채널 시험 중인 채널(null = 아님)
   master: number
   blackout: boolean
   fading: boolean
@@ -21,6 +22,7 @@ export interface State {
     port: string // 지금 연결된 포트
     error: string
     preferred: string // 설정한 포트, 빈 값 = 자동
+    type: import('../../main/dmx/enttec').DmxType
     onStart: boolean
   }
   frame: number[]

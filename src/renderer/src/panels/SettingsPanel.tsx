@@ -34,6 +34,15 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
 
       <div className="group">
       <h4>DMX 출력 (USB 인터페이스)</h4>
+      <p className="hint">인터페이스 종류</p>
+      <label className="radio">
+        <input type="radio" checked={st.output.type === 'pro'} onChange={() => send({ t: 'dmxType', type: 'pro' })} />
+        Enttec DMX USB Pro 호환 (DMXking ultraDMX 등)
+      </label>
+      <label className="radio">
+        <input type="radio" checked={st.output.type === 'open'} onChange={() => send({ t: 'dmxType', type: 'open' })} />
+        Open DMX 호환 (Lixada USB-DMX512 등 FTDI 칩 제품)
+      </label>
       <p className="hint">포트</p>
       <label className="radio">
         <select value={st.output.preferred} onChange={(e) => send({ t: 'dmxPort', path: e.target.value })}>

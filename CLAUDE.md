@@ -35,7 +35,7 @@
 2. `core/engine`: 상태 엔진. 조명별 LIVE 값과 PREVIEW 값을 따로 가진다. 씬 불러오기, 페이드, 512채널 프레임 계산. 화면·USB와 무관한 순수 코드로 작성한다.
 3. `main/dmx`: DMX 출력. 같은 인터페이스를 따르는 두 구현을 둔다.
    - `VirtualOutput`: 장비 없이 채널 값을 화면(채널 모니터)으로만 보여준다. 개발 기본값.
-   - `EnttecProOutput`: 실제 인터페이스로 전송.
+   - `UsbDmxOutput`(`main/dmx/enttec.ts`): 실제 인터페이스로 전송. 종류는 설정 `dmxType` — `pro`(Enttec Pro 메시지) 또는 `open`(Open DMX: 250000bps 8N2, 브레이크 후 시작 코드 0 + 512채널, Lixada 등 FTDI 제품).
 4. `main/remote`: 폰 원격 서버.
 5. 쇼 파일 입출력과 설정 저장.
 

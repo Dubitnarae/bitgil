@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Show } from '../../core/engine/types'
 import { send, type State } from './api'
 import { Stage3D } from './3d/Stage3D'
@@ -11,7 +11,7 @@ import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
 import { UpdateNotice } from './panels/UpdateNotice'
-import { FindPanel } from './panels/FindPanel'
+import { ChannelTest, FindPanel } from './panels/FindPanel'
 import { VenuePanel } from './panels/VenuePanel'
 import { aimAt, withDrafts, type Aim } from './aim'
 
@@ -34,6 +34,22 @@ export default function App() {
     return () => { off(); offShow() }
   }, [])
 
+  // 비상 단축키: B = 블랙아웃 켜기/끄기, H = 기본 조명. 글자 입력 칸에서는 안 먹음. 한글 자판이어도 되게 e.code 로 본다.
+  const stRef = useRef(st)
+  stRef.current = st
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement
+      const typing = el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' ||
+        (el.tagName === 'INPUT' && !['range', 'checkbox', 'radio', 'button'].includes((el as HTMLInputElement).type))
+      if (typing || e.repeat || e.ctrlKey || e.altKey || e.metaKey || !stRef.current) return
+      if (e.code === 'KeyB') send({ t: 'blackout', on: !stRef.current.blackout })
+      else if (e.code === 'KeyH') send({ t: 'default' })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   if (!show || !st) return <div className="loading">불러오는 중…</div>
 
   // 조명 찾기 중: 3D는 실제 출력 화면, 조명을 누르면 그 조명을 켠다
@@ -54,12 +70,13 @@ export default function App() {
           <Stage3D show={aim ? withDrafts(show, aim.drafts) : show} values={values} master={master} selected={finding ? [st.find!] : selected}
             onSelect={onSelect} onClear={() => setSelected([])} quality={st.quality.used}
             onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p, aim!)) : undefined} />
-          <span className="viewtag">{finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
+          <span className="viewtag">{st.chTest ? `실제 출력 · 채널 ${st.chTest.ch} 시험 중 (3D는 채널 시험을 안 보여 줌)` : finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>
         <aside>
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
           {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
           {st.editMode && <FindPanel show={show} st={st} selected={selected} />}
+          {st.editMode && !st.find && <ChannelTest st={st} />}
           {st.editMode && <VenuePanel show={show} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <CuePanel show={show} st={st} setFade={setFade} />

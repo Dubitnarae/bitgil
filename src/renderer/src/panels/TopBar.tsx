@@ -9,10 +9,10 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
     <header className="topbar">
       <strong className="logo">빛길 <small className="dev">v{st.version} · 개발자 KIM YEONGDO</small>
         {st.update.text && <small className="update">{st.update.text}</small>}</strong>
-      <button className={'blackout' + (st.blackout ? ' on' : '')} onClick={() => send({ t: 'blackout', on: !st.blackout })}>
-        {st.blackout ? '블랙아웃 해제' : '블랙아웃'}
+      <button className={'blackout' + (st.blackout ? ' on' : '')} title="키보드 B" onClick={() => send({ t: 'blackout', on: !st.blackout })}>
+        {st.blackout ? '블랙아웃 해제' : '블랙아웃'} <small>B</small>
       </button>
-      <button onClick={() => send({ t: 'default' })}>기본 조명</button>
+      <button title="키보드 H" onClick={() => send({ t: 'default' })}>기본 조명 <small>H</small></button>
       <label className="master">
         전체 밝기
         <input type="range" min={0} max={100} value={Math.round(st.master * 100)}
