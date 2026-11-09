@@ -130,3 +130,7 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 .notice { position: fixed; right: 16px; bottom: 16px; width: 440px; z-index: 20000000; }
 .notice .panel { background: #1d2129; border: 1px solid #3a7bd5; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.6); }
 .notice pre { white-space: pre-wrap; font: inherit; background: #181b22; border: 1px solid #2c313c; border-radius: 6px; padding: 8px 10px; max-height: 260px; overflow: auto; margin: 6px 0; }
+.palette { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.palette .swatch { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; cursor: pointer; }
+.palette .swatch:hover { outline: 2px solid #4da3ff; }
+.palette input[type=color] { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; background: none; cursor: pointer; }

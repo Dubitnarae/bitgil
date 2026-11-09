@@ -2,11 +2,14 @@ import type { Show } from '../../../core/engine/types'
 import type { State } from '../api'
 import { send } from '../api'
 import { aimSave, aimStart, aimUndo, type Aim } from '../aim'
+import { PALETTE, hexToRgbw, rgbwToHex } from '../../../core/engine/color'
 
 const ATTRS: [string, string][] = [
   ['dimmer', '밝기'], ['red', '빨강'], ['green', '초록'], ['blue', '파랑'], ['white', '흰색'],
   ['pan', '팬(좌우)'], ['tilt', '틸트(위아래)'], ['zoom', '줌'], ['shutter', '셔터']
 ]
+
+const COLOR = ['red', 'green', 'blue', 'white']
 
 interface Props {
   show: Show; st: State; selected: string[]; setSelected: (ids: string[]) => void
@@ -54,6 +57,28 @@ export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: P
         {aim && <p className="hint">{!st.editMode && unsaved ? '편집 모드가 닫혀 저장할 수 없습니다. [편집 모드]를 다시 여세요. · ' : ''}
           {aim.msg || '3D 화면에서 비출 곳(바닥·벽·무대)을 누르세요. 무빙은 그쪽으로 돌고([적용] 필요), 고정 조명은 편집 모드에서 찍은 뒤 [저장]을 눌러야 저장됩니다.'}</p>}
       </>}
+      {(() => {
+        const rgbIds = selected.filter((id) => hasAttr(id, 'red'))
+        if (!rgbIds.length) return null
+        const withW = rgbIds.filter((id) => hasAttr(id, 'white'))
+        const noW = rgbIds.filter((id) => !hasAttr(id, 'white'))
+        const put = ([r, g, b, w]: number[]) => {
+          if (withW.length) [r, g, b, w].forEach((value, i) => send({ t: 'set', ids: withW, attr: COLOR[i], value }))
+          // 흰색 채널이 없는 조명은 W를 R·G·B에 더해서
+          if (noW.length) [r + w, g + w, b + w].forEach((value, i) => send({ t: 'set', ids: noW, attr: COLOR[i], value: Math.min(255, value) }))
+        }
+        const o = st.previewOut[rgbIds[0]] ?? {}
+        return (
+          <div className="palette" title="누르면 고른 조명 색이 바뀝니다(미리보기, [적용] 필요)">
+            {PALETTE.map((c) => (
+              <button key={c.name} className="swatch" title={c.name} aria-label={c.name}
+                style={{ background: rgbwToHex(c.rgbw) }} onClick={() => put(c.rgbw)} />
+            ))}
+            <input type="color" title="원하는 색 고르기" aria-label="원하는 색 고르기"
+              value={rgbwToHex(COLOR.map((a) => o[a] ?? 0))} onChange={(e) => put(hexToRgbw(e.target.value))} />
+          </div>
+        )
+      })()}
       {selected.length > 0 && ATTRS.map(([a, label]) => {
         const ids = selected.filter((id) => hasAttr(id, a))
         if (!ids.length) return null
