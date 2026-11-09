@@ -12,8 +12,8 @@
     "start": "electron-vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "dist": "electron-vite build && electron-builder --win",
-    "release": "electron-vite build && electron-builder --win --publish always"
+    "dist": "electron-vite build && electron-builder --win && node tools/check-installer.mjs",
+    "release": "electron-vite build && electron-builder --win --publish always && node tools/check-installer.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
