@@ -13,6 +13,15 @@ export interface PhoneState {
   master: number
   fading: boolean
   output: boolean // 실제 장비로 나가는 중
+  edit: boolean // 편집 모드 열림(폰 설정 모드를 쓸 수 있음)
+  setup?: PhoneSetup // 편집 모드일 때만
+}
+
+/** 폰 설정 모드에 보낼 조명 정보(편집 모드일 때만) */
+export interface PhoneSetup {
+  find: string | null
+  chTest: { ch: number; value: number } | null
+  fixtures: { id: string; type: string; address: number; count: number; verified: boolean; batten: string; direction: string; position: { x: number; y: number; z: number }; aim: { x: number; y: number; z: number } | null; clash: string[] }[]
 }
 
 /** 폰에서 오는 명령 3가지 */
@@ -49,9 +58,14 @@ export function startRemote(opts: {
   code: () => string
   state: () => PhoneState
   run: (c: PhoneCmd) => void
+  /** 폰 설정 모드: PIN 이 맞으면 편집 모드를 연다 */
+  unlock: (pin: string) => boolean
+  /** 폰 설정 모드 명령(JSON). 오류 문구를 돌려준다(빈 값 = 됨) */
+  setup: (cmd: unknown) => string
   onError: (msg: string) => void
 }) {
   const lock = new Lockout()
+  const pinLock = new Lockout() // PIN도 5번 틀리면 1분 잠김
   const clients = new Set<ServerResponse>()
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://x')
@@ -76,6 +90,21 @@ export function startRemote(opts: {
       else { res.writeHead(400); return res.end() }
       res.writeHead(204)
       return res.end()
+    }
+    if (req.method === 'POST' && url.pathname === '/unlock') {
+      res.writeHead(pinLock.check(opts.unlock(url.searchParams.get('pin') ?? ''), Date.now()) ? 204 : 403)
+      return res.end()
+    }
+    if (req.method === 'POST' && url.pathname === '/setup') {
+      let body = ''
+      req.on('data', (d) => { body += d; if (body.length > 10_000) req.destroy() })
+      req.on('end', () => {
+        let err: string
+        try { err = opts.setup(JSON.parse(body)) } catch { err = '명령 형식이 이상합니다' }
+        res.writeHead(err ? 400 : 204, { 'Content-Type': 'text/plain; charset=utf-8' })
+        res.end(err)
+      })
+      return
     }
     res.writeHead(404)
     res.end()

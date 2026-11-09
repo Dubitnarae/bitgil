@@ -15,8 +15,10 @@ describe('폰 원격', () => {
     const got: PhoneCmd[] = []
     const r = startRemote({
       code: () => '123456',
-      state: () => ({ scene: '찬양', cue: 0, total: 2, next: '말씀', blackout: false, master: 1, fading: false, output: false }),
+      state: () => ({ scene: '찬양', cue: 0, total: 2, next: '말씀', blackout: false, master: 1, fading: false, output: false, edit: false }),
       run: (c) => got.push(c),
+      unlock: (pin) => pin === '1234',
+      setup: (c) => ((c as { t: string }).t === 'find' ? '' : '안 되는 명령'),
       onError: (m) => { throw new Error(m) }
     })
     try {
@@ -27,6 +29,13 @@ describe('폰 원격', () => {
       expect((await fetch(base + '/cmd?code=123456&c=blackout&on=1', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/cmd?code=123456&c=이상한', { method: 'POST' })).status).toBe(400)
       expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }])
+      // 폰 설정 모드: PIN, 명령 JSON(오류 문구는 그대로 돌려줌)
+      expect((await fetch(base + '/unlock?code=123456&pin=0000', { method: 'POST' })).status).toBe(403)
+      expect((await fetch(base + '/unlock?code=123456&pin=1234', { method: 'POST' })).status).toBe(204)
+      expect((await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"find","id":"1-1"}' })).status).toBe(204)
+      const bad = await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"editVenue"}' })
+      expect([bad.status, await bad.text()]).toEqual([400, '안 되는 명령'])
+      expect((await fetch(base + '/setup?code=123456', { method: 'POST', body: '{깨짐' })).status).toBe(400)
       const ev = await fetch(base + '/events?code=123456')
       const first = await ev.body!.getReader().read()
       expect(new TextDecoder().decode(first.value)).toContain('"scene":"찬양"')

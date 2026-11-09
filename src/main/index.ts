@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { mergeScenes, scenesToXhd, xhdToScenes } from './xhd'
+import { overlaps } from '../core/engine/patch'
 import { join } from 'node:path'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
@@ -48,7 +49,7 @@ function setRemote(on: boolean) {
   remote?.close()
   remote = null
   remoteError = ''
-  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, onError: (m) => { remoteError = m; console.error(m) } })
+  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, onError: (m) => { remoteError = m; console.error(m) } })
 }
 const sceneName = (id?: string) => engine.show.scenes.find((s) => s.id === id)?.name ?? ''
 function phoneState(): PhoneState {
@@ -62,8 +63,40 @@ function phoneState(): PhoneState {
     blackout: engine.blackout,
     master: engine.master,
     fading: engine.fading,
-    output: enttec.enabled && enttec.connected
+    output: enttec.enabled && enttec.connected,
+    edit: edit.isOpen(Date.now()),
+    setup: edit.isOpen(Date.now()) ? {
+      find: engine.find,
+      chTest: engine.chTest,
+      fixtures: engine.show.fixtures.map((x) => ({
+        id: x.id, type: engine.show.fixture_types.find((t) => t.id === x.type)?.label ?? x.type,
+        address: x.address, count: engine.show.fixture_types.find((t) => t.id === x.type)?.channel_count ?? 1,
+        verified: x.verified, batten: x.batten ?? '바닥', direction: x.direction, position: x.position, aim: x.aim ?? null,
+        clash: x.id === engine.find ? overlaps(engine.show, x.id) : []
+      }))
+    } : undefined
   }
+}
+/** 폰 설정 모드: 노트북과 같은 편집 PIN 으로 편집 모드를 연다(노트북도 편집 모드가 됨) */
+function phoneUnlock(pin: string) {
+  if (!settings.pinHash || !checkPin(pin, settings.pinHash)) return false
+  edit.open(Date.now())
+  phoneNote = { text: '설정 모드 열림', at: Date.now() }
+  return true
+}
+// 폰 설정 모드에서 되는 명령: 조명 찾기·채널 시험·조명 고치기(주소·위치·방향·확인)·자리 바꾸기, 그리고 닫기
+const PHONE_SETUP = ['find', 'chTest', 'editFixture', 'swapFixtures']
+function phoneSetup(c: unknown): string {
+  const cmd = c as Command | { t: 'lock' }
+  if (!edit.isOpen(Date.now())) return '편집 모드가 닫혔습니다. PIN을 다시 넣어 주세요'
+  if (cmd?.t === 'lock') { edit.close(); endFind(); phoneNote = { text: '설정 모드 닫음', at: Date.now() }; return '' }
+  if (!PHONE_SETUP.includes(cmd?.t)) return '폰에서는 할 수 없는 명령입니다'
+  try {
+    edit.touch(Date.now())
+    if (runCommand(engine, cmd as Command, Date.now()) === 'showChanged') showChanged()
+    phoneNote = { text: cmd.t === 'find' ? (cmd.id ? `조명 찾기 ${cmd.id}` : '조명 찾기 끝') : cmd.t === 'chTest' ? (cmd.ch ? `채널 시험 ${cmd.ch}` : '채널 시험 끝') : cmd.t === 'swapFixtures' ? `자리 바꾸기 ${cmd.a} ↔ ${cmd.b}` : `조명 ${(cmd as { id: string }).id} 고침`, at: Date.now() }
+    return ''
+  } catch (err) { return err instanceof Error ? err.message : String(err) }
 }
 // 폰에서 누른 것을 노트북 화면에 잠깐 알린다(노트북 앞 사람이 놀라지 않게)
 let phoneNote = { text: '', at: 0 }
