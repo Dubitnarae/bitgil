@@ -41,6 +41,7 @@ describe('편집 모드 PIN', () => {
     expect(allowedInOperation({ t: 'editFixtureType', id: 'wash', edit: {} }, show)).toBe(false)
     expect(allowedInOperation({ t: 'cue', index: 0 }, show)).toBe(true)
     expect(allowedInOperation({ t: 'blackout', on: true }, show)).toBe(true)
+    expect(allowedInOperation({ t: 'quality', set: 'low' }, show)).toBe(true) // 화면 품질은 PIN 없이
     expect(allowedInOperation({ t: 'output', on: true }, show)).toBe(true)
   })
 })

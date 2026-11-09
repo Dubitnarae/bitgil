@@ -20,6 +20,7 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
         <span>{Math.round(st.master * 100)}%</span>
       </label>
       <div className="spacer" />
+      <QualityPicker q={st.quality} />
       <div className="seg">
         <button className={view === 'preview' ? 'act' : ''} onClick={() => setView('preview')}>미리보기 화면</button>
         <button className={view === 'live' ? 'act' : ''} onClick={() => setView('live')}>실제 출력 화면</button>
@@ -30,6 +31,24 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
         : <button onClick={() => onPin(st.pinSet ? 'unlock' : 'set')}>편집 모드</button>}
       <OutputStatus o={st.output} />
     </header>
+  )
+}
+
+const NAME = { low: '낮음', normal: '보통', high: '높음' } as const
+
+/** 화면 품질: 운영 모드에서도 바로 바꿀 수 있고 지금 품질이 항상 보인다. 실제 조명 출력과는 상관없음 */
+function QualityPicker({ q }: { q: State['quality'] }) {
+  return (
+    <label title={`3D 화면 선명도·갱신 횟수. 느리거나 팬 소리가 크면 낮음으로. 실제 조명 출력(초당 40번)은 그대로
+이 컴퓨터: CPU ${q.cores}코어 · 메모리 ${q.memGB}GB`}>
+      화면 품질
+      <select value={q.set} onChange={(e) => send({ t: 'quality', set: e.target.value as State['quality']['set'] })}>
+        <option value="auto">자동 ({NAME[q.used]})</option>
+        <option value="low">낮음</option>
+        <option value="normal">보통</option>
+        <option value="high">높음</option>
+      </select>
+    </label>
   )
 }
 
