@@ -15,6 +15,18 @@ import { ChannelTest, FindPanel } from './panels/FindPanel'
 import { VenuePanel } from './panels/VenuePanel'
 import { aimAt, withDrafts, type Aim } from './aim'
 
+/** 폰에서 버튼을 누르면 5초 동안 화면 위쪽 가운데에 알림 */
+function PhoneNote({ note }: { note: State['phone'] }) {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    if (!note.at || Date.now() - note.at > 5000) return
+    setOn(true)
+    const t = setTimeout(() => setOn(false), 5000)
+    return () => clearTimeout(t)
+  }, [note.at])
+  return on ? <div className="phone-note">📱 폰에서 누름: <b>{note.text}</b></div> : null
+}
+
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
   const [st, setSt] = useState<State | null>(null)
@@ -90,6 +102,7 @@ export default function App() {
       </footer>
       {pin && <PinDialog mode={pin} onClose={() => setPin(null)} />}
       <UpdateNotice st={st} />
+      <PhoneNote note={st.phone} />
     </div>
   )
 }

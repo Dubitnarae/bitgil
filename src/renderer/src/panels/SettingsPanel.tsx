@@ -81,7 +81,9 @@ export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import
         폰 카메라로 찍으면 바로 연결됩니다(코드 입력 필요 없음)
         {st.remote.urls.map((u) => <RemoteQr key={u} url={`${u}/?code=${st.remote.code}`} />)}
         직접 넣을 때 주소: {st.remote.urls.join('  또는  ') || '(Wi-Fi 연결 없음)'}<br />
-        원격 접속 코드: <b>{st.remote.code}</b> · 지금 연결된 폰 {st.remote.clients}대
+        원격 접속 코드: <b>{st.remote.code}</b>{' '}
+        <button onClick={() => confirm('원격 접속 코드를 새로 만들까요?\n지금 연결된 폰은 끊기고, 새 코드(QR)로 다시 연결해야 합니다.') && send({ t: 'remoteNewCode' })}>코드 새로 만들기</button>
+        {' '}· 지금 연결된 폰 {st.remote.clients}대
         {st.remote.error && <><br /><span style={{ color: '#ff6b6b' }}>{st.remote.error}</span></>}
       </p>}
       </div>

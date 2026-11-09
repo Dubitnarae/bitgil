@@ -65,7 +65,10 @@ function phoneState(): PhoneState {
     output: enttec.enabled && enttec.connected
   }
 }
+// 폰에서 누른 것을 노트북 화면에 잠깐 알린다(노트북 앞 사람이 놀라지 않게)
+let phoneNote = { text: '', at: 0 }
 function phoneCmd(c: PhoneCmd) {
+  phoneNote = { text: c.c === 'blackout' ? (c.on ? '블랙아웃' : '블랙아웃 해제') : c.c === 'default' ? '기본 조명' : `다음 씬 — ${sceneName(engine.show.cuelist[engine.cue + 1]?.scene) || '없음'}`, at: Date.now() }
   try {
     if (c.c === 'blackout') engine.blackout = c.on
     else runCommand(engine, { t: c.c === 'next' ? 'nextCue' : 'default' }, Date.now())
@@ -114,6 +117,7 @@ function buildState() {
     frame: Array.from(output.last),
     editMode: edit.isOpen(now),
     pinSet: !!settings.pinHash,
+    phone: phoneNote,
     remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
     saveError,
     version: app.getVersion(),
@@ -221,6 +225,10 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (c.t === 'dmxType') { enttec.setType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
+    if (c.t === 'remoteNewCode') {
+      saveSettings({ ...settings, remoteCode: (settings.remoteCode = String(randomInt(1_000_000)).padStart(6, '0')) })
+      return setRemote(!!remote) // 다시 열어 옛 코드로 붙어 있던 폰 연결을 끊는다
+    }
     if (c.t === 'checkUpdate') return checkNow()
     if (c.t === 'updateChoice') { const skip = chooseUpdate(c.choice); if (skip) saveSettings({ ...settings, skipVersion: (settings.skipVersion = skip) }); return }
     if (c.t === 'autoUpdate') { setAutoInstall(c.on); return saveSettings({ ...settings, autoUpdate: (settings.autoUpdate = c.on) }) }

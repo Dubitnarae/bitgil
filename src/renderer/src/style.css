@@ -148,3 +148,4 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 .label { text-shadow: 0 0 2px #000, 0 0 4px #000, 0 1px 2px #000; }
 .label.dim { color: #a3abba; }
 .outgroup { display: flex; align-items: center; gap: 6px; }
+.phone-note { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 20000001; background: #2d6cdf; color: #fff; padding: 10px 18px; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.6); pointer-events: none; }

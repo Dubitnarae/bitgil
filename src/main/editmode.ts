@@ -49,7 +49,8 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'dmxType':
     case 'outputOnStart':
     case 'autoUpdate':
-    case 'remote': return false
+    case 'remote':
+    case 'remoteNewCode': return false
     default: return true
   }
 }

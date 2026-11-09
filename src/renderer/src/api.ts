@@ -37,6 +37,7 @@ export interface State {
   quality: { set: import('../../main/quality').QualitySetting; used: import('../../main/quality').Quality; cores: number; memGB: number }
   editMode: boolean // false = 운영 모드
   pinSet: boolean
+  phone: { text: string; at: number } // 폰에서 마지막으로 누른 것(at = 시각, 0 = 아직 없음)
   remote: { on: boolean; code: string; urls: string[]; error: string; clients: number }
 }
 

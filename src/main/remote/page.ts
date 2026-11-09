@@ -14,6 +14,7 @@ button:disabled{opacity:.35}
 #def{background:#3a7d44}#bo{background:#8a1c1c}#bo.on{background:#ff3b3b}
 input{font-size:24px;width:100%;box-sizing:border-box;padding:12px;margin:10px 0;text-align:center}
 #login,#main{display:none}
+#sent{text-align:center;color:#6ee07a;font-weight:bold;min-height:1.4em}
 </style></head><body>
 <h1>빛길 원격</h1>
 <div id="login">
@@ -31,6 +32,7 @@ input{font-size:24px;width:100%;box-sizing:border-box;padding:12px;margin:10px 0
   <button id="nx">다음 씬 ▶</button>
   <button id="def">기본 조명</button>
   <button id="bo">블랙아웃</button>
+  <div id="sent"></div>
 </div>
 <p style="color:#7d8596;font-size:12px;text-align:center">빛길 · 개발자 KIM YEONGDO</p>
 <script>
@@ -57,7 +59,12 @@ function draw(){
   $('bo').className=st.blackout?'on':'';
   $('bo').textContent=st.blackout?'블랙아웃 끄기':'블랙아웃';
 }
-function cmd(q){fetch('/cmd?code='+encodeURIComponent(code)+'&'+q,{method:'POST'}).then(function(r){if(!r.ok)alert('명령이 거절되었습니다('+r.status+')')},function(){alert('노트북에 보내지 못했습니다')})}
+var sentT=0;
+function cmd(q){fetch('/cmd?code='+encodeURIComponent(code)+'&'+q,{method:'POST'}).then(function(r){
+  if(!r.ok)return alert('명령이 거절되었습니다('+r.status+')');
+  if(navigator.vibrate)navigator.vibrate(40); // 눌렸다는 짧은 진동(아이폰은 안 됨)
+  $('sent').textContent='보냄 ✓';clearTimeout(sentT);sentT=setTimeout(function(){$('sent').textContent=''},1500);
+},function(){alert('노트북에 보내지 못했습니다')})}
 $('go').onclick=function(){code=$('code').value.trim();localStorage.setItem('bitgil-code',code);connect()};
 $('nx').onclick=function(){ if(st&&st.next&&confirm('"'+st.next+'"(으)로 진행할까요?\\n실제 조명이 바로 바뀝니다.'))cmd('c=next') };
 $('def').onclick=function(){cmd('c=default')};
