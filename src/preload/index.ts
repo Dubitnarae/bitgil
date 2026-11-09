@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('bitgil', {
   lock: () => ipcRenderer.invoke('edit:lock'),
   xhdImport: () => ipcRenderer.invoke('xhd:import'),
   xhdExport: () => ipcRenderer.invoke('xhd:export'),
+  showExport: () => ipcRenderer.invoke('show:export'),
+  showImport: () => ipcRenderer.invoke('show:import'),
   onShow: (cb: (s: unknown) => void) => {
     const h = (_e: unknown, s: unknown) => cb(s)
     ipcRenderer.on('show', h)

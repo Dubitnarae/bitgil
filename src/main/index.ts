@@ -7,7 +7,7 @@ import { VirtualOutput } from './dmx/output'
 import { UsbDmxOutput, listPorts } from './dmx/enttec'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
-import { loadShowFile, saveShowFile } from './showfile'
+import { loadShowFile, parseShow, saveShowFile } from './showfile'
 import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
@@ -183,6 +183,33 @@ ipcMain.handle('xhd:export', async () => {
       (skipped.length ? ` · 콘솔에 같은 자리(P페이지-페이더)가 없어 뺀 씬: ${skipped.join(', ')}` : '') +
       (unpatched ? ` · 콘솔 패치에 없는 채널 값 ${unpatched}개는 빠짐` : '')
   } catch (err) { return `내보내지 못했습니다: ${err instanceof Error ? err.message : err}` }
+})
+
+// 쇼 파일 옮기기(교회 노트북 ↔ 집 컴퓨터, USB): 편집 모드에서만
+const showFilter = [{ name: '빛길 쇼 파일', extensions: ['json'] }]
+ipcMain.handle('show:export', async () => {
+  if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
+  const d = new Date()
+  const day = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+  const dst = await dialog.showSaveDialog(win, { title: '쇼 파일 내보내기 (USB 등)', defaultPath: `빛길 쇼 ${day}.bitgil.json`, filters: showFilter })
+  if (dst.canceled || !dst.filePath) return ''
+  try {
+    writeFileSync(dst.filePath + '.tmp', JSON.stringify(engine.show, null, 2), 'utf-8')
+    renameSync(dst.filePath + '.tmp', dst.filePath)
+    return `내보냈습니다: ${dst.filePath}`
+  } catch (err) { return `내보내지 못했습니다: ${err instanceof Error ? err.message : err}` }
+})
+ipcMain.handle('show:import', async () => {
+  if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
+  const r = await dialog.showOpenDialog(win, { title: '쇼 파일 가져오기', filters: showFilter, properties: ['openFile'] })
+  if (r.canceled || !r.filePaths[0]) return ''
+  try {
+    saveShowFile(showDir, parseShow(readFileSync(r.filePaths[0], 'utf-8'))) // 지금 쇼는 백업 폴더로
+  } catch (err) { return `가져오지 못했습니다: ${err instanceof Error ? err.message : err}` }
+  // 씬·조명이 통째로 바뀌므로 엔진을 새로 만들도록 다시 켠다(옛 값·페이더가 섞이지 않게)
+  app.relaunch()
+  app.exit(0)
+  return ''
 })
 
 ipcMain.on('cmd', (_e, c: Command) => {

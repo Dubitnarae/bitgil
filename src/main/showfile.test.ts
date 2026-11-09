@@ -3,7 +3,7 @@ import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { Show } from '../core/engine/types'
-import { BACKUP_DIR, loadShowFile, saveShowFile, SHOW_FILE } from './showfile'
+import { BACKUP_DIR, loadShowFile, parseShow, saveShowFile, SHOW_FILE } from './showfile'
 
 const starter = 'data/starter-show.bitgil.json'
 
@@ -39,5 +39,14 @@ describe('쇼 파일 저장', () => {
     saveShowFile(dir, show, new Date(2026, 10, 8, 12, 0, 1)) // 백업 = A
     writeFileSync(join(dir, SHOW_FILE), '{깨진 파일')
     expect(loadShowFile(dir, starter).name).toBe('A')
+  })
+})
+
+describe('쇼 파일 가져오기 검사', () => {
+  it('빛길 쇼는 통과, 다른 JSON·깨진 파일은 막는다', () => {
+    const text = readFileSync(starter, 'utf-8')
+    expect(parseShow(text).scenes.length).toBeGreaterThan(0)
+    expect(() => parseShow('{"scenes":[]}')).toThrow('빛길 쇼 파일이 아닙니다')
+    expect(() => parseShow('{깨짐')).toThrow()
   })
 })

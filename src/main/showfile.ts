@@ -45,3 +45,13 @@ function stamp(d: Date) {
   const p = (n: number, w = 2) => String(n).padStart(w, '0')
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${p(d.getMilliseconds(), 3)}`
 }
+
+/** 가져올 쇼 파일 검사: 빛길 쇼 형식이 아니면 이유를 던진다(USB로 옮긴 파일이 깨졌거나 다른 파일일 때) */
+export function parseShow(text: string): Show {
+  const s = JSON.parse(text)
+  for (const k of ['fixture_types', 'fixtures', 'scenes', 'cuelist'] as const) {
+    if (!Array.isArray(s?.[k])) throw new Error(`빛길 쇼 파일이 아닙니다 (${k} 없음)`)
+  }
+  if (!s.venue || typeof s.venue !== 'object') throw new Error('빛길 쇼 파일이 아닙니다 (venue 없음)')
+  return s
+}

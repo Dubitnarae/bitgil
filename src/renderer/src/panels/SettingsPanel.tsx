@@ -15,6 +15,7 @@ export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import
   const refresh = () => window.bitgil.listPorts().then(setPorts, () => setPorts([]))
   useEffect(() => { refresh() }, [])
   const [xhdMsg, setXhdMsg] = useState('')
+  const [showMsg, setShowMsg] = useState('')
   return (
     <section className="panel settings">
       <h3>설정 <button className="close" onClick={onClose}>닫기</button></h3>
@@ -93,6 +94,14 @@ export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import
         <input type="checkbox" checked={st.update.on} onChange={(e) => send({ t: 'autoUpdate', on: e.target.checked })} />
         업데이트 확인 — 하루 한 번 새 버전을 확인해 알려 줌. 설치할지는 그때 고름 (설치는 프로그램을 끌 때, 예배 중에는 안 함)
       </label>
+      </div>
+
+      <div className="group">
+      <h4>쇼 파일 옮기기 (다른 컴퓨터 ↔ USB)</h4>
+      <p className="hint">씬·순서 목록·조명 위치가 모두 들어 있는 파일. 집 컴퓨터에서 고친 쇼를 교회 노트북으로 옮길 때 씁니다</p>
+      <button onClick={() => window.bitgil.showExport().then(setShowMsg)}>쇼 파일 내보내기</button>{' '}
+      <button onClick={() => confirm('쇼 파일을 가져올까요?\n지금 쇼는 백업 폴더에 남고, 빛길이 다시 켜집니다(출력은 설정대로 다시 시작).\n예배 중에는 하지 마세요.') && window.bitgil.showImport().then(setShowMsg)}>쇼 파일 가져오기</button>
+      {showMsg && <p className="hint"><b>{showMsg}</b></p>}
       </div>
 
       <div className="group">

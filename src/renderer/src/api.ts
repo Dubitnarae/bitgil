@@ -52,6 +52,8 @@ declare global {
       lock(): Promise<void>
       xhdImport(): Promise<string>
       xhdExport(): Promise<string>
+      showExport(): Promise<string>
+      showImport(): Promise<string>
       onState(cb: (s: State) => void): () => void
       onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void
     }
