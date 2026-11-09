@@ -1,7 +1,7 @@
 import type { Show } from '../../../core/engine/types'
 import type { State } from '../api'
 import { send } from '../api'
-import type { Aim } from '../aim'
+import { aimSave, aimStart, aimUndo, type Aim } from '../aim'
 
 const ATTRS: [string, string][] = [
   ['dimmer', '밝기'], ['red', '빨강'], ['green', '초록'], ['blue', '파랑'], ['white', '흰색'],
@@ -16,6 +16,7 @@ interface Props {
 
 export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: Props) {
   const types = new Map(show.fixture_types.map((t) => [t.id, t]))
+  const unsaved = aim ? Object.keys(aim.drafts).length : 0
   const hasAttr = (id: string, a: string) => {
     const f = show.fixtures.find((x) => x.id === id)
     return !!f && !!types.get(f.type)?.channels.some((c) => c.attr === a)
@@ -37,14 +38,21 @@ export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: P
       <p className="hint">
         {selected.length ? `선택: ${selected.join(', ')}` : '3D 화면에서 조명을 누르세요 (Shift·Ctrl+클릭 = 여러 개)'}
       </p>
-      {selected.length > 0 && <>
-        <button className={'aimbtn' + (aim ? ' on' : '')} onClick={() => setAim(aim ? null : { msg: '' })}
-          title="켜고 3D 화면의 바닥·벽·무대를 누르면 고른 조명이 그곳을 비춥니다">
+      {(selected.length > 0 || aim) && <>
+        <button className={'aimbtn' + (aim ? ' on' : '')} onClick={() => {
+          if (!aim) return setAim(aimStart())
+          if (unsaved && !confirm(`저장하지 않은 고정 조명 조준점 ${unsaved}대를 버리고 끌까요?`)) return
+          setAim(null)
+        }} title="켜고 3D 화면의 바닥·벽·무대를 누르면 고른 조명이 그곳을 비춥니다">
           {aim ? '빛 위치 찍기 끄기' : '빛 위치 찍기'}
         </button>
-        {aim?.undo && <button onClick={() => { aim.undo!(); setAim({ msg: '마지막으로 찍기 전으로 되돌렸습니다' }) }}
-          title="마지막으로 찍은 것만 취소: 무빙은 원래 팬·틸트로(미리보기), 고정 조명은 원래 방향·조준점으로">되돌리기</button>}
-        {aim && <p className="hint">{aim.msg || '3D 화면에서 비출 곳(바닥·벽·무대)을 누르세요. 무빙은 그쪽으로 돌고([적용] 필요), 고정 조명은 편집 모드에서 조준점이 저장됩니다.'}</p>}
+        {aim && <button disabled={!aim.history.length} onClick={() => setAim(aimUndo(aim))}
+          title="한 번 찍기 전으로(여러 번 가능): 무빙은 원래 팬·틸트로(미리보기), 고정 조명은 저장 안 한 조준점을 되돌림">
+          되돌리기{aim.history.length ? ` (${aim.history.length})` : ''}</button>}
+        {aim && unsaved > 0 && <button className="aimbtn on" disabled={!st.editMode} onClick={() => setAim(aimSave(aim))}
+          title="찍은 고정 조명 조준점을 쇼 파일에 저장">저장 ({unsaved}대)</button>}
+        {aim && <p className="hint">{!st.editMode && unsaved ? '편집 모드가 닫혀 저장할 수 없습니다. [편집 모드]를 다시 여세요. · ' : ''}
+          {aim.msg || '3D 화면에서 비출 곳(바닥·벽·무대)을 누르세요. 무빙은 그쪽으로 돌고([적용] 필요), 고정 조명은 편집 모드에서 찍은 뒤 [저장]을 눌러야 저장됩니다.'}</p>}
       </>}
       {selected.length > 0 && ATTRS.map(([a, label]) => {
         const ids = selected.filter((id) => hasAttr(id, a))

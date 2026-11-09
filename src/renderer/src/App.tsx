@@ -13,7 +13,7 @@ import { PinDialog } from './panels/PinDialog'
 import { UpdateNotice } from './panels/UpdateNotice'
 import { FindPanel } from './panels/FindPanel'
 import { VenuePanel } from './panels/VenuePanel'
-import { aimAt, type Aim } from './aim'
+import { aimAt, withDrafts, type Aim } from './aim'
 
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
@@ -51,9 +51,9 @@ export default function App() {
       <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} />
       <main>
         <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
-          <Stage3D show={show} values={values} master={master} selected={finding ? [st.find!] : selected}
+          <Stage3D show={aim ? withDrafts(show, aim.drafts) : show} values={values} master={master} selected={finding ? [st.find!] : selected}
             onSelect={onSelect} onClear={() => setSelected([])}
-            onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p)) : undefined} />
+            onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p, aim!)) : undefined} />
           <span className="viewtag">{finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>
         <aside>
