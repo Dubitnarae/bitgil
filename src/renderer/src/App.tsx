@@ -74,7 +74,7 @@ export default function App() {
         </div>
         <aside>
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
-          {settings && st.editMode && <SettingsPanel st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
+          {settings && st.editMode && <SettingsPanel show={show} st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
           {st.editMode && <FindPanel show={show} st={st} selected={selected} />}
           {st.editMode && !st.find && <ChannelTest st={st} />}
           {st.editMode && <VenuePanel show={show} />}

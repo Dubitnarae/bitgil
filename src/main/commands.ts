@@ -12,6 +12,7 @@ export type Command =
   | { t: 'blackout'; on: boolean }
   | { t: 'master'; value: number }
   | { t: 'default' }
+  | { t: 'defaultScene'; id: string } // 기본 조명으로 켤 씬 정하기(편집 모드)
   | { t: 'fader'; id: string; value: number }
   | { t: 'fadersDown' }
   | { t: 'faderMode'; mode: FaderMode }
@@ -44,6 +45,10 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'
     case 'renameScene': e.renameScene(c.id, c.name); return 'showChanged'
     case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
+    case 'defaultScene':
+      if (!e.show.scenes.some((s) => s.id === c.id)) throw new Error(`씬을 찾을 수 없음: ${c.id}`)
+      e.show.default_scene = c.id
+      return 'showChanged'
     case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
     case 'editFixture': editFixture(e.show, c.id, c.edit); return 'showChanged'
     case 'swapFixtures': swapFixtures(e.show, c.a, c.b); return 'showChanged'
@@ -64,7 +69,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'fadersDown': for (const s of e.show.scenes) e.setFader(now, s.id, 0); return
     case 'faderMode': e.faderMode = c.mode; return
     case 'default': {
-      // shortcut: 기본 조명 = 쇼 파일 default_scene, 없으면 첫 씬. 설정 화면에서 고르는 기능은 다음 단계
+      // 기본 조명 = 쇼 파일 default_scene(설정에서 고름), 안 정했으면 첫 씬
       const id = e.show.default_scene ?? e.show.scenes[0]?.id
       if (id) e.goScene(now, id)
       e.blackout = false

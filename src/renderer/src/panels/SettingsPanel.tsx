@@ -10,7 +10,7 @@ function RemoteQr({ url }: { url: string }) {
   return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
 }
 
-export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose: () => void; onChangePin: () => void }) {
+export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import('../../../core/engine/types').Show; st: State; onClose: () => void; onChangePin: () => void }) {
   const [ports, setPorts] = useState<{ path: string; manufacturer?: string }[]>([])
   const refresh = () => window.bitgil.listPorts().then(setPorts, () => setPorts([]))
   useEffect(() => { refresh() }, [])
@@ -30,6 +30,17 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
         미리보기 후 반영 — 미리보기 화면에서 보고 [적용]을 눌러야 나간다
       </label>
 
+      </div>
+
+      <div className="group">
+      <h4>기본 조명</h4>
+      <p className="hint">[기본 조명] 버튼·키보드 H·폰 원격 [기본 조명]을 누르면 바로 켜질 씬 (블랙아웃도 풀림)</p>
+      <label className="radio">
+        <select value={show.default_scene ?? ''} onChange={(e) => send({ t: 'defaultScene', id: e.target.value })}>
+          {!show.default_scene && <option value="">아직 안 정함 — 지금은 첫 씬 ({show.scenes[0]?.name ?? '없음'})</option>}
+          {show.scenes.map((s) => <option key={s.id} value={s.id}>{s.id} {s.name}</option>)}
+        </select>
+      </label>
       </div>
 
       <div className="group">
