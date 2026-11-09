@@ -41,7 +41,7 @@ function QualityPicker({ q }: { q: State['quality'] }) {
   return (
     <label title={`3D 화면 선명도·갱신 횟수. 느리거나 팬 소리가 크면 낮음으로. 실제 조명 출력(초당 40번)은 그대로
 이 컴퓨터: CPU ${q.cores}코어 · 메모리 ${q.memGB}GB`}>
-      화면 품질
+      화면
       <select value={q.set} onChange={(e) => send({ t: 'quality', set: e.target.value as State['quality']['set'] })}>
         <option value="auto">자동 ({NAME[q.used]})</option>
         <option value="low">낮음</option>
@@ -55,15 +55,18 @@ function QualityPicker({ q }: { q: State['quality'] }) {
 /** 실제 장비 출력: 켜기/대기 버튼 + 상태. 켰는데 연결이 안 되면 빨갛게(2초마다 다시 연결 중) */
 function OutputStatus({ o }: { o: State['output'] }) {
   const cls = !o.enabled ? 'status idle' : o.connected ? 'status' : 'status bad'
-  const text = !o.enabled ? '출력 대기 (장비로 안 보냄)'
-    : o.connected ? `장비 출력 중 · ${o.port}`
-    : '연결 안 됨 · 다시 연결 중…'
+  const text = !o.enabled ? '출력 대기'
+    : o.connected ? `출력 중 · ${o.port}`
+    : '연결 안 됨'
+  const tip = !o.enabled ? '장비로 보내지 않는 중입니다. [출력 켜기]를 누르면 실제 조명으로 나갑니다.'
+    : o.connected ? `실제 조명 장비로 출력 중 (${o.port})`
+    : `DMX 장비 연결이 끊겼습니다. 2초마다 다시 연결 중…${o.error ? ' — ' + o.error : ''}`
   return (
-    <>
+    <span className="outgroup">
       <button className={o.enabled ? 'on' : ''} onClick={() => send({ t: 'output', on: !o.enabled })}>
         {o.enabled ? '출력 끄기(대기)' : '출력 켜기'}
       </button>
-      <span className={cls} title={o.error}>{text}</span>
-    </>
+      <span className={cls} title={tip}>{text}</span>
+    </span>
   )
 }

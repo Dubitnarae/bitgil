@@ -134,3 +134,17 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 .palette .swatch { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; cursor: pointer; }
 .palette .swatch:hover { outline: 2px solid #4da3ff; }
 .palette input[type=color] { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; background: none; cursor: pointer; }
+
+/* ── 가독성 점검(v0.1.13) ── */
+/* 상단 막대: 창이 좁아도 출력 상태가 잘리지 않게 줄을 넘김. 버전·개발자는 로고 아래 줄로 */
+.topbar { flex-wrap: wrap; row-gap: 6px; }
+.logo { line-height: 1.1; }
+.logo .dev { display: block; margin-left: 0; }
+.topbar label { display: flex; align-items: center; gap: 6px; }
+/* 적용·저장 줄: 버튼 글자가 한 글자씩 세로로 꺾이지 않게 */
+.apply { flex-wrap: wrap; }
+.apply button { white-space: nowrap; }
+/* 3D 이름표: 밝은 빛 위에서도 읽히게 진한 그림자 */
+.label { text-shadow: 0 0 2px #000, 0 0 4px #000, 0 1px 2px #000; }
+.label.dim { color: #a3abba; }
+.outgroup { display: flex; align-items: center; gap: 6px; }
