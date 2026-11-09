@@ -52,6 +52,12 @@ describe('페이더 반영 방식', () => {
     expect(Object.keys(e.preview)).toEqual(['1-12'])
     e.clearManual()
     expect(e.preview).toEqual({})
+    e.setPreview(['2-1'], 'dimmer', 9)
+    e.setPreview(['2-1'], 'red', 5)
+    e.clearManual(['2-1'], ['red']) // 속성 하나만
+    expect(e.preview).toEqual({ '2-1': { dimmer: 9 } })
+    e.clearManual(['2-1'], ['dimmer'])
+    expect(e.preview).toEqual({})
   })
   it('바로 반영 모드: 움직이면 즉시 출력', () => {
     const e = new Engine(show)

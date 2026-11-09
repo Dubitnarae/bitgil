@@ -6,7 +6,7 @@ import { editFixture, editFixtureType, editVenue, swapFixtures, type FixtureEdit
 export type Command =
   | { t: 'set'; ids: string[]; attr: string; value: number }
   | { t: 'selectScene'; id: string }
-  | { t: 'clearManual'; ids?: string[] }
+  | { t: 'clearManual'; ids?: string[]; attrs?: string[] }
   | { t: 'apply'; fade: number }
   | { t: 'cancel' }
   | { t: 'blackout'; on: boolean }
@@ -51,7 +51,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'nextCue': return e.goNextCue(now)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
-    case 'clearManual': return e.clearManual(c.ids)
+    case 'clearManual': return e.clearManual(c.ids, c.attrs)
     case 'apply': return e.apply(now, c.fade)
     case 'cancel': return e.cancel()
     case 'blackout': e.blackout = c.on; return

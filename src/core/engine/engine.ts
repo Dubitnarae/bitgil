@@ -124,11 +124,15 @@ export class Engine {
     this.previewFaders = this.only(sceneId)
   }
 
-  /** 손으로 조정한 값 지우기(미리보기). ids가 없으면 전부. */
-  clearManual(ids?: string[]) {
+  /** 손으로 조정한 값 지우기(미리보기). ids가 없으면 전부, attrs가 있으면 그 속성만. */
+  clearManual(ids?: string[], attrs?: string[]) {
     if (!ids?.length) { this.preview = {}; return }
     this.preview = clone(this.preview)
-    for (const id of ids) delete this.preview[id]
+    for (const id of ids) {
+      if (!attrs) { delete this.preview[id]; continue }
+      for (const a of attrs) delete this.preview[id]?.[a]
+      if (this.preview[id] && !Object.keys(this.preview[id]).length) delete this.preview[id]
+    }
   }
 
   apply(now: number, fadeSeconds: number) {
