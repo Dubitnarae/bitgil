@@ -52,7 +52,7 @@ export default function App() {
       <main>
         <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
           <Stage3D show={aim ? withDrafts(show, aim.drafts) : show} values={values} master={master} selected={finding ? [st.find!] : selected}
-            onSelect={onSelect} onClear={() => setSelected([])}
+            onSelect={onSelect} onClear={() => setSelected([])} quality={st.quality.used}
             onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p, aim!)) : undefined} />
           <span className="viewtag">{finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>

@@ -2,6 +2,7 @@ import { app } from 'electron'
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { FaderMode } from '../core/engine/engine'
+import type { QualitySetting } from './quality'
 
 export interface Settings {
   faderMode: FaderMode
@@ -21,9 +22,11 @@ export interface Settings {
   lastUpdateCheck: string
   /** 사용자가 [이 버전 건너뛰기]를 고른 버전(그보다 새 버전이 나오면 다시 알림) */
   skipVersion: string
+  /** 화면 품질(기본 자동: 컴퓨터 사양으로 고름) */
+  quality: QualitySetting
 }
 
-const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '', skipVersion: '' }
+const DEFAULTS: Settings = { faderMode: 'live', dmxPort: '', outputOnStart: false, pinHash: '', remoteOn: false, remoteCode: '', autoUpdate: true, lastUpdateCheck: '', skipVersion: '', quality: 'auto' }
 const dir = () => join(app.getPath('appData'), '빛길')
 const file = () => join(dir(), 'settings.json')
 

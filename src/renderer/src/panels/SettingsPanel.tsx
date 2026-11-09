@@ -66,6 +66,18 @@ export function SettingsPanel({ st, onClose, onChangePin }: { st: State; onClose
       </div>
 
       <div className="group">
+      <h4>화면 품질 (컴퓨터 사양에 맞추기)</h4>
+      <p className="hint">3D 화면 선명도와 화면 갱신 횟수. 느리거나 팬 소리가 크면 낮음으로. 실제 조명 출력(초당 40번)은 그대로입니다.<br />
+        이 컴퓨터: CPU {st.quality.cores}코어 · 메모리 {st.quality.memGB}GB → 지금 <b>{({ low: '낮음', normal: '보통', high: '높음' })[st.quality.used]}</b></p>
+      {([['auto', '자동 — 사양을 보고 고름 (권장)'], ['low', '낮음 — 오래된 노트북·내장 그래픽'], ['normal', '보통'], ['high', '높음 — 고해상도 모니터에서 선명하게, 더 부드럽게']] as const).map(([v, text]) => (
+        <label className="radio" key={v}>
+          <input type="radio" checked={st.quality.set === v} onChange={() => send({ t: 'quality', set: v })} />
+          {text}
+        </label>
+      ))}
+      </div>
+
+      <div className="group">
       <h4>업데이트</h4>
       <p className="hint">지금 버전: <b>v{st.version}</b> · 마지막 확인: {st.update.lastCheck || '아직 없음'}{' '}
         <button onClick={() => send({ t: 'checkUpdate' })}>지금 확인</button>{st.update.text && <> · <b>{st.update.text}</b></>}</p>

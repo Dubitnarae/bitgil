@@ -46,6 +46,7 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'dmxPort':
     case 'outputOnStart':
     case 'autoUpdate':
+    case 'quality':
     case 'remote': return false
     default: return true
   }

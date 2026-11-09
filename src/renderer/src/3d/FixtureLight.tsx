@@ -14,6 +14,7 @@ interface Props {
   venue: Venue
   selected: boolean
   onSelect: (id: string, add: boolean) => void
+  segments: number
 }
 
 const UP = new Vector3(0, 1, 0)
@@ -23,7 +24,7 @@ const RING = Array.from({ length: 33 }, (_, i) => {
   return [Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3] as [number, number, number]
 })
 
-export function FixtureLight({ fixture: f, type, values, master, venue, selected, onSelect }: Props) {
+export function FixtureLight({ fixture: f, type, values, master, venue, selected, onSelect, segments }: Props) {
   const mat = useMemo(beamMaterial, [])
   const c = fixtureColor(type, values, master)
   const d = beamDirection(f, type, values)
@@ -61,10 +62,10 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
       {on && (
         <>
           <mesh position={pos.clone().addScaledVector(dir, len / 2)} quaternion={coneQ} material={mat}>
-            <coneGeometry args={[radius, len, 24, 1, true]} />
+            <coneGeometry args={[radius, len, segments, 1, true]} />
           </mesh>
           <mesh position={[hit.point.x + hit.normal.x * 0.02, hit.point.y + hit.normal.y * 0.02, hit.point.z + hit.normal.z * 0.02]} quaternion={poolQ}>
-            <circleGeometry args={[radius, 32]} />
+            <circleGeometry args={[radius, segments + 8]} />
             <meshBasicMaterial color={color} transparent opacity={0.55 * c.intensity} blending={AdditiveBlending} depthWrite={false} />
           </mesh>
         </>

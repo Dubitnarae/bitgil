@@ -32,6 +32,7 @@ export interface State {
     on: boolean // 설정: 자동 업데이트
     lastCheck: string // 마지막 확인 날
   }
+  quality: { set: import('../../main/quality').QualitySetting; used: import('../../main/quality').Quality; cores: number; memGB: number }
   editMode: boolean // false = 운영 모드
   pinSet: boolean
   remote: { on: boolean; code: string; urls: string[]; error: string; clients: number }

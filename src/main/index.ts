@@ -11,6 +11,8 @@ import { loadShowFile, saveShowFile } from './showfile'
 import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
+import { cpus, totalmem } from 'node:os'
+import { PRESETS, resolveQuality } from './quality'
 import { checkNow, chooseUpdate, setAutoInstall, startUpdater, update } from './updater'
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
@@ -81,6 +83,8 @@ setInterval(() => {
 /** 편집 모드가 닫히면(직접 닫기·10분 경과) 조명 찾기도 끝내고 원래 조명으로 돌아간다 */
 function endFind() { if (engine.find) engine.setFind(Date.now(), null) }
 
+const quality = () => resolveQuality(settings.quality, cpus().length, totalmem() / 1024 ** 3)
+
 function buildState() {
   const now = Date.now()
   if (!edit.isOpen(now)) endFind()
@@ -111,19 +115,23 @@ function buildState() {
     remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
     saveError,
     version: app.getVersion(),
+    quality: { set: settings.quality, used: quality(), cores: cpus().length, memGB: Math.round(totalmem() / 1024 ** 3) },
     update: { text: update.text, notice: update.notice, on: settings.autoUpdate, lastCheck: settings.lastUpdateCheck }
   }
 }
 
-// 화면에는 바뀌었을 때만 상태를 보낸다(초당 최대 20번). 처음 상태는 화면이 준비되면 직접 가져간다(state:get).
+// 화면에는 바뀌었을 때만 상태를 보낸다(간격은 화면 품질에 따라 33~100ms). 처음 상태는 화면이 준비되면 직접 가져간다(state:get).
 let lastSent = ''
-setInterval(() => {
-  if (!win) return
-  const state = buildState()
-  const json = JSON.stringify(state)
-  if (json !== lastSent) win.webContents.send('state', state)
-  lastSent = json
-}, 50)
+function sendState() {
+  if (win) {
+    const state = buildState()
+    const json = JSON.stringify(state)
+    if (json !== lastSent) win.webContents.send('state', state)
+    lastSent = json
+  }
+  setTimeout(sendState, PRESETS[quality()].stateMs)
+}
+sendState()
 
 ipcMain.handle('show:get', () => engine.show)
 ipcMain.handle('state:get', () => buildState())
@@ -186,6 +194,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (c.t === 'checkUpdate') return checkNow()
     if (c.t === 'updateChoice') { const skip = chooseUpdate(c.choice); if (skip) saveSettings({ ...settings, skipVersion: (settings.skipVersion = skip) }); return }
     if (c.t === 'autoUpdate') { setAutoInstall(c.on); return saveSettings({ ...settings, autoUpdate: (settings.autoUpdate = c.on) }) }
+    if (c.t === 'quality') return saveSettings({ ...settings, quality: (settings.quality = c.set) })
     if (c.t === 'outputOnStart') return saveSettings({ ...settings, outputOnStart: (settings.outputOnStart = c.on) })
     if (runCommand(engine, c, Date.now()) === 'showChanged') showChanged()
     if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })

@@ -34,6 +34,7 @@ export type Command =
   | { t: 'checkUpdate' } // 설정의 [지금 확인]
   | { t: 'updateChoice'; choice: import('./updater').UpdateChoice } // 운영 모드에서도 가능
   | { t: 'remote'; on: boolean }
+  | { t: 'quality'; set: import('./quality').QualitySetting }
 
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
 export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | void {
