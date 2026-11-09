@@ -69,6 +69,8 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .modal .panel { width: 340px; }
 .modal input { display: block; width: 100%; margin: 6px 0; font-size: 20px; letter-spacing: 8px; text-align: center; }
 .resetview { position: absolute; right: 10px; top: 8px; }
+.view.pointing canvas { cursor: crosshair; }
+.aimbtn.on { background: #2f6fd6; color: #fff; }
 .cuelist { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; max-height: 240px; overflow: auto; }
 .cuelist li { display: flex; align-items: center; gap: 6px; }
 .cuelist li.on button.cue { border-color: #ffd23f; color: #ffd23f; }

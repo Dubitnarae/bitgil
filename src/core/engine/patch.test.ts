@@ -45,6 +45,8 @@ describe('패치 수정', () => {
     const s = load()
     editFixture(s, '2-1', { address: 400, position: { x: 1, y: 2, z: 3 }, direction: 'up', verified: true })
     expect(fx(s, '2-1')).toMatchObject({ address: 400, position: { x: 1, y: 2, z: 3 }, direction: 'up', mount: 'floor', verified: true })
+    editFixture(s, '2-1', { direction: 'aimed', aim: { x: 1, y: 0, z: 1 } }) // 바닥 조명을 겨눔으로 바꿔도 바닥 그대로
+    expect(fx(s, '2-1')).toMatchObject({ direction: 'aimed', mount: 'floor' })
   })
   it('틀린 값이면 아무것도 바꾸지 않는다', () => {
     const s = load()

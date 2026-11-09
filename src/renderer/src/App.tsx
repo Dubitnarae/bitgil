@@ -13,6 +13,7 @@ import { PinDialog } from './panels/PinDialog'
 import { UpdateNotice } from './panels/UpdateNotice'
 import { FindPanel } from './panels/FindPanel'
 import { VenuePanel } from './panels/VenuePanel'
+import { aimAt } from './aim'
 
 export default function App() {
   const [show, setShow] = useState<Show | null>(null)
@@ -23,6 +24,7 @@ export default function App() {
   const [monitor, setMonitor] = useState(false)
   const [settings, setSettings] = useState(false)
   const [pin, setPin] = useState<'unlock' | 'set' | 'change' | null>(null)
+  const [aimMsg, setAimMsg] = useState<string | null>(null) // null = 빛 위치 찍기 꺼짐
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
@@ -42,14 +44,16 @@ export default function App() {
   // 미리보기 화면은 전체 밝기·블랙아웃을 빼고 편집 값(+미리보기 페이더)만 보여준다
   const values = shown === 'live' ? st.live : st.previewOut
   const master = shown === 'live' ? (st.blackout ? 0 : finding ? 1 : st.master) : 1
+  const pointing = aimMsg !== null && selected.length > 0
 
   return (
     <div className="app">
       <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} />
       <main>
-        <div className={'view ' + shown}>
+        <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
           <Stage3D show={show} values={values} master={master} selected={finding ? [st.find!] : selected}
-            onSelect={onSelect} onClear={() => setSelected([])} />
+            onSelect={onSelect} onClear={() => setSelected([])}
+            onPoint={pointing ? (p) => setAimMsg(aimAt(show, st, selected, p)) : undefined} />
           <span className="viewtag">{finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
         </div>
         <aside>
@@ -59,7 +63,7 @@ export default function App() {
           {st.editMode && <VenuePanel show={show} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <CuePanel show={show} st={st} setFade={setFade} />
-          <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} />
+          <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} aimMsg={aimMsg} setAimMsg={setAimMsg} />
         </aside>
       </main>
       <footer>

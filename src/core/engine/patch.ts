@@ -36,8 +36,8 @@ export function editFixture(show: Show, id: string, p: FixtureEdit) {
   if (p.direction) {
     if (!DIRECTIONS.includes(p.direction)) throw new Error(`설치 방향이 이상함: ${p.direction}`)
     next.direction = p.direction
-    // shortcut: 설치 위치(천장/바닥)는 방향에서 정함(위로·무빙 = 바닥), 천장 무빙 같은 예외가 생기면 따로 고르게
-    next.mount = p.direction === 'up' || p.direction === 'pan_tilt' ? 'floor' : 'ceiling'
+    // shortcut: 설치 위치(천장/바닥)는 방향에서 정함(위로·무빙 = 바닥, 겨눔 = 그대로), 천장 무빙 같은 예외가 생기면 따로 고르게
+    if (p.direction !== 'aimed') next.mount = p.direction === 'up' || p.direction === 'pan_tilt' ? 'floor' : 'ceiling'
   }
   if (p.verified !== undefined) next.verified = !!p.verified
   if (p.aim !== undefined) next.aim = p.aim && { x: num(p.aim.x, '조준점 x'), y: num(p.aim.y, '조준점 y'), z: num(p.aim.z, '조준점 z') }
