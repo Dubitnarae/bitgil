@@ -15,6 +15,10 @@ import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/s
 import { cpus, totalmem } from 'node:os'
 import { PRESETS, resolveQuality } from './quality'
 import { checkNow, chooseUpdate, setAutoInstall, startUpdater, update } from './updater'
+import { makeErrorLog } from './errorlog'
+
+// 오류 로그: %APPDATA%\빛길\error.log (settings.json 과 같은 폴더)
+const logError = makeErrorLog(join(app.getPath('appData'), '빛길', 'error.log'))
 
 // 사용자 쇼 파일은 문서\빛길\show.bitgil.json (없으면 시작 데이터로 시작, 처음 바뀔 때 저장)
 const showDir = join(app.getPath('documents'), '빛길')
@@ -111,10 +115,13 @@ function phoneCmd(c: PhoneCmd) {
 setRemote(settings.remoteOn)
 
 // DMX 출력 루프: 화면 그리기와 따로, 초당 40번(25ms) 일정하게 보낸다
+// 한 번 오류가 나도 루프는 계속 돈다(조명이 멈추지 않게). 오류 난 프레임만 건너뛰고 장비는 마지막 값을 유지.
 setInterval(() => {
-  const frame = engine.frame(Date.now())
-  output.send(frame)
-  enttec.send(frame)
+  try {
+    const frame = engine.frame(Date.now())
+    output.send(frame)
+    enttec.send(frame)
+  } catch (err) { logError('출력 루프', err) }
 }, 25)
 
 /** 편집 모드가 닫히면(직접 닫기·10분 경과) 조명 찾기도 끝내고 원래 조명으로 돌아간다 */
@@ -164,12 +171,14 @@ function buildState() {
 // 화면에는 바뀌었을 때만 상태를 보낸다(간격은 화면 품질에 따라 33~100ms). 처음 상태는 화면이 준비되면 직접 가져간다(state:get).
 let lastSent = ''
 function sendState() {
-  if (win) {
-    const state = buildState()
-    const json = JSON.stringify(state)
-    if (json !== lastSent) win.webContents.send('state', state)
-    lastSent = json
-  }
+  try {
+    if (win) {
+      const state = buildState()
+      const json = JSON.stringify(state)
+      if (json !== lastSent) win.webContents.send('state', state)
+      lastSent = json
+    }
+  } catch (err) { logError('화면 상태 전송', err) } // 여기서 멈추면 화면이 굳으므로 다음 번을 꼭 예약한다
   setTimeout(sendState, PRESETS[quality()].stateMs)
 }
 sendState()
@@ -301,3 +310,8 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => app.quit())
+
+// 예상 못 한 오류는 로그에 남기고 계속 돈다(예배 중 꺼지지 않게).
+// 파일 맨 끝에 두는 이유: 위쪽 시작 준비가 실패하면 Electron 기본 오류 창이 그대로 뜨게.
+process.on('uncaughtException', (err) => logError('uncaughtException', err))
+process.on('unhandledRejection', (err) => logError('unhandledRejection', err))
