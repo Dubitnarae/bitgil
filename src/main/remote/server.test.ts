@@ -1,3 +1,4 @@
+import { request } from 'node:http'
 import { describe, expect, it } from 'vitest'
 import { Lockout, REMOTE_PORT, startRemote, type PhoneCmd } from './server'
 
@@ -39,6 +40,30 @@ describe('폰 원격', () => {
       const ev = await fetch(base + '/events?code=123456')
       const first = await ev.body!.getReader().read()
       expect(new TextDecoder().decode(first.value)).toContain('"scene":"찬양"')
+    } finally {
+      r.close()
+    }
+  })
+
+  it('PIN 잠금 중에는 PIN 검사 없이 403, 실패 횟수는 접속 IP별', async () => {
+    let asked = 0
+    const r = startRemote({
+      code: () => '123456',
+      state: () => ({ scene: '', cue: -1, total: 0, next: '', blackout: false, master: 1, fading: false, output: false, edit: false }),
+      run: () => {},
+      unlock: (pin) => { asked++; return pin === '1234' },
+      setup: () => '',
+      onError: (m) => { throw new Error(m) }
+    })
+    // 보내는 쪽 주소를 정해서 다른 폰인 척한다(127.x.x.x 는 모두 이 컴퓨터)
+    const unlock = (from: string, pin: string) => new Promise<number>((ok, fail) =>
+      request({ host: '127.0.0.1', port: REMOTE_PORT, localAddress: from, method: 'POST', path: `/unlock?code=123456&pin=${pin}`, agent: false },
+        (res) => { res.resume(); ok(res.statusCode!) }).on('error', fail).end())
+    try {
+      for (let i = 0; i < 5; i++) expect(await unlock('127.0.0.1', '0000')).toBe(403)
+      expect(await unlock('127.0.0.1', '1234')).toBe(403) // 잠김: 맞는 PIN도 거절
+      expect(asked).toBe(5) // 잠긴 뒤에는 PIN 검사를 부르지도 않음
+      expect(await unlock('127.0.0.2', '1234')).toBe(204) // 다른 폰은 잠기지 않음
     } finally {
       r.close()
     }

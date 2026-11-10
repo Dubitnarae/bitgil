@@ -33,6 +33,7 @@ export const REMOTE_PORT = 8130
 export class Lockout {
   private fails = 0
   private until = 0
+  locked(now: number): boolean { return now < this.until }
   check(ok: boolean, now: number): boolean {
     if (now < this.until) return false
     if (ok) { this.fails = 0; return true }
@@ -65,7 +66,9 @@ export function startRemote(opts: {
   onError: (msg: string) => void
 }) {
   const lock = new Lockout()
-  const pinLock = new Lockout() // PIN도 5번 틀리면 1분 잠김
+  // PIN도 5번 틀리면 1분 잠김. 접속 IP별로 센다(한 폰이 틀려도 다른 폰은 안 잠김)
+  // shortcut: IP 목록을 지우지 않는다(같은 Wi-Fi 기기 수만큼만 생김), 인터넷에 열게 되면 정리 필요
+  const pinLocks = new Map<string, Lockout>()
   const clients = new Set<ServerResponse>()
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://x')
@@ -92,7 +95,12 @@ export function startRemote(opts: {
       return res.end()
     }
     if (req.method === 'POST' && url.pathname === '/unlock') {
-      res.writeHead(pinLock.check(opts.unlock(url.searchParams.get('pin') ?? ''), Date.now()) ? 204 : 403)
+      const ip = req.socket.remoteAddress ?? ''
+      const l = pinLocks.get(ip) ?? new Lockout()
+      pinLocks.set(ip, l)
+      const now = Date.now()
+      // 잠긴 동안에는 PIN 검사 자체를 하지 않는다(검사하면 맞는 PIN일 때 403을 주면서도 편집 모드가 열려 버림)
+      res.writeHead(!l.locked(now) && l.check(opts.unlock(url.searchParams.get('pin') ?? ''), now) ? 204 : 403)
       return res.end()
     }
     if (req.method === 'POST' && url.pathname === '/setup') {
