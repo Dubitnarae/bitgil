@@ -34,6 +34,7 @@ export type Command =
   | { t: 'dmxType'; type: import('./dmx/enttec').DmxType }
   | { t: 'outputOnStart'; on: boolean }
   | { t: 'autoUpdate'; on: boolean }
+  | { t: 'pinEnabled'; on: boolean } // 편집 모드 PIN 사용(결과를 돌려줘야 해서 ipc 'edit:pinEnabled' 로 받는다)
   | { t: 'checkUpdate' } // 설정의 [지금 확인]
   | { t: 'updateChoice'; choice: import('./updater').UpdateChoice } // 운영 모드에서도 가능
   | { t: 'remote'; on: boolean }

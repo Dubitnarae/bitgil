@@ -9,7 +9,7 @@ import { UsbDmxOutput, listPorts } from './dmx/enttec'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, parseShow, saveShowFile } from './showfile'
-import { allowedInOperation, checkPin, EditMode, hashPin, isPin } from './editmode'
+import { allowedInOperation, canSetPinEnabled, canUnlock, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
 import { cpus, totalmem } from 'node:os'
@@ -65,6 +65,7 @@ function phoneState(): PhoneState {
     fading: engine.fading,
     output: enttec.enabled && enttec.connected,
     edit: edit.isOpen(Date.now()),
+    pinOff: !settings.pinEnabled,
     setup: edit.isOpen(Date.now()) ? {
       find: engine.find,
       chTest: engine.chTest,
@@ -77,9 +78,9 @@ function phoneState(): PhoneState {
     } : undefined
   }
 }
-/** 폰 설정 모드: 노트북과 같은 편집 PIN 으로 편집 모드를 연다(노트북도 편집 모드가 됨) */
+/** 폰 설정 모드: 노트북과 같은 편집 PIN 으로 편집 모드를 연다(노트북도 편집 모드가 됨). 'PIN 사용'이 꺼져 있으면 PIN 없이 */
 function phoneUnlock(pin: string) {
-  if (!settings.pinHash || !checkPin(pin, settings.pinHash)) return false
+  if (!canUnlock(pin, settings)) return false
   edit.open(Date.now())
   phoneNote = { text: '설정 모드 열림', at: Date.now() }
   return true
@@ -150,6 +151,7 @@ function buildState() {
     frame: Array.from(output.last),
     editMode: edit.isOpen(now),
     pinSet: !!settings.pinHash,
+    pinEnabled: settings.pinEnabled,
     phone: phoneNote,
     remote: { on: !!remote, code: settings.remoteCode, urls: lanUrls(), error: remoteError, clients: remote?.clients() ?? 0 },
     saveError,
@@ -175,10 +177,20 @@ sendState()
 ipcMain.handle('show:get', () => engine.show)
 ipcMain.handle('state:get', () => buildState())
 ipcMain.handle('ports:list', () => listPorts())
-// 편집 모드: PIN이 맞으면 연다. PIN이 아직 없으면 처음 정한 PIN으로 연다.
+// 편집 모드: PIN이 맞으면 연다('PIN 사용'이 꺼져 있으면 PIN 없이). PIN이 아직 없으면 처음 정한 PIN으로 연다.
 ipcMain.handle('edit:unlock', (_e, pin: string) => {
-  if (!settings.pinHash || !checkPin(String(pin), settings.pinHash)) return false
+  if (!canUnlock(String(pin), settings)) return false
   edit.open(Date.now())
+  return true
+})
+// 'PIN 사용' 켜기/끄기: 편집 모드에서만, 끌 때는 현재 PIN 확인
+ipcMain.handle('edit:pinEnabled', (_e, on: boolean, pin?: string) => {
+  on = !!on
+  const now = Date.now()
+  if (!edit.isOpen(now) && !allowedInOperation({ t: 'pinEnabled', on }, engine.show)) return false
+  if (!canSetPinEnabled(on, String(pin ?? ''), settings.pinHash)) return false
+  edit.touch(now)
+  saveSettings({ ...settings, pinEnabled: (settings.pinEnabled = on) })
   return true
 })
 ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
@@ -186,6 +198,7 @@ ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
   // PIN 바꾸기는 편집 모드에서 현재 PIN까지 맞아야 한다(처음 정할 때는 예외)
   if (!isPin(pin)) return false
   if (settings.pinHash && (!edit.isOpen(Date.now()) || !checkPin(String(current ?? ''), settings.pinHash))) return false
+  if (!settings.pinHash) settings.pinEnabled = true // PIN 없이 꺼 둔 상태에서 새 PIN을 정하면 PIN 사용도 켠다
   saveSettings({ ...settings, pinHash: (settings.pinHash = hashPin(pin)) })
   edit.open(Date.now())
   return true

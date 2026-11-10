@@ -10,7 +10,7 @@ function RemoteQr({ url }: { url: string }) {
   return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
 }
 
-export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import('../../../core/engine/types').Show; st: State; onClose: () => void; onChangePin: () => void }) {
+export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../../../core/engine/types').Show; st: State; onClose: () => void; onPin: (m: 'set' | 'change' | 'off') => void }) {
   const [ports, setPorts] = useState<{ path: string; manufacturer?: string }[]>([])
   const refresh = () => window.bitgil.listPorts().then(setPorts, () => setPorts([]))
   useEffect(() => { refresh() }, [])
@@ -119,7 +119,12 @@ export function SettingsPanel({ show, st, onClose, onChangePin }: { show: import
 
       <div className="group">
       <h4>편집 모드 PIN</h4>
-      <button onClick={onChangePin}>PIN 바꾸기</button>
+      <label className="radio">
+        <input type="checkbox" checked={st.pinEnabled}
+          onChange={(e) => { if (!e.target.checked) onPin('off'); else if (st.pinSet) window.bitgil.pinEnabled(true); else onPin('set') }} />
+        편집 모드 PIN 사용 — 끄면 노트북과 폰 모두 PIN 없이 편집 모드가 열림 (폰 접속 코드는 그대로 필요, 끌 때 현재 PIN 확인)
+      </label>
+      <button onClick={() => onPin('change')}>PIN 바꾸기</button>
       </div>
       <p className="hint">빛길 v{st.version} · 개발자 KIM YEONGDO</p>
     </section>

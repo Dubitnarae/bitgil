@@ -50,7 +50,7 @@ input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin
 
 <div id="setup" class="s">
   <div class="row"><button id="back">◀ 운영 화면</button><button id="lock" class="stop">설정 모드 닫기</button></div>
-  <div id="pinBox" class="box">편집 모드 <b>PIN</b>(노트북과 같은 4자리)을 넣으세요. 열면 노트북도 편집 모드가 되고, 10분 동안 조작이 없으면 닫힙니다.
+  <div id="pinBox" class="box"><span id="pinTxt"></span> 열면 노트북도 편집 모드가 되고, 10분 동안 조작이 없으면 닫힙니다.
     <input id="pin" type="password" inputmode="numeric" maxlength="4"><button id="pinGo" class="go">설정 모드 열기</button>
     <div id="pinMsg" class="warn"></div></div>
   <div id="work">
@@ -186,7 +186,7 @@ $('chEnd').onclick=function(){$('chIn').value=st.setup.chTest.ch;setup({t:'chTes
 function drawSetup(){
   if(!st||view!=='setup')return;
   vis('pinBox',!st.edit);vis('work',st.edit);$('lock').disabled=!st.edit;
-  if(!st.edit){form=null;return}
+  if(!st.edit){form=null;vis('pin',!st.pinOff);$('pinTxt').textContent=st.pinOff?'PIN 사용이 꺼져 있어 PIN 없이 열립니다.':'편집 모드 PIN(노트북과 같은 4자리)을 넣으세요.';return}
   var s=st.setup,f=cur();
   $('sWarn').innerHTML=(st.output?'':'<div class="warn">출력 대기 중이라 실제 조명은 안 켜집니다. 노트북에서 [출력 켜기]를 누르세요.</div>')+(st.blackout?'<div class="warn">블랙아웃 중이라 조명이 꺼져 있습니다.</div>':'');
   for(var i=0;i<tabs.length;i++)tabs[i].className=tabs[i].getAttribute('data-t')===tab?'act':'';

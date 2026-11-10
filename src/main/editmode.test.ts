@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Show } from '../core/engine/types'
-import { allowedInOperation, checkPin, EDIT_TIMEOUT_MS, EditMode, hashPin, isPin } from './editmode'
+import { allowedInOperation, canSetPinEnabled, canUnlock, checkPin, EDIT_TIMEOUT_MS, EditMode, hashPin, isPin } from './editmode'
 
 describe('편집 모드 PIN', () => {
   it('맞는 PIN만 통과하고, 저장 값에 PIN 숫자가 그대로 없다', () => {
@@ -12,6 +12,25 @@ describe('편집 모드 PIN', () => {
     expect(isPin('0123')).toBe(true)
     expect(isPin('123')).toBe(false)
     expect(isPin('12a4')).toBe(false)
+  })
+
+  it("'PIN 사용'이 꺼져 있으면 PIN 없이 열리고, 켜져 있으면 맞는 PIN만", () => {
+    const pinHash = hashPin('1234')
+    expect(canUnlock('', { pinEnabled: false, pinHash })).toBe(true)
+    expect(canUnlock('', { pinEnabled: false, pinHash: '' })).toBe(true)
+    expect(canUnlock('', { pinEnabled: true, pinHash })).toBe(false)
+    expect(canUnlock('0000', { pinEnabled: true, pinHash })).toBe(false)
+    expect(canUnlock('1234', { pinEnabled: true, pinHash })).toBe(true)
+    expect(canUnlock('1234', { pinEnabled: true, pinHash: '' })).toBe(false) // PIN을 아직 안 정함
+  })
+
+  it("'PIN 사용' 끄기는 현재 PIN이 맞아야 하고, 켜기는 확인 없이(PIN이 있어야)", () => {
+    const pinHash = hashPin('1234')
+    expect(canSetPinEnabled(false, '', pinHash)).toBe(false)
+    expect(canSetPinEnabled(false, '0000', pinHash)).toBe(false)
+    expect(canSetPinEnabled(false, '1234', pinHash)).toBe(true)
+    expect(canSetPinEnabled(true, '', pinHash)).toBe(true)
+    expect(canSetPinEnabled(true, '', '')).toBe(false) // PIN이 없으면 먼저 새 PIN 정하기
   })
 
   it('10분 동안 조작이 없으면 닫히고, 조작하면 다시 10분', () => {
@@ -35,6 +54,8 @@ describe('편집 모드 PIN', () => {
     expect(allowedInOperation({ t: 'renameScene', id: 'T-01', name: 'c' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'faderMode', mode: 'preview' }, show)).toBe(false)
     expect(allowedInOperation({ t: 'autoUpdate', on: false }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'pinEnabled', on: false }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'pinEnabled', on: true }, show)).toBe(false)
     expect(allowedInOperation({ t: 'updateChoice', choice: 'skip' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'setCuelist', list: [] }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editVenue', venue: {} as never }, show)).toBe(false)

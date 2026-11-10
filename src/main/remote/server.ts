@@ -14,6 +14,7 @@ export interface PhoneState {
   fading: boolean
   output: boolean // 실제 장비로 나가는 중
   edit: boolean // 편집 모드 열림(폰 설정 모드를 쓸 수 있음)
+  pinOff?: boolean // 'PIN 사용'이 꺼짐 → 폰도 PIN 없이 설정 모드를 연다
   setup?: PhoneSetup // 편집 모드일 때만
 }
 

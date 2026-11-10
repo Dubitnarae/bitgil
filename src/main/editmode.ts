@@ -19,6 +19,14 @@ export function checkPin(pin: string, stored: string): boolean {
   return timingSafeEqual(scryptSync(pin, salt, 32), Buffer.from(hash, 'hex'))
 }
 
+/** 편집 모드를 열어도 되는지: 'PIN 사용'이 꺼져 있으면 PIN 없이 열린다(노트북·폰 공통) */
+export const canUnlock = (pin: string, s: { pinEnabled: boolean; pinHash: string }) =>
+  !s.pinEnabled || (!!s.pinHash && checkPin(pin, s.pinHash))
+
+/** 'PIN 사용' 켜기/끄기: 끌 때는 현재 PIN이 맞아야 하고, 켤 때는 확인 없이(단, PIN이 정해져 있어야) */
+export const canSetPinEnabled = (on: boolean, pin: string, pinHash: string) =>
+  !!pinHash && (on || checkPin(pin, pinHash))
+
 /** 편집 모드 타이머: 마지막 조작 뒤 10분이 지나면 저절로 닫힌다 */
 export class EditMode {
   private until = 0
@@ -49,6 +57,7 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'dmxType':
     case 'outputOnStart':
     case 'autoUpdate':
+    case 'pinEnabled':
     case 'remote':
     case 'remoteNewCode': return false
     default: return true

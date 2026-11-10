@@ -28,7 +28,8 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
       {st.fading && <span className="badge">페이드 중…</span>}
       {st.editMode
         ? <><button className="on" onClick={() => window.bitgil.lock()}>편집 모드 닫기</button><button onClick={onSettings}>설정</button></>
-        : <button onClick={() => onPin(st.pinSet ? 'unlock' : 'set')}>편집 모드</button>}
+        : <button onClick={() => !st.pinEnabled ? window.bitgil.unlock('') : onPin(st.pinSet ? 'unlock' : 'set')}>편집 모드</button>}
+      {!st.pinEnabled && <span className="badge" title="편집 모드가 PIN 없이 열립니다(노트북·폰 모두). 편집 모드 → 설정에서 다시 켤 수 있습니다.">⚠ PIN 꺼짐</span>}
       <OutputStatus o={st.output} />
     </header>
   )

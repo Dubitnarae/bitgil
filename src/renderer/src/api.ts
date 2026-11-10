@@ -37,6 +37,7 @@ export interface State {
   quality: { set: import('../../main/quality').QualitySetting; used: import('../../main/quality').Quality; cores: number; memGB: number }
   editMode: boolean // false = 운영 모드
   pinSet: boolean
+  pinEnabled: boolean // false = PIN 없이 편집 모드가 열림
   phone: { text: string; at: number } // 폰에서 마지막으로 누른 것(at = 시각, 0 = 아직 없음)
   remote: { on: boolean; code: string; urls: string[]; error: string; clients: number }
 }
@@ -50,6 +51,7 @@ declare global {
       send(cmd: Command): void
       unlock(pin: string): Promise<boolean>
       setPin(pin: string, current?: string): Promise<boolean>
+      pinEnabled(on: boolean, pin?: string): Promise<boolean> // 끌 때는 현재 PIN 필요
       lock(): Promise<void>
       xhdImport(): Promise<string>
       xhdExport(): Promise<string>

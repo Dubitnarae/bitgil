@@ -35,7 +35,7 @@ export default function App() {
   const [fade, setFade] = useState(2)
   const [monitor, setMonitor] = useState(false)
   const [settings, setSettings] = useState(false)
-  const [pin, setPin] = useState<'unlock' | 'set' | 'change' | null>(null)
+  const [pin, setPin] = useState<'unlock' | 'set' | 'change' | 'off' | null>(null)
   const [aim, setAim] = useState<Aim | null>(null) // null = 빛 위치 찍기 꺼짐
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function App() {
         </div>
         <aside>
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
-          {settings && st.editMode && <SettingsPanel show={show} st={st} onClose={() => setSettings(false)} onChangePin={() => setPin('change')} />}
+          {settings && st.editMode && <SettingsPanel show={show} st={st} onClose={() => setSettings(false)} onPin={setPin} />}
           {st.editMode && <FindPanel show={show} st={st} selected={selected} />}
           {st.editMode && !st.find && <ChannelTest st={st} />}
           {st.editMode && <VenuePanel show={show} />}
