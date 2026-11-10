@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, powerSaveBlocker } from 'electron'
 import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { mergeScenes, scenesToXhd, xhdToScenes } from './xhd'
 import { overlaps } from '../core/engine/patch'
@@ -16,6 +16,15 @@ import { cpus, totalmem } from 'node:os'
 import { PRESETS, resolveQuality } from './quality'
 import { checkNow, chooseUpdate, setAutoInstall, startUpdater, update } from './updater'
 import { makeErrorLog } from './errorlog'
+
+// 빛길은 하나만 켠다(둘이 같은 DMX 포트·쇼 파일을 잡지 않게). 두 번째는 아무것도 열기 전에 바로 끝내고, 먼저 켜진 창이 앞으로 나온다.
+if (!app.requestSingleInstanceLock()) process.exit(0)
+app.on('second-instance', () => {
+  if (!win) return
+  if (win.isMinimized()) win.restore()
+  win.show()
+  win.focus()
+})
 
 // 오류 로그: %APPDATA%\빛길\error.log (settings.json 과 같은 폴더)
 const logError = makeErrorLog(join(app.getPath('appData'), '빛길', 'error.log'))
@@ -43,6 +52,12 @@ engine.faderMode = settings.faderMode
 const enttec = new UsbDmxOutput(settings.dmxPort, settings.dmxType)
 enttec.setEnabled(settings.outputOnStart)
 let win: BrowserWindow | null = null
+// 출력이 켜져 있는 동안은 컴퓨터가 절전·화면 꺼짐으로 들어가지 않게 막는다(예배 중 조명 신호가 끊기지 않게)
+let awake: number | null = null
+function keepAwake() {
+  if (enttec.enabled && awake === null) awake = powerSaveBlocker.start('prevent-display-sleep')
+  else if (!enttec.enabled && awake !== null) { powerSaveBlocker.stop(awake); awake = null }
+}
 const edit = new EditMode() // 시작은 항상 운영 모드
 
 // 폰 원격: 설정에서 켰을 때만 같은 Wi-Fi에 연다. 접속 코드는 처음 한 번 만든다.
@@ -276,7 +291,7 @@ ipcMain.on('cmd', (_e, c: Command) => {
     const now = Date.now()
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
     edit.touch(now)
-    if (c.t === 'output') return enttec.setEnabled(c.on)
+    if (c.t === 'output') { enttec.setEnabled(c.on); return keepAwake() }
     if (c.t === 'dmxType') { enttec.setType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
     if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
@@ -304,6 +319,16 @@ app.whenReady().then(() => {
     webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false }
   })
   win.removeMenu()
+  keepAwake() // '시작할 때 바로 출력'이 켜져 있을 때
+  // 출력 중에 창을 닫으면 한 번 물어본다. 묻는 동안에도 출력 루프가 돌도록 기다리지 않는 창(showMessageBox)을 쓴다.
+  win.on('close', (e) => {
+    if (!enttec.enabled || !win) return
+    e.preventDefault()
+    dialog.showMessageBox(win, {
+      type: 'warning', title: '빛길', message: '지금 조명으로 출력 중입니다.', detail: '빛길을 끄면 조명 신호가 끊깁니다. 그래도 끌까요?',
+      buttons: ['끄기', '취소'], defaultId: 1, cancelId: 1, noLink: true
+    }).then((r) => { if (r.response === 0) win?.destroy() })
+  })
   win.on('closed', () => (win = null))
   if (process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL)
   else win.loadFile(join(__dirname, '../renderer/index.html'))
