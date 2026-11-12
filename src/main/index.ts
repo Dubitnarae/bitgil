@@ -6,7 +6,8 @@ import { join } from 'node:path'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
 import { UsbDmxOutput, listPorts, type DmxType } from './dmx/enttec'
-import { UdmxOutput } from './dmx/udmx'
+import { UdmxOutput, checkDriver } from './dmx/udmx'
+import { execFile } from 'node:child_process'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, parseShow, saveShowFile } from './showfile'
@@ -213,6 +214,19 @@ sendState()
 ipcMain.handle('show:get', () => engine.show)
 ipcMain.handle('state:get', () => buildState())
 ipcMain.handle('ports:list', () => listPorts())
+ipcMain.handle('udmx:driverState', () => checkDriver())
+// uDMX 드라이버 설치: 함께 담긴 Zadig 를 관리자 권한으로 연다(Windows 확인 창이 뜸). 편집 모드에서만.
+// Zadig 는 관리자 권한 전용이라 일반 실행이 안 돼서 PowerShell Start-Process -Verb RunAs 로 연다(같은 폴더의 zadig.ini = WinUSB 기본)
+ipcMain.handle('udmx:installDriver', () => {
+  if (!edit.isOpen(Date.now())) return Promise.resolve('편집 모드에서만 할 수 있습니다')
+  const dir = app.isPackaged ? join(process.resourcesPath, 'zadig') : join(app.getAppPath(), 'vendor', 'zadig')
+  const q = (s: string) => `'${s.replace(/'/g, "''")}'` // PowerShell 작은따옴표 문자열(경로에 ' 가 있어도 안전하게)
+  const ps = `Start-Process -FilePath ${q(join(dir, 'zadig-2.9.exe'))} -WorkingDirectory ${q(dir)} -Verb RunAs -Wait`
+  return new Promise<string>((ok) => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], { windowsHide: true }, (err) => {
+    udmx.recheckDriver()
+    ok(err ? '드라이버 설치 창을 열지 못했습니다 (확인 창에서 [아니요]를 눌렀거나 파일이 없음)' : '')
+  }))
+})
 // 편집 모드: PIN이 맞으면 연다('PIN 사용'이 꺼져 있으면 PIN 없이). PIN이 아직 없으면 처음 정한 PIN으로 연다.
 ipcMain.handle('edit:unlock', (_e, pin: string) => {
   if (!canUnlock(String(pin), settings)) return false

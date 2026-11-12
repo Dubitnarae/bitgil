@@ -10,6 +10,28 @@ function RemoteQr({ url }: { url: string }) {
   return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
 }
 
+/** uDMX 드라이버 상태 + 설치 버튼(함께 담긴 Zadig 를 연다) */
+function UdmxDriver() {
+  const [drv, setDrv] = useState<string>('확인 중…')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const check = () => window.bitgil.udmxDriverState().then(
+    (d) => setDrv(d === 'ok' ? '설치됨 ✓' : d === 'missing' ? '없음 — 아래 버튼으로 설치하세요' : 'uDMX 가 안 꽂혀 있음 (꽂고 [다시 확인])'),
+    () => setDrv('확인 못 함'))
+  useEffect(() => { check() }, [])
+  const install = () => {
+    setBusy(true)
+    setMsg('Windows 확인 창에서 [예] → Zadig 에서 uDMX 를 고르고 USB ID 16C0 05DC 확인 → WinUSB 인지 보고 [Install Driver] (끝나면 저절로 닫힘)')
+    window.bitgil.udmxInstallDriver().then((m) => { setMsg(m); setBusy(false); check() })
+  }
+  return <p className="hint">
+    uDMX 드라이버(WinUSB): <b>{drv}</b> <button onClick={check}>다시 확인</button><br />
+    <button disabled={busy} onClick={install}>{busy ? 'Zadig 실행 중…' : 'uDMX 드라이버 설치'}</button>
+    {' '}컴퓨터마다 처음 한 번만. uDMX 를 꽂은 채로 누르세요. uDMX 는 노트북 → USB 허브 → uDMX 로 꽂아야 안정적입니다
+    {msg && <><br /><b>{msg}</b></>}
+  </p>
+}
+
 export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../../../core/engine/types').Show; st: State; onClose: () => void; onPin: (m: 'set' | 'change' | 'off') => void }) {
   const [ports, setPorts] = useState<{ path: string; manufacturer?: string }[]>([])
   const refresh = () => window.bitgil.listPorts().then(setPorts, () => setPorts([]))
@@ -59,6 +81,7 @@ export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../.
         <input type="radio" checked={st.output.type === 'udmx'} onChange={() => send({ t: 'dmxType', type: 'udmx' })} />
         uDMX (Anyma 호환, 장치 관리자에 COM 포트 없이 'uDMX'로 보이는 제품 — Zadig 드라이버 필요)
       </label>
+      {st.output.type === 'udmx' && <UdmxDriver />}
       {st.output.type !== 'udmx' && <>
       <p className="hint">포트</p>
       <label className="radio">

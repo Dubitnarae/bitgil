@@ -1,5 +1,36 @@
-import { describe, expect, it } from 'vitest'
-import { UdmxOutput } from './udmx'
+import { describe, expect, it, vi } from 'vitest'
+import { driverState, NO_DRIVER, UdmxOutput } from './udmx'
+
+// 실제 장치를 건드리지 않게: usb 목록에는 아무것도 없다고 한다(드라이버 없는 uDMX 와 같은 모습)
+vi.mock('usb', () => ({ usb: { findDeviceByIds: async () => undefined } }))
+
+describe('uDMX 드라이버 판단', () => {
+  it('안 꽂힘', () => expect(driverState([])).toBe('none'))
+  it('WinUSB 이고 오류 없음 = 설치됨', () => expect(driverState([{ Service: 'WinUSB', ConfigManagerErrorCode: 0 }])).toBe('ok'))
+  it('드라이버 없음(오류 28)', () => expect(driverState([{ Service: null, ConfigManagerErrorCode: 28 }])).toBe('missing'))
+  it('다른 드라이버(libusb0 등)도 설치 필요', () => expect(driverState([{ Service: 'libusb0', ConfigManagerErrorCode: 0 }])).toBe('missing'))
+  it('여러 줄 중 하나라도 정상이면 설치됨', () => expect(driverState([{ Service: null, ConfigManagerErrorCode: 28 }, { Service: 'WinUSB', ConfigManagerErrorCode: 0 }])).toBe('ok'))
+})
+
+describe('uDMX 연결 실패 안내', () => {
+  const connectOnce = async (state: 'none' | 'missing') => {
+    const out = new UdmxOutput()
+    let checks = 0
+    out.check = async () => { checks++; return state }
+    out.setEnabled(true)
+    await vi.waitFor(() => expect(out.error).not.toBe(''))
+    return { out, checks: () => checks }
+  }
+  it('꽂혀 있는데 드라이버가 없으면 설치 버튼 위치를 알려 준다', async () => {
+    const { out } = await connectOnce('missing')
+    expect(out.error).toBe(NO_DRIVER)
+    expect(out.connected).toBe(false)
+  })
+  it('안 꽂혀 있으면 꽂으라고', async () => {
+    const { out } = await connectOnce('none')
+    expect(out.error).toContain('꽂혀 있는지')
+  })
+})
 
 /** 실제 장치 대신 제어 전송만 기록하는 가짜 장치를 꽂는다 */
 function fake(fail = false) {

@@ -48,6 +48,8 @@ declare global {
       getShow(): Promise<import('../../core/engine/types').Show>
       getState(): Promise<State>
       listPorts(): Promise<{ path: string; manufacturer?: string }[]>
+      udmxDriverState(): Promise<import('../../main/dmx/udmx').DriverState>
+      udmxInstallDriver(): Promise<string> // 빈 문자열 = Zadig 를 열었다 닫음
       send(cmd: Command): void
       unlock(pin: string): Promise<boolean>
       setPin(pin: string, current?: string): Promise<boolean>
