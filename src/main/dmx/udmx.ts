@@ -39,9 +39,20 @@ export class UdmxOutput implements DmxOutput {
     if (!this.enabled || !this.connected || !dev || this.busy) return
     this.busy = true // 앞 전송이 안 끝났으면 건너뜀. 장치가 멈춰도 제어 전송은 1초(1000ms) 뒤 실패로 끝나 갇히지 않는다
     dev.nativeControlTransferOut(SET_CHANNEL_RANGE, 1000, frame).then(
-      () => { this.busy = false },
-      (err: unknown) => { this.busy = false; this.lost(dev, err instanceof Error ? err.message : String(err)) })
+      () => { this.busy = false; this.stalls = 0 },
+      (err: unknown) => {
+        this.busy = false
+        const why = err instanceof Error ? err.message : String(err)
+        // 허브를 거친 저가 uDMX 는 5% 정도 한 번씩 stall 을 내고 다음 전송에서 바로 살아난다 → 그 프레임만 건너뜀.
+        // 연속으로 이어지면 장치가 굳은 것(뺐다 꽂아야 풀림). 장치가 빠진 것 같은 다른 오류는 바로 끊김.
+        if (/stall/i.test(why) && ++this.stalls < UdmxOutput.MAX_STALLS) return
+        this.lost(dev, why)
+      })
   }
+
+  /** 이만큼 연속 stall 이면 굳은 것으로 본다(약 0.5~1초). 시험에서 정상 장치의 연속 실패는 최대 2번 */
+  static readonly MAX_STALLS = 20
+  private stalls = 0
 
   private async connect() {
     if (this.opening || this.connected) return
@@ -57,6 +68,7 @@ export class UdmxOutput implements DmxOutput {
       this.path = 'uDMX'
       this.connected = true
       this.busy = false
+      this.stalls = 0
       this.error = ''
     } catch (err) {
       this.error = err instanceof Error ? err.message : String(err)

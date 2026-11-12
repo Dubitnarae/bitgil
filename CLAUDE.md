@@ -37,7 +37,7 @@
 3. `main/dmx`: DMX 출력. 같은 인터페이스를 따르는 구현들을 둔다.
    - `VirtualOutput`: 장비 없이 채널 값을 화면(채널 모니터)으로만 보여준다. 개발 기본값.
    - `UsbDmxOutput`(`main/dmx/enttec.ts`): COM 포트 인터페이스로 전송. 종류는 설정 `dmxType` — `pro`(Enttec Pro 메시지) 또는 `open`(Open DMX: 250000bps 8N2, 브레이크 후 시작 코드 0 + 512채널, Lixada 등 FTDI 제품).
-   - `UdmxOutput`(`main/dmx/udmx.ts`): `dmxType` 이 `udmx` 일 때. uDMX(Anyma 호환, VID 0x16C0 / PID 0x05DC)는 COM 포트가 없어 npm `usb` 로 USB 제어 전송(bmRequestType 0x40, bRequest 2 = SetChannelRange, wValue 512, wIndex 0, 데이터 = 채널 1~512). Windows 는 Zadig 로 WinUSB 드라이버 설치 필요. 메인(`index.ts`)은 두 출력을 다 만들어 두고 `dmxType` 에 맞는 하나만 쓴다.
+   - `UdmxOutput`(`main/dmx/udmx.ts`): `dmxType` 이 `udmx` 일 때. uDMX(Anyma 호환, VID 0x16C0 / PID 0x05DC)는 COM 포트가 없어 npm `usb` 로 USB 제어 전송(bmRequestType 0x40, bRequest 2 = SetChannelRange, wValue 512, wIndex 0, 데이터 = 채널 1~512). Windows 는 Zadig 로 WinUSB 드라이버 설치 필요, 연결 시 claimInterface(0) 필수. 저가 uDMX 는 가끔 stall 을 내므로 연속 20번(MAX_STALLS)일 때만 끊김으로 본다. 노트북에 바로 꽂으면 굳어서 USB 허브를 거쳐야 함. 메인(`index.ts`)은 두 출력을 다 만들어 두고 `dmxType` 에 맞는 하나만 쓴다.
    - 공통 규칙: 출력 켜졌을 때만 열고 초당 40번(25ms) 보냄, 끊기면 상단 빨간 표시·2초마다 다시 연결.
 4. `main/remote`: 폰 원격 서버.
 5. 쇼 파일 입출력과 설정 저장.

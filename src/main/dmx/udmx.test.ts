@@ -47,11 +47,31 @@ describe('UdmxOutput', () => {
     expect(isClosed()).toBe(true)
   })
 
-  it('장치가 굳으면(stall) 뺐다 꽂으라고 알린다', async () => {
-    const { out } = fake(true)
-    Object.assign(out, { dev: { nativeControlTransferOut: () => Promise.reject(new Error('controlTransferOut error: endpoint stalled')), close: () => Promise.resolve() } })
-    out.send(frame)
-    await tick()
+  /** 정해 둔 결과 순서대로 응답하는 장치(true = stall) */
+  function stally(results: boolean[]) {
+    const out = new UdmxOutput()
+    let i = 0
+    const dev = {
+      nativeControlTransferOut: () => (results[i++] ? Promise.reject(new Error('controlTransferOut error: endpoint stalled')) : Promise.resolve(512)),
+      close: () => Promise.resolve()
+    }
+    Object.assign(out, { dev, enabled: true, connected: true })
+    return out
+  }
+
+  it('가끔 한 번씩 나는 stall 은 그 프레임만 건너뛰고 연결을 유지한다(허브 거친 장치)', async () => {
+    const out = stally([true, false, true, true, false])
+    for (let k = 0; k < 5; k++) { out.send(frame); await tick() }
+    expect(out.connected).toBe(true)
+    expect(out.error).toBe('')
+  })
+
+  it('stall 이 연속으로 이어지면 굳은 것 → 끊김 + 뺐다 꽂으라고 알린다', async () => {
+    const out = stally(Array(UdmxOutput.MAX_STALLS).fill(true))
+    for (let k = 0; k < UdmxOutput.MAX_STALLS - 1; k++) { out.send(frame); await tick() }
+    expect(out.connected).toBe(true)
+    out.send(frame); await tick()
+    expect(out.connected).toBe(false)
     expect(out.error).toContain('뺐다 다시 꽂아')
   })
 
