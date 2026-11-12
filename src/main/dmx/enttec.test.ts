@@ -22,7 +22,8 @@ describe('UsbDmxOutput 전송 모양', () => {
     const log: unknown[] = []
     const port = {
       set: (o: object, cb: () => void) => { log.push(o); cb() },
-      write: (b: Buffer, cb: () => void) => { log.push(b); cb() }
+      write: (b: Buffer, cb: () => void) => { log.push(b); cb() },
+      drain: (cb: () => void) => { log.push('drain'); cb() }
     }
     Object.assign(out, { port, enabled: true, connected: true })
     return { out, log }
@@ -37,6 +38,7 @@ describe('UsbDmxOutput 전송 모양', () => {
     expect(b.length).toBe(513)
     expect(b[0]).toBe(0)
     expect(b[512]).toBe(7)
+    expect(log[3]).toBe('drain') // 다 나간 뒤에야 다음 프레임(브레이크)을 허락
   })
 
   it('Pro: 브레이크 없이 7E 06 … E7 메시지 하나', () => {

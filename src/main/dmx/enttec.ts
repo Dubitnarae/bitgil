@@ -59,7 +59,9 @@ export class UsbDmxOutput implements DmxOutput {
     const done = () => { this.busy = false }
     if (this.type === 'pro') return void port.write(Buffer.from(enttecPacket(frame)), done)
     // Open DMX: 브레이크(선을 잠깐 0으로, USB 왕복 시간만큼 → 88µs 이상) → 시작 코드 0 + 512채널
-    port.set({ brk: true }, () => port.set({ brk: false }, () => port.write(Buffer.concat([Buffer.of(0), Buffer.from(frame)]), done)))
+    // drain = 실제로 선에 다 나갈 때까지 기다림. 안 기다리면 다음 브레이크가 앞 프레임 끝 채널을 잘라 먹는다
+    port.set({ brk: true }, () => port.set({ brk: false }, () =>
+      port.write(Buffer.concat([Buffer.of(0), Buffer.from(frame)]), () => port.drain(done))))
   }
 
   private async connect() {
@@ -74,6 +76,8 @@ export class UsbDmxOutput implements DmxOutput {
         : { path, baudRate: 250000, dataBits: 8, stopBits: 2, parity: 'none', autoOpen: false })
       await new Promise<void>((ok, fail) => port.open((err) => (err ? fail(err) : ok())))
       if (!this.enabled) { port.close(); return } // 여는 사이에 출력을 끈 경우
+      // FreeStyler·Enttec 예제·OLA 의 Open DMX 처럼 RTS 를 내린다(serialport 는 열 때 RTS 를 올려 둠)
+      if (this.type === 'open') await new Promise<void>((ok) => port.set({ rts: false }, () => ok()))
       port.on('close', () => this.lost(port, '연결이 끊겼습니다'))
       port.on('error', (err) => this.lost(port, err.message))
       this.port = port
