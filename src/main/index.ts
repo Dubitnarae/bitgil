@@ -5,7 +5,8 @@ import { overlaps } from '../core/engine/patch'
 import { join } from 'node:path'
 import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
-import { UsbDmxOutput, listPorts } from './dmx/enttec'
+import { UsbDmxOutput, listPorts, type DmxType } from './dmx/enttec'
+import { UdmxOutput } from './dmx/udmx'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
 import { loadShowFile, parseShow, saveShowFile } from './showfile'
@@ -49,8 +50,19 @@ const output = new VirtualOutput() // 채널 모니터용, 항상 마지막 프�
 const settings = loadSettings()
 engine.faderMode = settings.faderMode
 // 시작 기본은 '출력 대기'(장비로 안 보냄). 설정에서 '시작할 때 바로 출력'을 켰을 때만 바로 내보낸다.
-const enttec = new UsbDmxOutput(settings.dmxPort, settings.dmxType)
+// COM 포트 방식(pro·open)과 uDMX(USB 제어 전송)는 따로 있고, 설정 dmxType 에 맞는 하나만 쓴다
+const serial = new UsbDmxOutput(settings.dmxPort, settings.dmxType === 'udmx' ? 'pro' : settings.dmxType)
+const udmx = new UdmxOutput()
+let enttec: UsbDmxOutput | UdmxOutput = settings.dmxType === 'udmx' ? udmx : serial
 enttec.setEnabled(settings.outputOnStart)
+/** 인터페이스 종류 바꾸기: 쓰던 출력을 닫고 새 쪽으로 옮긴다(켜져 있었으면 새 쪽도 켬) */
+function setDmxType(type: DmxType) {
+  const on = enttec.enabled
+  enttec.setEnabled(false)
+  if (type !== 'udmx') serial.setType(type)
+  enttec = type === 'udmx' ? udmx : serial
+  enttec.setEnabled(on)
+}
 let win: BrowserWindow | null = null
 // 출력이 켜져 있는 동안은 컴퓨터가 절전·화면 꺼짐으로 들어가지 않게 막는다(예배 중 조명 신호가 끊기지 않게)
 let awake: number | null = null
@@ -166,7 +178,7 @@ function buildState() {
       connected: enttec.connected,
       port: enttec.path,
       error: enttec.error,
-      preferred: enttec.preferred,
+      preferred: serial.preferred,
       type: enttec.type,
       onStart: settings.outputOnStart
     },
@@ -292,8 +304,8 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
     edit.touch(now)
     if (c.t === 'output') { enttec.setEnabled(c.on); return keepAwake() }
-    if (c.t === 'dmxType') { enttec.setType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
-    if (c.t === 'dmxPort') { enttec.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
+    if (c.t === 'dmxType') { setDmxType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
+    if (c.t === 'dmxPort') { serial.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }
     if (c.t === 'remoteNewCode') {
       saveSettings({ ...settings, remoteCode: (settings.remoteCode = String(randomInt(1_000_000)).padStart(6, '0')) })

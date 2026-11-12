@@ -39,6 +39,7 @@
 2. 빛길 → 편집 모드 → 설정에서 인터페이스 종류와 포트를 고른다.
    - **Enttec Pro 호환**: Enttec DMX USB Pro, DMXking ultraDMX Micro
    - **Open DMX 호환**: FTDI 칩을 쓰는 제품(Lixada USB-DMX512 등)
+   - **uDMX (Anyma 호환)**: COM 포트 없이 'uDMX'로 보이는 제품. 처음 한 번 [Zadig](https://zadig.akeo.ie/)로 WinUSB 드라이버 설치 필요(docs/장비-시험-점검표.md 2-1)
 3. 상단 [출력 켜기]를 누른다. 켜기 전에는 **출력 대기** 상태라 실제 조명으로 나가지 않는다.
 
 - 선이 빠지면 상단 상태가 빨갛게 바뀌고 2초마다 다시 연결한다.

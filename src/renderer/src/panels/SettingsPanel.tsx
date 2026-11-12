@@ -55,6 +55,11 @@ export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../.
         <input type="radio" checked={st.output.type === 'open'} onChange={() => send({ t: 'dmxType', type: 'open' })} />
         Open DMX 호환 (Lixada USB-DMX512 등 FTDI 칩 제품)
       </label>
+      <label className="radio">
+        <input type="radio" checked={st.output.type === 'udmx'} onChange={() => send({ t: 'dmxType', type: 'udmx' })} />
+        uDMX (Anyma 호환, 장치 관리자에 COM 포트 없이 'uDMX'로 보이는 제품 — Zadig 드라이버 필요)
+      </label>
+      {st.output.type !== 'udmx' && <>
       <p className="hint">포트</p>
       <label className="radio">
         <select value={st.output.preferred} onChange={(e) => send({ t: 'dmxPort', path: e.target.value })}>
@@ -65,6 +70,7 @@ export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../.
         </select>
         <button onClick={refresh}>다시 찾기</button>
       </label>
+      </>}
       <label className="radio">
         <input type="checkbox" checked={st.output.onStart} onChange={(e) => send({ t: 'outputOnStart', on: e.target.checked })} />
         프로그램을 켜면 바로 장비로 출력 (끄면 '출력 대기'로 시작 — 권장)

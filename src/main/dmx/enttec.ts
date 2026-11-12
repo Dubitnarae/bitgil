@@ -12,8 +12,10 @@ export function pickPort(ports: PortInfo[], preferred: string): string | undefin
 
 export const listPorts = (): Promise<PortInfo[]> => SerialPort.list()
 
-/** 인터페이스 종류. pro = Enttec DMX USB Pro 호환(장비가 DMX 신호를 만듦), open = FTDI 칩만 있는 Open DMX 호환(Lixada 등, 컴퓨터가 신호 시간을 맞춤) */
-export type DmxType = 'pro' | 'open'
+/** 인터페이스 종류. pro = Enttec DMX USB Pro 호환(장비가 DMX 신호를 만듦), open = FTDI 칩만 있는 Open DMX 호환(Lixada 등, 컴퓨터가 신호 시간을 맞춤),
+ * udmx = uDMX(Anyma 호환, COM 포트 없음 — udmx.ts 의 UdmxOutput 이 맡음) */
+export type DmxType = 'pro' | 'open' | 'udmx'
+export type SerialDmxType = Exclude<DmxType, 'udmx'>
 
 /**
  * USB-DMX 실제 출력. 출력이 켜졌을 때만 포트를 열고 보낸다.
@@ -29,7 +31,7 @@ export class UsbDmxOutput implements DmxOutput {
   private opening = false
   private busy = false
 
-  constructor(public preferred = '', public type: DmxType = 'pro') {
+  constructor(public preferred = '', public type: SerialDmxType = 'pro') {
     setInterval(() => { if (this.enabled && !this.connected) void this.connect() }, 2000)
   }
 
@@ -45,7 +47,7 @@ export class UsbDmxOutput implements DmxOutput {
     if (this.enabled) void this.connect()
   }
 
-  setType(type: DmxType) {
+  setType(type: SerialDmxType) {
     this.type = type
     this.close()
     if (this.enabled) void this.connect()
