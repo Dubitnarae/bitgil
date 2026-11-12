@@ -19,18 +19,19 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
           onChange={(e) => send({ t: 'master', value: Number(e.target.value) / 100 })} />
         <span>{Math.round(st.master * 100)}%</span>
       </label>
+      {/* 출력 상태는 앞쪽에: 창이 좁아 줄이 넘어가도 덜 중요한 오른쪽 것들이 아래로 간다 */}
+      <OutputStatus o={st.output} />
       <div className="spacer" />
       <QualityPicker q={st.quality} />
       <div className="seg">
-        <button className={view === 'preview' ? 'act' : ''} onClick={() => setView('preview')}>미리보기 화면</button>
-        <button className={view === 'live' ? 'act' : ''} onClick={() => setView('live')}>실제 출력 화면</button>
+        <button className={view === 'preview' ? 'act' : ''} onClick={() => setView('preview')} title="3D 화면에 미리보기 값을 보여 줌">미리보기</button>
+        <button className={view === 'live' ? 'act' : ''} onClick={() => setView('live')} title="3D 화면에 실제로 나가는 값을 보여 줌">실제 출력</button>
       </div>
       {st.fading && <span className="badge">페이드 중…</span>}
       {st.editMode
         ? <><button className="on" onClick={() => window.bitgil.lock()}>편집 모드 닫기</button><button onClick={onSettings}>설정</button></>
         : <button onClick={() => !st.pinEnabled ? window.bitgil.unlock('') : onPin(st.pinSet ? 'unlock' : 'set')}>편집 모드</button>}
       {!st.pinEnabled && <span className="badge" title="편집 모드가 PIN 없이 열립니다(노트북·폰 모두). 편집 모드 → 설정에서 다시 켤 수 있습니다.">⚠ PIN 꺼짐</span>}
-      <OutputStatus o={st.output} />
     </header>
   )
 }

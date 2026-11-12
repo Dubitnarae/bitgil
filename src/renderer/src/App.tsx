@@ -87,12 +87,14 @@ export default function App() {
         <aside>
           {/* 설정은 편집 모드에서만(10분 지나 닫히면 같이 사라진다) */}
           {settings && st.editMode && <SettingsPanel show={show} st={st} onClose={() => setSettings(false)} onPin={setPin} />}
-          {st.editMode && <FindPanel show={show} st={st} selected={selected} />}
-          {st.editMode && !st.find && <ChannelTest st={st} />}
-          {st.editMode && <VenuePanel show={show} />}
+          {/* 조명 찾기 중일 때만 맨 위. 평소에는 예배 때 쓰는 씬·순서·조명 선택이 먼저 보이게 편집 도구는 아래로 */}
+          {st.editMode && finding && <FindPanel show={show} st={st} selected={selected} />}
           <ScenePanel show={show} st={st} fade={fade} setFade={setFade} />
           <CuePanel show={show} st={st} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} aim={aim} setAim={setAim} />
+          {st.editMode && !finding && <FindPanel show={show} st={st} selected={selected} />}
+          {st.editMode && !finding && <ChannelTest st={st} />}
+          {st.editMode && <VenuePanel show={show} />}
         </aside>
       </main>
       <footer>
