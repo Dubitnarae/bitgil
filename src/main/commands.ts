@@ -32,6 +32,7 @@ export type Command =
   | { t: 'output'; on: boolean }
   | { t: 'dmxPort'; path: string }
   | { t: 'dmxType'; type: import('./dmx/enttec').DmxType }
+  | { t: 'dmxTest'; secs: number } // 연결 시험(편집 모드). secs 0 = 지금 멈추고 결과 보기
   | { t: 'outputOnStart'; on: boolean }
   | { t: 'autoUpdate'; on: boolean }
   | { t: 'pinEnabled'; on: boolean } // 편집 모드 PIN 사용(결과를 돌려줘야 해서 ipc 'edit:pinEnabled' 로 받는다)

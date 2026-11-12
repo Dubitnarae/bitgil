@@ -24,6 +24,7 @@ export interface State {
     preferred: string // 설정한 포트, 빈 값 = 자동
     type: import('../../main/dmx/enttec').DmxType
     onStart: boolean
+    test: { endsAt: number; result: string } // 연결 시험: endsAt 0 = 안 하는 중, result = 마지막 결과
   }
   frame: number[]
   saveError: string

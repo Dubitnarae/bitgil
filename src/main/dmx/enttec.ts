@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { enttecPacket } from '../../core/engine/frame'
-import type { DmxOutput } from './output'
+import { newStats, type DmxOutput } from './output'
 
 export interface PortInfo { path: string; manufacturer?: string; vendorId?: string }
 
@@ -30,6 +30,7 @@ export class UsbDmxOutput implements DmxOutput {
   private port: SerialPort | null = null
   private opening = false
   private busy = false
+  stats = newStats()
 
   constructor(public preferred = '', public type: SerialDmxType = 'pro') {
     setInterval(() => { if (this.enabled && !this.connected) void this.connect() }, 2000)
@@ -58,7 +59,7 @@ export class UsbDmxOutput implements DmxOutput {
     const port = this.port
     if (!this.enabled || !this.connected || !port || this.busy) return
     this.busy = true
-    const done = () => { this.busy = false }
+    const done = (err?: Error | null) => { this.busy = false; if (err) this.stats.fail++; else this.stats.ok++ }
     if (this.type === 'pro') return void port.write(Buffer.from(enttecPacket(frame)), done)
     // Open DMX: 브레이크(선을 잠깐 0으로, USB 왕복 시간만큼 → 88µs 이상) → 시작 코드 0 + 512채널
     // drain = 실제로 선에 다 나갈 때까지 기다림. 안 기다리면 다음 브레이크가 앞 프레임 끝 채널을 잘라 먹는다
@@ -98,6 +99,7 @@ export class UsbDmxOutput implements DmxOutput {
     if (this.port !== port) return
     this.port = null
     this.connected = false
+    this.stats.drops++
     if (this.enabled) this.error = why
     if (port.isOpen) port.close()
   }

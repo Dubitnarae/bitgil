@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process'
 import { usb } from 'usb'
-import type { DmxOutput } from './output'
+import { newStats, type DmxOutput } from './output'
 
 /** uDMX(Anyma 호환) 장치 번호 */
 export const UDMX_VID = 0x16c0
@@ -61,10 +61,12 @@ export class UdmxOutput implements DmxOutput {
     if (!this.enabled || !this.connected || !dev || this.busy) return
     this.busy = true // 앞 전송이 안 끝났으면 건너뜀. 장치가 멈춰도 제어 전송은 1초(1000ms) 뒤 실패로 끝나 갇히지 않는다
     dev.nativeControlTransferOut(SET_CHANNEL_RANGE, 1000, frame).then(
-      () => { this.busy = false; this.stalls = 0 },
+      () => { this.busy = false; this.stalls = 0; this.stats.ok++ },
       (err: unknown) => {
         this.busy = false
         const why = err instanceof Error ? err.message : String(err)
+        this.stats.fail++
+        this.stats.maxRun = Math.max(this.stats.maxRun, this.stalls + 1)
         // 허브를 거친 저가 uDMX 는 5% 정도 한 번씩 stall 을 내고 다음 전송에서 바로 살아난다 → 그 프레임만 건너뜀.
         // 연속으로 이어지면 장치가 굳은 것(뺐다 꽂아야 풀림). 장치가 빠진 것 같은 다른 오류는 바로 끊김.
         if (/stall/i.test(why) && ++this.stalls < UdmxOutput.MAX_STALLS) return
@@ -75,6 +77,7 @@ export class UdmxOutput implements DmxOutput {
   /** 이만큼 연속 stall 이면 굳은 것으로 본다(약 0.5~1초). 시험에서 정상 장치의 연속 실패는 최대 2번 */
   static readonly MAX_STALLS = 20
   private stalls = 0
+  stats = newStats()
   private driver: DriverState = 'none'
   private driverCheckedAt = 0
   /** 드라이버 상태 확인 방법(시험에서 바꿔 끼움) */
@@ -114,6 +117,7 @@ export class UdmxOutput implements DmxOutput {
     if (this.dev !== dev) return
     this.dev = null
     this.connected = false
+    this.stats.drops++
     // stall = 장치가 굳음(저가 uDMX 에서 확인됨). 프로그램으로는 못 풀고 뺐다 꽂아야 풀린다
     if (this.enabled) this.error = /stall/i.test(why) ? 'uDMX 가 멈췄습니다 — USB 를 뺐다 다시 꽂아 주세요' : `연결이 끊겼습니다: ${why}`
     dev.close().catch(() => {})

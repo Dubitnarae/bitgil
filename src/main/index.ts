@@ -7,6 +7,7 @@ import { Engine } from '../core/engine/engine'
 import { VirtualOutput } from './dmx/output'
 import { UsbDmxOutput, listPorts, type DmxType } from './dmx/enttec'
 import { UdmxOutput, checkDriver } from './dmx/udmx'
+import { ConnTest } from './dmx/conntest'
 import { execFile } from 'node:child_process'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
@@ -56,8 +57,27 @@ const serial = new UsbDmxOutput(settings.dmxPort, settings.dmxType === 'udmx' ? 
 const udmx = new UdmxOutput()
 let enttec: UsbDmxOutput | UdmxOutput = settings.dmxType === 'udmx' ? udmx : serial
 enttec.setEnabled(settings.outputOnStart)
+// 연결 시험(설정): 출력을 켜고 정해진 시간 동안 끊김·거절을 센 뒤, 출력을 시험 전 상태로 돌린다
+let connTest: ConnTest | null = null
+let connTestResult = ''
+function startConnTest(secs: number) {
+  if (secs <= 0) return finishConnTest(Date.now())
+  if (connTest) return
+  connTest = new ConnTest(enttec, Date.now(), secs * 1000, enttec.enabled)
+  connTestResult = ''
+  enttec.setEnabled(true)
+  keepAwake()
+}
+function finishConnTest(now: number) {
+  if (!connTest) return
+  connTestResult = connTest.report(now, enttec.error)
+  enttec.setEnabled(connTest.wasOn)
+  connTest = null
+  keepAwake()
+}
 /** 인터페이스 종류 바꾸기: 쓰던 출력을 닫고 새 쪽으로 옮긴다(켜져 있었으면 새 쪽도 켬) */
 function setDmxType(type: DmxType) {
+  finishConnTest(Date.now()) // 시험 중이면 지금까지 결과로 끝냄(다른 출력의 기록과 섞이지 않게)
   const on = enttec.enabled
   enttec.setEnabled(false)
   if (type !== 'udmx') serial.setType(type)
@@ -149,6 +169,7 @@ setInterval(() => {
     const frame = engine.frame(Date.now())
     output.send(frame)
     enttec.send(frame)
+    if (connTest?.tick(Date.now(), enttec.connected)) finishConnTest(Date.now())
   } catch (err) { logError('출력 루프', err) }
 }, 25)
 
@@ -181,7 +202,8 @@ function buildState() {
       error: enttec.error,
       preferred: serial.preferred,
       type: enttec.type,
-      onStart: settings.outputOnStart
+      onStart: settings.outputOnStart,
+      test: { endsAt: connTest ? connTest.startedAt + connTest.ms : 0, result: connTestResult }
     },
     frame: Array.from(output.last),
     editMode: edit.isOpen(now),
@@ -317,7 +339,8 @@ ipcMain.on('cmd', (_e, c: Command) => {
     const now = Date.now()
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
     edit.touch(now)
-    if (c.t === 'output') { enttec.setEnabled(c.on); return keepAwake() }
+    if (c.t === 'output') { if (connTest) finishConnTest(now); enttec.setEnabled(c.on); return keepAwake() }
+    if (c.t === 'dmxTest') return startConnTest(c.secs)
     if (c.t === 'dmxType') { setDmxType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }
     if (c.t === 'dmxPort') { serial.setPreferred(c.path); return saveSettings({ ...settings, dmxPort: (settings.dmxPort = c.path) }) }
     if (c.t === 'remote') { setRemote(c.on); return saveSettings({ ...settings, remoteOn: (settings.remoteOn = c.on) }) }

@@ -10,6 +10,21 @@ function RemoteQr({ url }: { url: string }) {
   return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
 }
 
+/** 연결 시험: 출력을 켜고 정해진 시간 동안 끊김·거절을 센다(끝나면 출력은 시험 전 상태로) */
+function ConnTestBox({ t }: { t: State['output']['test'] }) {
+  const [, tick] = useState(0)
+  useEffect(() => { if (!t.endsAt) return; const h = setInterval(() => tick((n) => n + 1), 1000); return () => clearInterval(h) }, [t.endsAt])
+  const left = Math.max(0, Math.ceil((t.endsAt - Date.now()) / 1000))
+  const start = (secs: number) => confirm('연결 시험을 시작할까요?\n시험 동안 출력이 켜져서, 조명이 연결돼 있으면 지금 조명 값이 그대로 나갑니다.\n(조명 없이 시험하거나, 먼저 블랙아웃을 켜 두세요)') && send({ t: 'dmxTest', secs })
+  return <p className="hint">
+    연결 시험 — 다른 컴퓨터·USB 포트·허브에서 인터페이스가 잘 붙는지 봅니다{' '}
+    {t.endsAt
+      ? <><b>시험 중… 남은 {left >= 60 ? `${Math.floor(left / 60)}분 ${left % 60}초` : `${left}초`}</b> (USB 를 만지지 마세요) <button onClick={() => send({ t: 'dmxTest', secs: 0 })}>그만</button></>
+      : <><button onClick={() => start(60)}>1분 시험</button> <button onClick={() => start(600)}>10분 시험</button></>}
+    {t.result && <><br />결과: <b style={{ color: t.result.includes('✗') ? '#ff6b6b' : undefined }}>{t.result}</b></>}
+  </p>
+}
+
 /** uDMX 드라이버 상태 + 설치 버튼(함께 담긴 Zadig 를 연다) */
 function UdmxDriver() {
   const [drv, setDrv] = useState<string>('확인 중…')
@@ -94,6 +109,7 @@ export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../.
         <button onClick={refresh}>다시 찾기</button>
       </label>
       </>}
+      <ConnTestBox t={st.output.test} />
       <label className="radio">
         <input type="checkbox" checked={st.output.onStart} onChange={(e) => send({ t: 'outputOnStart', on: e.target.checked })} />
         프로그램을 켜면 바로 장비로 출력 (끄면 '출력 대기'로 시작 — 권장)
