@@ -21,14 +21,14 @@
     "room": {
       "length_x": 16.8,
       "width_z": 12.2,
-      "eave_height": 6.0,
-      "ridge_height": 9.0,
+      "eave_height": 6,
+      "ridge_height": 9,
       "ridge_direction": "x"
     },
     "stage": {
-      "z_from": 0.0,
+      "z_from": 0,
       "z_to": 2.09,
-      "x_from": 0.0,
+      "x_from": 0,
       "x_to": 16.8,
       "height": 0.4,
       "label": "강대(무대, 나무 단)"
@@ -36,7 +36,7 @@
     "aisle": {
       "z_from": 2.09,
       "z_to": 6.24,
-      "floor_height": 0.0,
+      "floor_height": 0,
       "label": "통로 바닥 FL -1,200"
     },
     "seating_tiers": [
@@ -120,7 +120,7 @@
         "z": 0.9,
         "w": 1.5,
         "d": 0.6,
-        "h": 1.0
+        "h": 1
       },
       {
         "id": "band",
@@ -128,8 +128,8 @@
         "x": 1.4,
         "z": 6.6,
         "w": 0.7,
-        "d": 3.0,
-        "h": 0.0
+        "d": 3,
+        "h": 0
       }
     ],
     "text_panels": [
@@ -137,14 +137,14 @@
         "fixture": "1-10",
         "wall": "left",
         "z_center": 4.25,
-        "y_center": 3.0,
+        "y_center": 3,
         "label": "글씨(위)"
       },
       {
         "fixture": "1-11",
         "wall": "left",
         "z_center": 7.95,
-        "y_center": 3.0,
+        "y_center": 3,
         "label": "글씨(아래)"
       }
     ]
@@ -746,7 +746,7 @@
       "type": "8ch",
       "position": {
         "x": 0.41,
-        "y": 0.0,
+        "y": 0,
         "z": 5.12
       },
       "mount": "floor",
@@ -814,7 +814,7 @@
         "z": 1.2
       },
       "batten": "RD2",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -837,7 +837,7 @@
         "z": 1.2
       },
       "batten": "RD2",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -860,7 +860,7 @@
         "z": 1.2
       },
       "batten": "RD2",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -883,7 +883,7 @@
         "z": 1.2
       },
       "batten": "RD2",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -901,12 +901,12 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 0.0,
-        "y": 3.0,
+        "x": 0,
+        "y": 3,
         "z": 4.25
       },
       "batten": "RD1",
-      "verified": false,
+      "verified": true,
       "evidence": "글씨 판 장착, 왼쪽 벽 위 글씨"
     },
     {
@@ -924,12 +924,12 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 0.0,
-        "y": 3.0,
+        "x": 0,
+        "y": 3,
         "z": 7.95
       },
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "글씨 판 장착, 왼쪽 벽 아래 글씨"
     },
     {
@@ -937,6 +937,52 @@
       "fixture_page": 1,
       "fixture_button": 12,
       "address": 108,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 8.83,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 0.01,
+        "y": 2.97,
+        "z": 8.04
+      },
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-13",
+      "fixture_page": 1,
+      "fixture_button": 13,
+      "address": 111,
+      "universe": 1,
+      "type": "OV_300W_3",
+      "position": {
+        "x": 9.38,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "aimed",
+      "aim": {
+        "x": 0.01,
+        "y": 3,
+        "z": 4.19
+      },
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "1-14",
+      "fixture_page": 1,
+      "fixture_button": 14,
+      "address": 114,
       "universe": 1,
       "type": "OV_300W_3",
       "position": {
@@ -948,52 +994,6 @@
       "direction": "down",
       "aim": null,
       "batten": "RD1",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "1-13",
-      "fixture_page": 1,
-      "fixture_button": 13,
-      "address": 111,
-      "universe": 1,
-      "type": "OV_300W_3",
-      "position": {
-        "x": 4.07,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "aimed",
-      "aim": {
-        "x": 2.84,
-        "y": 1.9,
-        "z": 1.2
-      },
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "1-14",
-      "fixture_page": 1,
-      "fixture_button": 14,
-      "address": 114,
-      "universe": 1,
-      "type": "OV_300W_3",
-      "position": {
-        "x": 9.38,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "aimed",
-      "aim": {
-        "x": 9.38,
-        "y": 1.9,
-        "z": 1.2
-      },
-      "batten": "RD2",
       "verified": false,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
@@ -1012,12 +1012,12 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 8.4,
-        "y": 1.9,
-        "z": 1.05
+        "x": 8.41,
+        "y": 1.16,
+        "z": 1.35
       },
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진 2번(1-15만 켜짐)으로 위치 확인, 강대상을 비춤"
     },
     {
@@ -1025,139 +1025,6 @@
       "fixture_page": 2,
       "fixture_button": 1,
       "address": 151,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 3.58,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-2",
-      "fixture_page": 2,
-      "fixture_button": 2,
-      "address": 162,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 5.13,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-3",
-      "fixture_page": 2,
-      "fixture_button": 3,
-      "address": 173,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 6.99,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-4",
-      "fixture_page": 2,
-      "fixture_button": 4,
-      "address": 184,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 8.4,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-5",
-      "fixture_page": 2,
-      "fixture_button": 5,
-      "address": 195,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 10.24,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-6",
-      "fixture_page": 2,
-      "fixture_button": 6,
-      "address": 206,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 11.73,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-7",
-      "fixture_page": 2,
-      "fixture_button": 7,
-      "address": 217,
-      "universe": 1,
-      "type": "11ch",
-      "position": {
-        "x": 12.92,
-        "y": 5.2,
-        "z": 5.56
-      },
-      "mount": "ceiling",
-      "direction": "down",
-      "aim": null,
-      "batten": "RD2",
-      "verified": false,
-      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
-    },
-    {
-      "id": "2-8",
-      "fixture_page": 2,
-      "fixture_button": 8,
-      "address": 228,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1169,14 +1036,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-9",
+      "id": "2-2",
       "fixture_page": 2,
-      "fixture_button": 9,
-      "address": 239,
+      "fixture_button": 2,
+      "address": 162,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1188,14 +1055,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-10",
+      "id": "2-3",
       "fixture_page": 2,
-      "fixture_button": 10,
-      "address": 250,
+      "fixture_button": 3,
+      "address": 173,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1207,14 +1074,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-11",
+      "id": "2-4",
       "fixture_page": 2,
-      "fixture_button": 11,
-      "address": 261,
+      "fixture_button": 4,
+      "address": 184,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1226,14 +1093,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-12",
+      "id": "2-5",
       "fixture_page": 2,
-      "fixture_button": 12,
-      "address": 272,
+      "fixture_button": 5,
+      "address": 195,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1245,14 +1112,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-13",
+      "id": "2-6",
       "fixture_page": 2,
-      "fixture_button": 13,
-      "address": 283,
+      "fixture_button": 6,
+      "address": 206,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1264,14 +1131,14 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
-      "id": "2-14",
+      "id": "2-7",
       "fixture_page": 2,
-      "fixture_button": 14,
-      "address": 294,
+      "fixture_button": 7,
+      "address": 217,
       "universe": 1,
       "type": "11ch",
       "position": {
@@ -1283,7 +1150,140 @@
       "direction": "down",
       "aim": null,
       "batten": "RD3",
-      "verified": false,
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-8",
+      "fixture_page": 2,
+      "fixture_button": 8,
+      "address": 228,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 3.58,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-9",
+      "fixture_page": 2,
+      "fixture_button": 9,
+      "address": 239,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 5.13,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-10",
+      "fixture_page": 2,
+      "fixture_button": 10,
+      "address": 250,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 6.99,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-11",
+      "fixture_page": 2,
+      "fixture_button": 11,
+      "address": 261,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 8.4,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-12",
+      "fixture_page": 2,
+      "fixture_button": 12,
+      "address": 272,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 10.24,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-13",
+      "fixture_page": 2,
+      "fixture_button": 13,
+      "address": 283,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 11.73,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
+      "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
+    },
+    {
+      "id": "2-14",
+      "fixture_page": 2,
+      "fixture_button": 14,
+      "address": 294,
+      "universe": 1,
+      "type": "11ch",
+      "position": {
+        "x": 12.92,
+        "y": 5.2,
+        "z": 5.56
+      },
+      "mount": "ceiling",
+      "direction": "down",
+      "aim": null,
+      "batten": "RD2",
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -1294,19 +1294,19 @@
       "universe": 1,
       "type": "11ch",
       "position": {
-        "x": 8.83,
+        "x": 4.07,
         "y": 5.2,
         "z": 5.56
       },
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 9.44,
-        "y": 0.8,
-        "z": 8.17
+        "x": 0,
+        "y": 1.23,
+        "z": 2.8
       },
       "batten": "RD2",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -1325,7 +1325,7 @@
       "direction": "down",
       "aim": null,
       "batten": "RD1",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -1382,7 +1382,7 @@
       "direction": "down",
       "aim": null,
       "batten": "RD1",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -1401,7 +1401,7 @@
       "direction": "down",
       "aim": null,
       "batten": "RD1",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     },
     {
@@ -1420,7 +1420,7 @@
       "direction": "down",
       "aim": null,
       "batten": "RD1",
-      "verified": false,
+      "verified": true,
       "evidence": "사진·스케치로 추정, 조명 찾기로 확인 필요"
     }
   ],
@@ -1522,9 +1522,9 @@
   "scenes": [
     {
       "id": "P1-01",
-      "name": "P1-01",
+      "name": "설교",
       "source": "콘솔 Replay Page 1 페이더 1",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-1": {
           "tilt": 142,
@@ -1766,9 +1766,9 @@
     },
     {
       "id": "P1-02",
-      "name": "P1-02",
+      "name": "솔로",
       "source": "콘솔 Replay Page 1 페이더 2",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-15": {
           "dimmer": 255,
@@ -1778,9 +1778,9 @@
     },
     {
       "id": "P1-03",
-      "name": "P1-03",
+      "name": "찬양",
       "source": "콘솔 Replay Page 1 페이더 3",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-1": {
           "tilt": 142,
@@ -2014,9 +2014,9 @@
     },
     {
       "id": "P1-04",
-      "name": "P1-04",
+      "name": "말씀",
       "source": "콘솔 Replay Page 1 페이더 4",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-12": {
           "dimmer": 255,
@@ -2030,9 +2030,9 @@
     },
     {
       "id": "P1-08",
-      "name": "P1-08",
+      "name": "Strobe 전체",
       "source": "콘솔 Replay Page 1 페이더 8",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-1": {
           "dimmer": 255,
@@ -2281,9 +2281,9 @@
     },
     {
       "id": "P1-09",
-      "name": "P1-09",
+      "name": "인테리어",
       "source": "콘솔 Replay Page 1 페이더 9",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-1": {
           "tilt": 142,
@@ -2517,9 +2517,9 @@
     },
     {
       "id": "P1-10",
-      "name": "P1-10",
+      "name": "객석",
       "source": "콘솔 Replay Page 1 페이더 10",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "2-1": {
           "red": 255,
@@ -2665,9 +2665,9 @@
     },
     {
       "id": "P2-01",
-      "name": "P2-01",
+      "name": "무대",
       "source": "콘솔 Replay Page 2 페이더 1",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-6": {
           "dimmer": 255
@@ -2687,7 +2687,7 @@
       "id": "P2-02",
       "name": "P2-02",
       "source": "콘솔 Replay Page 2 페이더 2",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-15": {
           "dimmer": 255,
@@ -2699,7 +2699,7 @@
       "id": "P2-04",
       "name": "P2-04",
       "source": "콘솔 Replay Page 2 페이더 4",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-12": {
           "dimmer": 255,
@@ -2713,9 +2713,9 @@
     },
     {
       "id": "P2-09",
-      "name": "P2-09",
+      "name": "기둥",
       "source": "콘솔 Replay Page 2 페이더 9",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "1-1": {
           "tilt": 142,
@@ -2951,7 +2951,7 @@
       "id": "P2-10",
       "name": "P2-10",
       "source": "콘솔 Replay Page 2 페이더 10",
-      "fade_seconds": 2.0,
+      "fade_seconds": 2,
       "values": {
         "2-1": {
           "red": 255,
@@ -3094,27 +3094,8 @@
           "dimmer": 255
         }
       }
-    },
-    {
-      "id": "P3-01",
-      "name": "P3-01",
-      "source": "콘솔 Replay Page 3 페이더 1",
-      "fade_seconds": 2.0,
-      "values": {
-        "1-6": {
-          "dimmer": 255
-        },
-        "1-7": {
-          "dimmer": 255
-        },
-        "1-8": {
-          "dimmer": 255
-        },
-        "1-9": {
-          "dimmer": 255
-        }
-      }
     }
   ],
-  "cuelist": []
+  "cuelist": [],
+  "default_scene": "P1-09"
 }
