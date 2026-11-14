@@ -47,6 +47,7 @@ function showChanged() {
     console.error(err)
   }
   win?.webContents.send('show', engine.show)
+  remote?.push('show', JSON.stringify(engine.show))
 }
 const output = new VirtualOutput() // 채널 모니터용, 항상 마지막 프레임을 기억
 const settings = loadSettings()
@@ -101,7 +102,7 @@ function setRemote(on: boolean) {
   remote?.close()
   remote = null
   remoteError = ''
-  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, onError: (m) => { remoteError = m; console.error(m) } })
+  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, appDir: join(__dirname, '../renderer'), api: remoteApi, onError: (m) => { remoteError = m; console.error(m) } })
 }
 const sceneName = (id?: string) => engine.show.scenes.find((s) => s.id === id)?.name ?? ''
 function phoneState(): PhoneState {
@@ -222,10 +223,10 @@ function buildState() {
 let lastSent = ''
 function sendState() {
   try {
-    if (win) {
+    if (win || remote?.appClients()) {
       const state = buildState()
       const json = JSON.stringify(state)
-      if (json !== lastSent) win.webContents.send('state', state)
+      if (json !== lastSent) { win?.webContents.send('state', state); remote?.push('state', json) }
       lastSent = json
     }
   } catch (err) { logError('화면 상태 전송', err) } // 여기서 멈추면 화면이 굳으므로 다음 번을 꼭 예약한다
@@ -233,13 +234,15 @@ function sendState() {
 }
 sendState()
 
-ipcMain.handle('show:get', () => engine.show)
-ipcMain.handle('state:get', () => buildState())
-ipcMain.handle('ports:list', () => listPorts())
-ipcMain.handle('udmx:driverState', () => checkDriver())
+// 화면이 부르는 기능(window.bitgil). 노트북 창은 IPC로, 원격 전체 화면은 HTTP(/api/이름)로 같은 함수를 부른다.
+const api: Record<string, (...a: any[]) => unknown> = {}
+api.getShow = () => engine.show
+api.getState = () => buildState()
+api.listPorts = () => listPorts()
+api.udmxDriverState = () => checkDriver()
 // uDMX 드라이버 설치: 함께 담긴 Zadig 를 관리자 권한으로 연다(Windows 확인 창이 뜸). 편집 모드에서만.
 // Zadig 는 관리자 권한 전용이라 일반 실행이 안 돼서 PowerShell Start-Process -Verb RunAs 로 연다(같은 폴더의 zadig.ini = WinUSB 기본)
-ipcMain.handle('udmx:installDriver', () => {
+api.udmxInstallDriver = () => {
   if (!edit.isOpen(Date.now())) return Promise.resolve('편집 모드에서만 할 수 있습니다')
   const dir = app.isPackaged ? join(process.resourcesPath, 'zadig') : join(app.getAppPath(), 'vendor', 'zadig')
   const q = (s: string) => `'${s.replace(/'/g, "''")}'` // PowerShell 작은따옴표 문자열(경로에 ' 가 있어도 안전하게)
@@ -248,15 +251,15 @@ ipcMain.handle('udmx:installDriver', () => {
     udmx.recheckDriver()
     ok(err ? '드라이버 설치 창을 열지 못했습니다 (확인 창에서 [아니요]를 눌렀거나 파일이 없음)' : '')
   }))
-})
+}
 // 편집 모드: PIN이 맞으면 연다('PIN 사용'이 꺼져 있으면 PIN 없이). PIN이 아직 없으면 처음 정한 PIN으로 연다.
-ipcMain.handle('edit:unlock', (_e, pin: string) => {
+api.unlock = (pin: string) => {
   if (!canUnlock(String(pin), settings)) return false
   edit.open(Date.now())
   return true
-})
+}
 // 'PIN 사용' 켜기/끄기: 편집 모드에서만, 끌 때는 현재 PIN 확인
-ipcMain.handle('edit:pinEnabled', (_e, on: boolean, pin?: string) => {
+api.pinEnabled = (on: boolean, pin?: string) => {
   on = !!on
   const now = Date.now()
   if (!edit.isOpen(now) && !allowedInOperation({ t: 'pinEnabled', on }, engine.show)) return false
@@ -264,8 +267,8 @@ ipcMain.handle('edit:pinEnabled', (_e, on: boolean, pin?: string) => {
   edit.touch(now)
   saveSettings({ ...settings, pinEnabled: (settings.pinEnabled = on) })
   return true
-})
-ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
+}
+api.setPin = (pin: string, current?: string) => {
   pin = String(pin)
   // PIN 바꾸기는 편집 모드에서 현재 PIN까지 맞아야 한다(처음 정할 때는 예외)
   if (!isPin(pin)) return false
@@ -274,12 +277,12 @@ ipcMain.handle('edit:setPin', (_e, pin: string, current?: string) => {
   saveSettings({ ...settings, pinHash: (settings.pinHash = hashPin(pin)) })
   edit.open(Date.now())
   return true
-})
-ipcMain.handle('edit:lock', () => { edit.close(); endFind() })
+}
+api.lock = () => { edit.close(); endFind() }
 
 // 기존 콘솔(Mini Pearl 1024 Pro) 백업 파일: 편집 모드에서만. 결과 문구를 화면에 돌려준다.
 const xhdFilter = [{ name: 'Mini Pearl 백업 (.XHD)', extensions: ['XHD', 'xhd'] }]
-ipcMain.handle('xhd:import', async () => {
+api.xhdImport = async () => {
   if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
   const r = await dialog.showOpenDialog(win, { title: '콘솔 백업에서 씬 불러오기', filters: xhdFilter, properties: ['openFile'] })
   if (r.canceled || !r.filePaths[0]) return ''
@@ -288,8 +291,8 @@ ipcMain.handle('xhd:import', async () => {
     showChanged()
     return `불러왔습니다: 새 씬 ${added}개, 같은 번호라 값을 바꾼 씬 ${replaced}개 (이전 쇼는 백업 폴더에 있음)`
   } catch (err) { return `불러오지 못했습니다: ${err instanceof Error ? err.message : err}` }
-})
-ipcMain.handle('xhd:export', async () => {
+}
+api.xhdExport = async () => {
   if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
   const src = await dialog.showOpenDialog(win, { title: '바탕이 될 콘솔 원본 백업 고르기 (원본은 바뀌지 않음)', filters: xhdFilter, properties: ['openFile'] })
   if (src.canceled || !src.filePaths[0]) return ''
@@ -305,11 +308,11 @@ ipcMain.handle('xhd:export', async () => {
       (skipped.length ? ` · 콘솔에 같은 자리(P페이지-페이더)가 없어 뺀 씬: ${skipped.join(', ')}` : '') +
       (unpatched ? ` · 콘솔 패치에 없는 채널 값 ${unpatched}개는 빠짐` : '')
   } catch (err) { return `내보내지 못했습니다: ${err instanceof Error ? err.message : err}` }
-})
+}
 
 // 쇼 파일 옮기기(교회 노트북 ↔ 집 컴퓨터, USB): 편집 모드에서만
 const showFilter = [{ name: '빛길 쇼 파일', extensions: ['json'] }]
-ipcMain.handle('show:export', async () => {
+api.showExport = async () => {
   if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
   const d = new Date()
   const day = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
@@ -320,8 +323,8 @@ ipcMain.handle('show:export', async () => {
     renameSync(dst.filePath + '.tmp', dst.filePath)
     return `내보냈습니다: ${dst.filePath}`
   } catch (err) { return `내보내지 못했습니다: ${err instanceof Error ? err.message : err}` }
-})
-ipcMain.handle('show:import', async () => {
+}
+api.showImport = async () => {
   if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
   const r = await dialog.showOpenDialog(win, { title: '쇼 파일 가져오기', filters: showFilter, properties: ['openFile'] })
   if (r.canceled || !r.filePaths[0]) return ''
@@ -332,9 +335,9 @@ ipcMain.handle('show:import', async () => {
   app.relaunch()
   app.exit(0)
   return ''
-})
+}
 
-ipcMain.on('cmd', (_e, c: Command) => {
+api.send = (c: Command) => {
   try {
     const now = Date.now()
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
@@ -356,7 +359,19 @@ ipcMain.on('cmd', (_e, c: Command) => {
     if (runCommand(engine, c, Date.now()) === 'showChanged') showChanged()
     if (c.t === 'faderMode') saveSettings({ ...settings, faderMode: (settings.faderMode = c.mode) })
   } catch (err) { console.error(err) }
-})
+}
+ipcMain.handle('api', (_e, name: string, ...args: unknown[]) => api[name]?.(...args))
+ipcMain.on('cmd', (_e, c: Command) => api.send(c))
+// 원격 전체 화면에서 부를 때. 파일 고르기 창이 뜨는 기능·드라이버 설치는 노트북 앞에서만(원격에서는 창이 노트북에 떠서 아무도 못 봄)
+const LOCAL_ONLY = ['udmxInstallDriver', 'xhdImport', 'xhdExport', 'showExport', 'showImport']
+function remoteApi(name: string, args: unknown[]) {
+  if (LOCAL_ONLY.includes(name)) return '이 기능은 빛길 노트북 화면에서만 할 수 있습니다'
+  if (!Object.hasOwn(api, name)) throw new Error('없는 기능입니다')
+  const r = api[name](...args)
+  if (name === 'send') phoneNote = { text: '원격 화면에서 조작', at: Date.now() }
+  if (name === 'unlock' && r === true) phoneNote = { text: '원격 화면에서 편집 모드 열림', at: Date.now() }
+  return r
+}
 
 app.whenReady().then(() => {
   startUpdater({ on: settings.autoUpdate, lastCheck: settings.lastUpdateCheck, skip: () => settings.skipVersion, checked: (day) => saveSettings({ ...settings, lastUpdateCheck: (settings.lastUpdateCheck = day) }) })

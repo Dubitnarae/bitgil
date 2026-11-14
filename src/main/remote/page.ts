@@ -89,6 +89,7 @@ input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin
     <div id="sMsg" class="warn"></div>
   </div>
 </div>
+<p style="text-align:center"><a href="/app/" style="color:#8fb4ff">노트북처럼 전체 화면(3D 포함)으로 열기 →</a></p>
 <p style="color:#7d8596;font-size:12px;text-align:center">빛길 · 개발자 KIM YEONGDO</p>
 <script>
 var $=function(id){return document.getElementById(id)}, st=null, es=null, view='main', tab='ok', form=null, listSig='';
@@ -219,3 +220,26 @@ function drawSetup(){
 }
 if(code)connect();else show(true);
 </script></body></html>`
+
+
+/**
+ * 원격 전체 화면(/app/)용 연결 스크립트: 노트북 프로그램의 window.bitgil(Electron 내부 통신)을 같은 이름의 HTTP 요청으로 바꾼다.
+ * 기능 이름은 src/preload/index.ts 와 같아야 한다. 접속 코드는 폰 화면과 같이 localStorage 'bitgil-code' 에 기억.
+ */
+export const BRIDGE = `(function(){
+var q=new URLSearchParams(location.search).get('code');
+if(q){localStorage.setItem('bitgil-code',q);history.replaceState(null,'',location.pathname)}
+var code=localStorage.getItem('bitgil-code')||'';
+if(!code){code=(prompt('빛길 원격 접속 코드 6자리 (노트북 설정 화면에 있음)')||'').trim();localStorage.setItem('bitgil-code',code)}
+var enc=encodeURIComponent(code);
+function fail(r){if(r.status===401){localStorage.removeItem('bitgil-code');alert('접속 코드가 틀렸거나 잠겼습니다(5번 틀리면 1분). 새로고침 후 다시 넣어 주세요.')}throw new Error('원격 요청 실패 '+r.status)}
+function call(name){var args=[].slice.call(arguments,1);return fetch('/api/'+name+'?code='+enc,{method:'POST',body:JSON.stringify(args)}).then(function(r){return r.ok?r.json():fail(r)})}
+var subs={state:[],show:[]},es=null;
+function open(){es=new EventSource('/app-events?code='+enc);
+  ['state','show'].forEach(function(k){es.addEventListener(k,function(e){var v=JSON.parse(e.data);subs[k].forEach(function(cb){cb(v)})})});
+  es.onerror=function(){document.title='빛길 (연결 끊김 — 다시 연결 중)'};es.onopen=function(){document.title='빛길 (원격)'}}
+function on(k){return function(cb){subs[k].push(cb);if(!es)open();return function(){subs[k]=subs[k].filter(function(x){return x!==cb})}}}
+var b={send:function(c){call('send',c).catch(function(e){console.error(e)})},onState:on('state'),onShow:on('show')};
+['getShow','getState','listPorts','udmxDriverState','udmxInstallDriver','unlock','setPin','pinEnabled','lock','xhdImport','xhdExport','showExport','showImport'].forEach(function(n){b[n]=call.bind(null,n)});
+window.bitgil=b;
+})()`

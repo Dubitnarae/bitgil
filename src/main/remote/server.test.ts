@@ -1,4 +1,7 @@
 import { request } from 'node:http'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { Lockout, REMOTE_PORT, startRemote, type PhoneCmd } from './server'
 
@@ -20,6 +23,7 @@ describe('폰 원격', () => {
       run: (c) => got.push(c),
       unlock: (pin) => pin === '1234',
       setup: (c) => ((c as { t: string }).t === 'find' ? '' : '안 되는 명령'),
+      appDir: '.', api: () => null,
       onError: (m) => { throw new Error(m) }
     })
     try {
@@ -53,6 +57,7 @@ describe('폰 원격', () => {
       run: () => {},
       unlock: (pin) => { asked++; return pin === '1234' },
       setup: () => '',
+      appDir: '.', api: () => null,
       onError: (m) => { throw new Error(m) }
     })
     // 보내는 쪽 주소를 정해서 다른 폰인 척한다(127.x.x.x 는 모두 이 컴퓨터)
@@ -66,6 +71,42 @@ describe('폰 원격', () => {
       expect(await unlock('127.0.0.2', '1234')).toBe(204) // 다른 폰은 잠기지 않음
     } finally {
       r.close()
+    }
+  })
+
+  it('원격 전체 화면: 화면 파일·연결 스크립트·기능 호출(코드 필요)·PIN 잠금', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bitgil-app-'))
+    writeFileSync(join(dir, 'index.html'), '<html><head><title>빛길</title></head></html>')
+    const calls: unknown[] = []
+    const r = startRemote({
+      code: () => '123456',
+      state: () => ({ scene: '', cue: -1, total: 0, next: '', blackout: false, master: 1, fading: false, output: false, edit: false }),
+      run: () => {}, unlock: () => false, setup: () => '',
+      appDir: dir,
+      api: (name, args) => { calls.push([name, ...args]); return name === 'unlock' ? args[0] === '1234' : { ok: name } },
+      onError: (m) => { throw new Error(m) }
+    })
+    const base = `http://127.0.0.1:${REMOTE_PORT}`
+    const post = (path: string, args: unknown[]) => fetch(base + path, { method: 'POST', body: JSON.stringify(args) })
+    try {
+      const html = await (await fetch(base + '/app/')).text()
+      expect(html).toContain('<head><script src="./bridge.js"></script>')
+      expect(await (await fetch(base + '/app/bridge.js')).text()).toContain('window.bitgil=b')
+      expect((await fetch(base + '/app/..%2f..%2fpackage.json')).status).toBe(404) // 폴더 밖 파일 막음
+      expect((await post('/api/getShow?code=000000', [])).status).toBe(401)
+      expect(await (await post('/api/send?code=123456', [{ t: 'blackout', on: true }])).json()).toEqual({ ok: 'send' })
+      expect(calls).toEqual([['send', { t: 'blackout', on: true }]])
+      expect((await post('/api/send?code=123456', {} as never)).status).toBe(400) // 인자는 배열만
+      for (let i = 0; i < 5; i++) expect(await (await post('/api/unlock?code=123456', ['0000'])).json()).toBe(false)
+      expect(await (await post('/api/unlock?code=123456', ['1234'])).json()).toBe(false) // PIN 5번 틀려 잠김
+      const ev = await fetch(base + '/app-events?code=123456')
+      const rd = ev.body!.getReader()
+      await rd.read()
+      r.push('show', '{"a":1}')
+      expect(new TextDecoder().decode((await rd.read()).value)).toBe('event: show\ndata: {"a":1}\n\n')
+    } finally {
+      r.close()
+      rmSync(dir, { recursive: true })
     }
   })
 })
