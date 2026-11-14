@@ -405,7 +405,7 @@
           "label": "Shutter",
           "mix": "LTP",
           "fade": false,
-          "locate": 255
+          "locate": 0
         },
         {
           "offset": 3,
@@ -581,7 +581,7 @@
           "label": "Shutter",
           "mix": "LTP",
           "fade": false,
-          "locate": 255
+          "locate": 0
         }
       ],
       "beam_deg": [
