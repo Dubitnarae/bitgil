@@ -810,9 +810,9 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 4.7,
-        "y": 1.9,
-        "z": 1.2
+        "x": 3.82,
+        "y": 1,
+        "z": 0
       },
       "batten": "RD2",
       "verified": true,
@@ -833,9 +833,9 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 6.54,
-        "y": 1.9,
-        "z": 1.2
+        "x": 7.16,
+        "y": 1.05,
+        "z": 0
       },
       "batten": "RD2",
       "verified": true,
@@ -856,9 +856,9 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 10.69,
-        "y": 1.9,
-        "z": 1.2
+        "x": 10.27,
+        "y": 1.04,
+        "z": 0
       },
       "batten": "RD2",
       "verified": true,
@@ -879,9 +879,9 @@
       "mount": "ceiling",
       "direction": "aimed",
       "aim": {
-        "x": 12.2,
-        "y": 1.9,
-        "z": 1.2
+        "x": 13.48,
+        "y": 0.98,
+        "z": 0
       },
       "batten": "RD2",
       "verified": true,
@@ -1105,7 +1105,7 @@
       "universe": 1,
       "type": "11ch",
       "position": {
-        "x": 10.0,
+        "x": 10,
         "y": 5.2,
         "z": 8.61
       },
