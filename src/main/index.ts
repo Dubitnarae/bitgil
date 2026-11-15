@@ -315,8 +315,9 @@ const showFilter = [{ name: '빛길 쇼 파일', extensions: ['json'] }]
 api.showExport = async () => {
   if (!edit.isOpen(Date.now()) || !win) return '편집 모드에서만 할 수 있습니다'
   const d = new Date()
-  const day = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
-  const dst = await dialog.showSaveDialog(win, { title: '쇼 파일 내보내기 (USB 등)', defaultPath: `빛길 쇼 ${day}.bitgil.json`, filters: showFilter })
+  const p = (n: number) => String(n).padStart(2, '0')
+  const when = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}` // 하루에 여러 번 내보내도 안 겹치게 시·분까지
+  const dst = await dialog.showSaveDialog(win, { title: '쇼 파일 내보내기 (USB 등)', defaultPath: `빛길 쇼 ${when}.bitgil.json`, filters: showFilter })
   if (dst.canceled || !dst.filePath) return ''
   try {
     writeFileSync(dst.filePath + '.tmp', JSON.stringify(engine.show, null, 2), 'utf-8')
