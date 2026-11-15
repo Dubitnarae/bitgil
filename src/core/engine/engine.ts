@@ -21,6 +21,7 @@ export class Engine {
   faderMode: FaderMode = 'live'
   cue = -1 // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 아직 시작 전)
   find: string | null = null // 조명 찾기: 이 조명만 Locate 값으로 켜고 나머지는 끈다(바로 LIVE)
+  findSet: Record<string, number> = {} // 기능 점검: 찾는 조명의 채널 값을 Locate 대신 이 값으로
   chTest: { ch: number; value: number } | null = null // 채널 시험: 이 DMX 채널 하나만 이 값으로 내보낸다(나머지 0)
   private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
@@ -84,14 +85,24 @@ export class Engine {
   setFind(now: number, id: string | null) {
     if (id && !this.show.fixtures.some((f) => f.id === id)) throw new Error(`조명을 찾을 수 없음: ${id}`)
     if (!id && this.find) this.findReturn = { from: this.findValues(), start: now, ms: 2000 }
+    if (id !== this.find) this.findSet = {}
     this.find = id
+  }
+
+  /** 기능 점검: 찾는 조명의 채널 하나를 이 값으로(null = Locate 값으로 되돌림). 바로 LIVE. */
+  setFindValue(attr: string, value: number | null) {
+    const f = this.show.fixtures.find((x) => x.id === this.find)
+    if (!f) throw new Error('조명 찾기 중에만 할 수 있습니다')
+    if (!this.types.get(f.type)?.channels.some((c) => c.attr === attr)) throw new Error(`이 조명에 없는 채널: ${attr}`)
+    if (value === null) delete this.findSet[attr]
+    else this.findSet[attr] = Math.max(0, Math.min(255, Math.round(value)))
   }
 
   private findValues(): Values {
     const f = this.show.fixtures.find((x) => x.id === this.find)
     const type = f && this.types.get(f.type)
     if (!f || !type) return {}
-    return { [f.id]: Object.fromEntries(type.channels.filter((c) => c.locate !== undefined).map((c) => [c.attr, c.locate!])) }
+    return { [f.id]: { ...Object.fromEntries(type.channels.filter((c) => c.locate !== undefined).map((c) => [c.attr, c.locate!])), ...this.findSet } }
   }
 
   /** 미리보기 화면에 보일 값 (PREVIEW + 미리보기 페이더) */

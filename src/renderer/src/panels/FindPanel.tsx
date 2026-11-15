@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Fixture, Show } from '../../../core/engine/types'
-import { overlaps, type FixtureEdit } from '../../../core/engine/patch'
+import { overlaps, type FixtureEdit, type TypeEdit } from '../../../core/engine/patch'
 import type { State } from '../api'
 import { send } from '../api'
 
@@ -57,8 +57,61 @@ export function FindPanel({ show, st, selected }: Props) {
             title={x.verified ? '확인됨' : '아직 확인 안 됨'}>{x.verified ? '✓' : ''}{x.id}</button>
         ))}
       </div>
+      <FunctionCheck show={show} st={st} f={f} />
       <FixtureEditor key={f.id + JSON.stringify(f)} show={show} f={f} />
     </section>
+  )
+}
+
+// 채널마다 실물에서 무엇을 보면 되는지
+const CHECK_HINT: Record<string, string> = {
+  dimmer: '0 → 255로 올리면 점점 밝아지나요?',
+  shutter: '어느 값에서 빛이 나오나요(열림)? 깜빡이는 값은 스트로브입니다.',
+  red: '빨강만 나오나요?', green: '초록만 나오나요?', blue: '파랑만 나오나요?', white: '흰색만 나오나요?',
+  zoom: '0과 255에서 3D 화면과 실물의 빛 크기가 같은 쪽으로 바뀌나요?',
+  pan: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 다르면 아래 공간 → 조명 종류에서 팬 범위를 고치세요.',
+  tilt: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 다르면 아래 공간 → 조명 종류에서 틸트 범위를 고치세요.'
+}
+
+/** 기능 점검(편집 모드, 조명 찾기 중): 찾는 조명의 채널 값을 하나씩 바로 바꿔 실물·3D를 비교하고, 다르면 고쳐 저장한다. */
+function FunctionCheck({ show, st, f }: { show: Show; st: State; f: Fixture }) {
+  const type = show.fixture_types.find((t) => t.id === f.type)
+  if (!type) return null
+  const chans = type.channels.filter((c) => !c.attr.endsWith('_fine'))
+  const checked = type.checked ?? []
+  const v = st.live[f.id] ?? {}
+  const set = (attr: string, value: number | null) => send({ t: 'findSet', attr, value })
+  const editType = (edit: TypeEdit) => send({ t: 'editFixtureType', id: type.id, edit })
+  return (
+    <div className="settings">
+      <div className="group">
+        <h4>기능 점검 · {type.label} <span className="hint">실물과 같음 {chans.filter((c) => checked.includes(c.attr)).length} / {chans.length}</span></h4>
+        <p className="hint">값을 바꾸면 이 조명이 바로 바뀝니다. 실물과 3D 화면을 같이 보고, 맞으면 [같음]을 켜세요.
+          같은 종류 조명 모두에 적용됩니다. 조명을 바꾸거나 찾기를 끝내면 찾기 값으로 돌아갑니다.</p>
+        {chans.map((c) => {
+          const val = v[c.attr] ?? 0
+          return (
+            <div key={c.attr} className="check">
+              <label className="slider">
+                <span title={CHECK_HINT[c.attr] ?? c.label}>{c.label}</span>
+                <input type="range" min={0} max={255} value={val} onChange={(e) => set(c.attr, Number(e.target.value))} />
+                <input type="number" min={0} max={255} value={val} onChange={(e) => set(c.attr, Number(e.target.value))} />
+              </label>
+              <div className="apply">
+                {[0, 127, 255].map((n) => <button key={n} onClick={() => set(c.attr, n)}>{n}</button>)}
+                <label title="실물이 3D 화면·설명과 같게 움직이면 켜세요"><input type="checkbox" checked={checked.includes(c.attr)}
+                  onChange={(e) => editType({ checked: e.target.checked ? [...checked, c.attr] : checked.filter((a) => a !== c.attr) })} /> 같음</label>
+                {val !== (c.locate ?? 0) && <button title="조명 찾기 때 이 채널을 지금 값으로 켭니다"
+                  onClick={() => editType({ locate: { [c.attr]: val } })}>찾기 값으로 저장 ({c.locate ?? 0}→{val})</button>}
+                {c.attr === 'zoom' && <label title="실물에서 줌 0이 가장 넓으면 켜세요"><input type="checkbox" checked={!!type.zoom_wide_at_0}
+                  onChange={(e) => editType({ zoom_wide_at_0: e.target.checked })} /> 0 = 넓게</label>}
+              </div>
+              {CHECK_HINT[c.attr] && <p className="hint">{CHECK_HINT[c.attr]}</p>}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

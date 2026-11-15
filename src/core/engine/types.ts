@@ -19,6 +19,8 @@ export interface FixtureType {
   beam_deg: [number, number]
   /** 줌 값 0 = 가장 넓게(실물 확인한 기구만 true) */
   zoom_wide_at_0?: boolean
+  /** 기능 점검에서 '실물과 같음'으로 표시한 채널(attr) */
+  checked?: string[]
   mount: string
   pan_deg?: number
   tilt_deg?: number

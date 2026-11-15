@@ -115,7 +115,7 @@ export function VenuePanel({ show }: { show: Show }) {
 
 function TypeRow({ t }: { t: FixtureType }) {
   const moving = t.kind === 'moving_head'
-  const [e, setE] = useState<Required<TypeEdit>>({ beam_deg: [...t.beam_deg], pan_deg: t.pan_deg ?? 540, tilt_deg: t.tilt_deg ?? 270 })
+  const [e, setE] = useState<Required<Pick<TypeEdit, 'beam_deg' | 'pan_deg' | 'tilt_deg'>>>({ beam_deg: [...t.beam_deg], pan_deg: t.pan_deg ?? 540, tilt_deg: t.tilt_deg ?? 270 })
   const edit: TypeEdit = moving ? e : { beam_deg: e.beam_deg }
   const error = check(() => editFixtureType({ fixture_types: [{ ...t }] } as Show, t.id, edit))
   const changed = JSON.stringify(e.beam_deg) !== JSON.stringify(t.beam_deg) || (moving && (e.pan_deg !== (t.pan_deg ?? 540) || e.tilt_deg !== (t.tilt_deg ?? 270)))

@@ -8,6 +8,21 @@ const load = (): Show => JSON.parse(readFileSync('data/starter-show.bitgil.json'
 const fx = (s: Show, id: string) => s.fixtures.find((f) => f.id === id)!
 
 describe('조명 찾기', () => {
+  it('기능 점검: 찾는 조명 채널 값을 바꾸고, 조명을 바꾸면 찾기 값으로 돌아간다', () => {
+    const e = new Engine(load())
+    expect(() => e.setFindValue('zoom', 0)).toThrow() // 찾기 중이 아님
+    e.setFind(0, '1-1')
+    e.setFindValue('zoom', 300)
+    expect(e.output(0)['1-1'].zoom).toBe(255)
+    expect(e.output(0)['1-1'].dimmer).toBe(255) // 나머지는 찾기 값
+    expect(() => e.setFindValue('nope', 1)).toThrow()
+    e.setFindValue('zoom', null)
+    expect(e.output(0)['1-1'].zoom).toBe(50)
+    e.setFindValue('zoom', 0)
+    e.setFind(0, '1-2')
+    expect(e.output(0)['1-2'].zoom).toBe(50)
+  })
+
   it('찾는 조명만 Locate 값으로 켜고 나머지는 끈다, 전체 밝기 0%여도 켜진다', () => {
     const e = new Engine(load())
     e.goScene(0, e.show.scenes[0].id)
@@ -104,6 +119,18 @@ describe('공간·조명 종류 수정', () => {
     editFixture(s, id, { aim: null })
     expect(fx(s, id).aim).toBeNull()
   })
+  it('기능 점검 결과(줌 방향·찾기 값·같음 표시)를 저장한다', () => {
+    const s = load()
+    editFixtureType(s, 'wash', { zoom_wide_at_0: true, locate: { shutter: 200 }, checked: ['dimmer', 'dimmer', 'zoom'] })
+    const t = s.fixture_types.find((x) => x.id === 'wash')!
+    expect(t.zoom_wide_at_0).toBe(true)
+    expect(t.channels.find((c) => c.attr === 'shutter')!.locate).toBe(200)
+    expect(t.checked).toEqual(['dimmer', 'zoom'])
+    expect(() => editFixtureType(s, 'wash', { locate: { nope: 1 } })).toThrow()
+    expect(() => editFixtureType(s, 'wash', { locate: { shutter: 300 } })).toThrow()
+    expect(() => editFixtureType(s, 'wash', { checked: ['nope'] })).toThrow()
+  })
+
   it('빛 각도·팬·틸트 범위를 고친다', () => {
     const s = load()
     editFixtureType(s, 'wash', { beam_deg: [8, 30], pan_deg: 540, tilt_deg: 200 })

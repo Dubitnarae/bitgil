@@ -89,7 +89,12 @@ export function editVenue(show: Show, v: Venue) {
 }
 
 /** 조명 종류에서 고칠 수 있는 항목(추정값) */
-export interface TypeEdit { beam_deg?: [number, number]; pan_deg?: number; tilt_deg?: number }
+export interface TypeEdit {
+  beam_deg?: [number, number]; pan_deg?: number; tilt_deg?: number
+  zoom_wide_at_0?: boolean
+  locate?: Record<string, number> // 채널별 찾기 값(Locate)
+  checked?: string[] // 기능 점검에서 실물과 같다고 표시한 채널
+}
 
 /** 조명 종류의 빛 각도(좁게~넓게)와 무빙 팬·틸트 범위를 고친다 */
 export function editFixtureType(show: Show, id: string, p: TypeEdit) {
@@ -103,6 +108,14 @@ export function editFixtureType(show: Show, id: string, p: TypeEdit) {
   }
   if (p.pan_deg !== undefined) next.pan_deg = num(p.pan_deg, '팬 범위', 720)
   if (p.tilt_deg !== undefined) next.tilt_deg = num(p.tilt_deg, '틸트 범위', 360)
+  if (p.zoom_wide_at_0 !== undefined) next.zoom_wide_at_0 = !!p.zoom_wide_at_0
+  const attrs = new Set(t.channels.map((c) => c.attr))
+  const known = (a: string) => { if (!attrs.has(a)) throw new Error(`이 조명 종류에 없는 채널: ${a}`); return a }
+  if (p.locate) {
+    const loc = Object.entries(p.locate).map(([a, v]) => [known(a), num(v, '찾기 값', 255)] as const)
+    next.channels = t.channels.map((c) => { const hit = loc.find(([a]) => a === c.attr); return hit ? { ...c, locate: Math.round(hit[1]) } : c })
+  }
+  if (p.checked) next.checked = [...new Set(p.checked.map(known))]
   Object.assign(t, next)
 }
 

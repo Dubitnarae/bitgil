@@ -23,6 +23,7 @@ export type Command =
   | { t: 'setCuelist'; list: CueStep[] }
   | { t: 'nextCue' }
   | { t: 'find'; id: string | null }
+  | { t: 'findSet'; attr: string; value: number | null } // 기능 점검: 찾는 조명 채널 값 바꾸기(null = Locate 로)
   | { t: 'chTest'; ch: number | null; value?: number }
   | { t: 'editFixture'; id: string; edit: FixtureEdit }
   | { t: 'swapFixtures'; a: string; b: string }
@@ -58,6 +59,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'editVenue': editVenue(e.show, c.venue); return 'showChanged'
     case 'editFixtureType': editFixtureType(e.show, c.id, c.edit); return 'showChanged'
     case 'find': return e.setFind(now, c.id)
+    case 'findSet': return e.setFindValue(c.attr, c.value)
     case 'chTest': return e.setChTest(c.ch === null ? null : { ch: c.ch, value: c.value ?? 255 })
     case 'cue': return e.loadCue(c.index)
     case 'nextCue': return e.goNextCue(now)

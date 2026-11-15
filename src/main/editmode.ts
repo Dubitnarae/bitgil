@@ -47,6 +47,7 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'setCuelist':
     case 'defaultScene':
     case 'find':
+    case 'findSet':
     case 'chTest':
     case 'editFixture':
     case 'swapFixtures':
