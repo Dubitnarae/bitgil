@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Html, Line } from '@react-three/drei'
 import { AdditiveBlending, Quaternion, Vector3 } from 'three'
 import type { Fixture, FixtureType, Venue } from '../../../core/engine/types'
-import { beamAngle, beamDirection, beamHit, fixtureColor } from '../../../core/engine/visual'
+import { beamAngle, beamBoost, beamDirection, beamHit, fixtureColor } from '../../../core/engine/visual'
 import { beamMaterial } from './beamMaterial'
 import { FixtureBody, floorLift, shapeOf } from './FixtureBody'
 
@@ -40,7 +40,8 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
   const on = c.intensity > 0.01 && c.r + c.g + c.b > 0.01
   const color: [number, number, number] = [c.r, c.g, c.b]
   mat.uniforms.color.value.setRGB(c.r, c.g, c.b)
-  mat.uniforms.opacity.value = 0.35 * c.intensity
+  const boost = beamBoost(type, values) // 줌으로 모으면 더 밝게
+  mat.uniforms.opacity.value = Math.min(1, 0.35 * c.intensity * boost)
 
   return (
     <group>
@@ -66,7 +67,7 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
           </mesh>
           <mesh position={[hit.point.x + hit.normal.x * 0.02, hit.point.y + hit.normal.y * 0.02, hit.point.z + hit.normal.z * 0.02]} quaternion={poolQ}>
             <circleGeometry args={[radius, segments + 8]} />
-            <meshBasicMaterial color={color} transparent opacity={0.55 * c.intensity} blending={AdditiveBlending} depthWrite={false} />
+            <meshBasicMaterial color={color} transparent opacity={Math.min(1, 0.55 * c.intensity * boost)} blending={AdditiveBlending} depthWrite={false} />
           </mesh>
         </>
       )}

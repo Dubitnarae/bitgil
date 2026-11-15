@@ -5,13 +5,20 @@ describe('beamAngle: 줌', () => {
     expect(beamAngle(t, { zoom: 0 })).toBe(t.beam_deg[1])
     expect(beamAngle(t, { zoom: 255 })).toBe(t.beam_deg[0])
   })
+  it('줌으로 좁힐수록 밝게(넓을 때 1, 최대 2), 줌 없는 기구는 1', () => {
+    const t = show.fixture_types.find((x) => x.id === '200W1S_5')!
+    expect(beamBoost(t, { zoom: 0 })).toBe(1)
+    expect(beamBoost(t, { zoom: 128 })).toBeGreaterThan(1)
+    expect(beamBoost(t, { zoom: 255 })).toBe(2)
+    expect(beamBoost(show.fixture_types.find((x) => x.id === '8ch')!, {})).toBe(1)
+  })
   it('표시 없는 기구는 그대로 0 = 좁게', () => {
     expect(beamAngle(type, { zoom: 0 })).toBe(type.beam_deg[0])
   })
 })
 import { readFileSync } from 'node:fs'
 import type { Show } from './types'
-import { beamAngle, beamDirection, beamHit, panTiltFor } from './visual'
+import { beamAngle, beamBoost, beamDirection, beamHit, panTiltFor } from './visual'
 
 const show: Show = JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
 const type = show.fixture_types.find((t) => t.id === 'wash')!

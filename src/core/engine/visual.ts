@@ -20,6 +20,15 @@ export function beamAngle(type: FixtureType, v: Record<string, number> | undefin
   return lo + (hi - lo) * (type.zoom_wide_at_0 ? 1 - z : z)
 }
 
+/**
+ * 줌으로 빛을 모을 때 화면에서 더 밝게 보이게 곱할 값(1~2). 가장 넓을 때 1.
+ * 실제로는 비추는 넓이에 반비례(15°↔45°면 약 10배)지만 화면은 그만큼 못 보여 주므로 지름 비율로, 2배까지만.
+ */
+export function beamBoost(type: FixtureType, v: Record<string, number> | undefined) {
+  const t = (deg: number) => Math.tan((deg / 2) * Math.PI / 180)
+  return Math.min(2, t(type.beam_deg[1]) / t(beamAngle(type, v)))
+}
+
 const norm = (v: Vec3): Vec3 => {
   const l = Math.hypot(v.x, v.y, v.z) || 1
   return { x: v.x / l, y: v.y / l, z: v.z / l }
