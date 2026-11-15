@@ -436,6 +436,7 @@
         15,
         45
       ],
+      "zoom_wide_at_0": true,
       "beam_estimated": true,
       "mount": "ceiling",
       "model": null,

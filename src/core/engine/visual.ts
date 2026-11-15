@@ -12,11 +12,12 @@ export function fixtureColor(type: FixtureType, v: Record<string, number> | unde
   return { r: c('red'), g: c('green'), b: c('blue'), intensity }
 }
 
-/** 빛 퍼짐 각도(도). 줌 채널이 있으면 좁음~넓음 사이. */
+/** 빛 퍼짐 각도(도). 줌 채널이 있으면 좁음~넓음 사이(zoom_wide_at_0 이면 0 이 넓음). */
 export function beamAngle(type: FixtureType, v: Record<string, number> | undefined) {
   const [lo, hi] = type.beam_deg
-  const hasZoom = type.channels.some((c) => c.attr === 'zoom')
-  return hasZoom ? lo + ((hi - lo) * (v?.zoom ?? 0)) / 255 : lo
+  if (!type.channels.some((c) => c.attr === 'zoom')) return lo
+  const z = (v?.zoom ?? 0) / 255
+  return lo + (hi - lo) * (type.zoom_wide_at_0 ? 1 - z : z)
 }
 
 const norm = (v: Vec3): Vec3 => {

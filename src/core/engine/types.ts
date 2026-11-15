@@ -17,6 +17,8 @@ export interface FixtureType {
   channel_count: number
   channels: Channel[]
   beam_deg: [number, number]
+  /** 줌 값 0 = 가장 넓게(실물 확인한 기구만 true) */
+  zoom_wide_at_0?: boolean
   mount: string
   pan_deg?: number
   tilt_deg?: number

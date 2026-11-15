@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest'
+describe('beamAngle: 줌', () => {
+  it('정면 조명(200W1S_5)은 줌 0 = 넓게, 255 = 좁게', () => {
+    const t = show.fixture_types.find((x) => x.id === '200W1S_5')!
+    expect(beamAngle(t, { zoom: 0 })).toBe(t.beam_deg[1])
+    expect(beamAngle(t, { zoom: 255 })).toBe(t.beam_deg[0])
+  })
+  it('표시 없는 기구는 그대로 0 = 좁게', () => {
+    expect(beamAngle(type, { zoom: 0 })).toBe(type.beam_deg[0])
+  })
+})
 import { readFileSync } from 'node:fs'
 import type { Show } from './types'
-import { beamDirection, beamHit, panTiltFor } from './visual'
+import { beamAngle, beamDirection, beamHit, panTiltFor } from './visual'
 
 const show: Show = JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
 const type = show.fixture_types.find((t) => t.id === 'wash')!
