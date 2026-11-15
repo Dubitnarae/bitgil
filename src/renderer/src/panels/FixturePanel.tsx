@@ -29,7 +29,9 @@ export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: P
       <h3>조명 선택</h3>
       <div className="chips">
         {show.groups.map((g) => (
-          <button key={g.id} onClick={() => setSelected(g.members)}>{g.label}</button>
+          // 배튼 그룹(RD1~3)은 저장된 목록 대신 지금 그 배튼에 달린 조명으로(자리 바꾸기 뒤에도 맞게)
+          <button key={g.id} onClick={() => setSelected(show.venue.battens.some((b) => b.id === g.id)
+            ? show.fixtures.filter((f) => f.batten === g.id).map((f) => f.id) : g.members)}>{g.label}</button>
         ))}
         <button onClick={() => setSelected(show.fixtures.map((f) => f.id))}>전체</button>
         <button onClick={() => setSelected([])}>선택 해제</button>
