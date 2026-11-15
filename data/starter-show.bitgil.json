@@ -210,7 +210,7 @@
           "label": "Shutter",
           "mix": "LTP",
           "fade": true,
-          "locate": 0
+          "locate": 255
         },
         {
           "offset": 8,
