@@ -13,12 +13,12 @@ describe('beamAngle: 줌', () => {
     expect(beamBoost(show.fixture_types.find((x) => x.id === '8ch')!, {})).toBe(1)
   })
   it('표시 없는 기구는 그대로 0 = 좁게', () => {
-    expect(beamAngle(type, { zoom: 0 })).toBe(type.beam_deg[0])
+    expect(beamAngle({ ...type, zoom_wide_at_0: undefined }, { zoom: 0 })).toBe(type.beam_deg[0])
   })
 })
 import { readFileSync } from 'node:fs'
 import type { Show } from './types'
-import { beamAngle, beamBoost, beamDirection, beamHit, panTiltFor } from './visual'
+import { beamAngle, beamBoost, beamDirection, beamHit, fixtureColor, panTiltFor, shutterState } from './visual'
 
 const show: Show = JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
 const type = show.fixture_types.find((t) => t.id === 'wash')!
@@ -59,5 +59,22 @@ describe('panTiltFor: 찍은 곳을 비추는 무빙 팬·틸트', () => {
 
   it('틸트 범위를 넘는 곳(바로 아래)은 null', () => {
     expect(panTiltFor(type, { x: 5, y: 3, z: 5 }, { x: 5, y: 0, z: 5 }, undefined)).toBeNull()
+  })
+})
+
+describe('셔터·팬 보정(실물 확인 2026-11-19)', () => {
+  const t = (id: string) => show.fixture_types.find((x) => x.id === id)!
+  it('무빙(wash)은 255 = 점등·0 = 꺼짐, 나머지는 0 = 점등·255 = 꺼짐, 사이는 스트로브', () => {
+    expect(shutterState(t('wash'), { shutter: 255 })).toBe('open')
+    expect(shutterState(t('wash'), { shutter: 0 })).toBe('closed')
+    expect(shutterState(t('8ch'), { shutter: 0 })).toBe('open')
+    expect(shutterState(t('8ch'), { shutter: 255 })).toBe('closed')
+    expect(shutterState(t('OV_300W_3'), { shutter: 120 })).toBe('strobe')
+    expect(fixtureColor(t('8ch'), { dimmer: 255, shutter: 255 }).intensity).toBe(0)
+  })
+  it('무빙 팬 가운데 값 + 틸트 기울임 = 보정 90° 만큼 위에서 볼 때 반시계(+z → +x)', () => {
+    const d = beamDirection(f, t('wash'), { pan: 127, pan_fine: 255, tilt: 200, tilt_fine: 0 })
+    expect(d.x).toBeGreaterThan(0.5)
+    expect(Math.abs(d.z)).toBeLessThan(0.01)
   })
 })

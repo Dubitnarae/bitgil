@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Html, Line } from '@react-three/drei'
 import { AdditiveBlending, Quaternion, Vector3 } from 'three'
 import type { Fixture, FixtureType, Venue } from '../../../core/engine/types'
@@ -27,6 +27,13 @@ const RING = Array.from({ length: 33 }, (_, i) => {
 export function FixtureLight({ fixture: f, type, values, master, venue, selected, onSelect, segments }: Props) {
   const mat = useMemo(beamMaterial, [])
   const c = fixtureColor(type, values, master)
+  // shortcut: 스트로브 속도는 값과 상관없이 초당 4번, 실물 속도를 맞춰야 하면 값→주기 표 추가
+  const [blink, setBlink] = useState(true)
+  useEffect(() => {
+    if (!c.strobe) return setBlink(true)
+    const t = setInterval(() => setBlink((b) => !b), 125)
+    return () => clearInterval(t)
+  }, [c.strobe])
   const d = beamDirection(f, type, values)
   const shape = shapeOf(type)
   const p0 = { ...f.position, y: f.position.y + (f.mount === 'floor' ? floorLift(shape) : 0) }
@@ -37,7 +44,7 @@ export function FixtureLight({ fixture: f, type, values, master, venue, selected
   const pos = new Vector3(p0.x, p0.y, p0.z)
   const coneQ = new Quaternion().setFromUnitVectors(UP, dir.clone().negate()) // 원뿔 꼭짓점이 조명 쪽
   const poolQ = new Quaternion().setFromUnitVectors(Z, new Vector3(hit.normal.x, hit.normal.y, hit.normal.z))
-  const on = c.intensity > 0.01 && c.r + c.g + c.b > 0.01
+  const on = blink && c.intensity > 0.01 && c.r + c.g + c.b > 0.01
   const color: [number, number, number] = [c.r, c.g, c.b]
   mat.uniforms.color.value.setRGB(c.r, c.g, c.b)
   const boost = beamBoost(type, values) // 줌으로 모으면 더 밝게

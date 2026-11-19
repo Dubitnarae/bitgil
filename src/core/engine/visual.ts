@@ -1,15 +1,24 @@
 import type { Fixture, FixtureType, Vec3, Venue } from './types'
 import { value16 } from './values'
 
-/** 표시 색과 세기(0~1). R·G·B에 W를 더해 섞고 밝기를 곱한다. */
-// shortcut: 셔터 값의 뜻(열림/스트로브)이 기구마다 달라 화면 표시에서는 무시, 실물 확인 후 반영
+/** 셔터 상태: 한쪽 끝은 지속 점등, 반대쪽 끝은 꺼짐, 그 사이는 스트로브(실물 확인 2026-11-19) */
+export function shutterState(type: FixtureType, v: Record<string, number> | undefined): 'open' | 'closed' | 'strobe' {
+  if (!type.channels.some((c) => c.attr === 'shutter')) return 'open'
+  const s = v?.shutter ?? 0
+  const open = type.shutter_open_at_255 ? 255 : 0
+  return s === open ? 'open' : s === 255 - open ? 'closed' : 'strobe'
+}
+
+/** 표시 색과 세기(0~1). R·G·B에 W를 더해 섞고 밝기를 곱한다. 셔터가 닫히면 0, 스트로브면 strobe=true */
 export function fixtureColor(type: FixtureType, v: Record<string, number> | undefined, master = 1) {
   const has = (a: string) => type.channels.some((c) => c.attr === a)
-  const intensity = (value16(v, 'dimmer') / 65535) * master
-  if (!has('red')) return { r: 1, g: 0.92, b: 0.8, intensity } // 흰색 전용 조명(약간 따뜻한 색)
+  const sh = shutterState(type, v)
+  const intensity = sh === 'closed' ? 0 : (value16(v, 'dimmer') / 65535) * master
+  const strobe = sh === 'strobe'
+  if (!has('red')) return { r: 1, g: 0.92, b: 0.8, intensity, strobe } // 흰색 전용 조명(약간 따뜻한 색)
   const w = (v?.white ?? 0) / 255
   const c = (a: string) => Math.min(1, (v?.[a] ?? 0) / 255 + w)
-  return { r: c('red'), g: c('green'), b: c('blue'), intensity }
+  return { r: c('red'), g: c('green'), b: c('blue'), intensity, strobe }
 }
 
 /** 빛 퍼짐 각도(도). 줌 채널이 있으면 좁음~넓음 사이(zoom_wide_at_0 이면 0 이 넓음). */
@@ -43,7 +52,7 @@ export function beamDirection(f: Fixture, type: FixtureType, v: Record<string, n
   if (f.direction === 'up') return { x: 0, y: 1, z: 0 }
   if (f.direction === 'pan_tilt') {
     const rad = Math.PI / 180
-    const pan = (value16(v, 'pan') / 65535 - 0.5) * (type.pan_deg ?? 540) * rad
+    const pan = ((value16(v, 'pan') / 65535 - 0.5) * (type.pan_deg ?? 540) + (type.pan_offset_deg ?? 0)) * rad
     const tilt = (value16(v, 'tilt') / 65535 - 0.5) * (type.tilt_deg ?? 270) * rad
     return { x: Math.sin(tilt) * Math.sin(pan), y: Math.cos(tilt), z: Math.sin(tilt) * Math.cos(pan) }
   }
@@ -104,7 +113,7 @@ export function panTiltFor(type: FixtureType, origin: Vec3, target: Vec3, cur: R
   const curPan = (value16(cur, 'pan') / 65535 - 0.5) * panR
   const curTilt = (value16(cur, 'tilt') / 65535 - 0.5) * tiltR
   const t = Math.acos(Math.max(-1, Math.min(1, d.y))) * deg
-  const p = Math.atan2(d.x, d.z) * deg
+  const p = Math.atan2(d.x, d.z) * deg - (type.pan_offset_deg ?? 0)
   let best: { pan: number; tilt: number; cost: number } | null = null
   for (const [tilt, pan0] of [[t, p], [-t, p + 180]])
     for (const k of [-720, -360, 0, 360, 720]) {

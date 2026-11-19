@@ -24,6 +24,10 @@ export interface FixtureType {
   mount: string
   pan_deg?: number
   tilt_deg?: number
+  /** 3D 팬 방향 보정(도, 위에서 볼 때 반시계 +). 설치 방향 때문에 실물과 돌아가 있을 때 */
+  pan_offset_deg?: number
+  /** 셔터 255 = 지속 점등·0 = 꺼짐(true). 없으면 0 = 점등·255 = 꺼짐. 그 사이는 스트로브 */
+  shutter_open_at_255?: boolean
 }
 
 export interface Fixture {
