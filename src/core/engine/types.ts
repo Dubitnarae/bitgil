@@ -72,7 +72,11 @@ export interface Show {
   scenes: Scene[]
   cuelist: CueStep[]
   default_scene?: string
+  /** 내 색(색 팔레트에 저장). 기본 색과 같은 이름이면 그 값을 바꾼다 */
+  colors?: NamedColor[]
 }
+
+export interface NamedColor { name: string; rgbw: [number, number, number, number] }
 
 /** 순서 목록 한 줄: 어떤 씬을 몇 초 페이드로 */
 export interface CueStep { scene: string; fade: number }

@@ -1,8 +1,9 @@
-import type { Show } from '../../../core/engine/types'
+import { useState } from 'react'
+import type { NamedColor, Show } from '../../../core/engine/types'
 import type { State } from '../api'
 import { send } from '../api'
 import { aimSave, aimStart, aimUndo, canUndo, type Aim } from '../aim'
-import { PALETTE, hexToRgbw, rgbwToHex } from '../../../core/engine/color'
+import { PALETTE, hexToRgbw, paletteWith, rgbwToHex, sameColor } from '../../../core/engine/color'
 
 const ATTRS: [string, string][] = [
   ['dimmer', '밝기'], ['red', '빨강'], ['green', '초록'], ['blue', '파랑'], ['white', '흰색'],
@@ -20,6 +21,7 @@ interface Props {
 export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: Props) {
   const types = new Map(show.fixture_types.map((t) => [t.id, t]))
   const unsaved = aim ? Object.keys(aim.drafts).length : 0
+  const [colorName, setColorName] = useState('')
   const hasAttr = (id: string, a: string) => {
     const f = show.fixtures.find((x) => x.id === id)
     return !!f && !!types.get(f.type)?.channels.some((c) => c.attr === a)
@@ -70,14 +72,39 @@ export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: P
           if (noW.length) [r + w, g + w, b + w].forEach((value, i) => send({ t: 'set', ids: noW, attr: COLOR[i], value: Math.min(255, value) }))
         }
         const o = st.previewOut[rgbIds[0]] ?? {}
+        const cur = COLOR.map((a) => o[a] ?? 0) as NamedColor['rgbw']
+        const mine = show.colors ?? []
+        const colors = paletteWith(mine)
+        const now = colors.find((c) => sameColor(c.rgbw, cur, hasAttr(rgbIds[0], 'white')))
+        const saveColor = () => {
+          const name = colorName.trim()
+          if (!name) return
+          const builtIn = PALETTE.some((c) => c.name === name)
+          if (builtIn && !confirm(`기본 색 '${name}' 값을 지금 색으로 바꿀까요? (실물에 맞춘 값으로 쓰기)`)) return
+          send({ t: 'setColors', list: [...mine.filter((c) => c.name !== name), { name, rgbw: cur }] })
+          setColorName('')
+        }
+        const removeColor = (c: NamedColor) => {
+          const base = PALETTE.some((p) => p.name === c.name)
+          if (confirm(base ? `'${c.name}'을 기본 값으로 되돌릴까요?` : `내 색 '${c.name}'을 지울까요?`)) send({ t: 'setColors', list: mine.filter((m) => m.name !== c.name) })
+        }
         return (
-          <div className="palette" title="누르면 고른 조명 색이 바뀝니다(미리보기, [적용] 필요)">
-            {PALETTE.map((c) => (
-              <button key={c.name} className="swatch" title={c.name} aria-label={c.name}
-                style={{ background: rgbwToHex(c.rgbw) }} onClick={() => put(c.rgbw)} />
+          <div className="palette">
+            {colors.map((c) => (
+              <button key={c.name} className={'swatch' + (c.mine ? ' mine' : '') + (c === now ? ' on' : '')}
+                title={`${c.name}${c.mine ? ' (내 값, 오른쪽 클릭 = ' + (PALETTE.some((p) => p.name === c.name) ? '기본 값으로)' : '지우기)') : ''} — 누르면 고른 조명 색이 바뀝니다(미리보기, [적용] 필요)`}
+                aria-label={c.name} style={{ background: rgbwToHex(c.rgbw) }} onClick={() => put(c.rgbw)}
+                onContextMenu={c.mine ? (e) => { e.preventDefault(); removeColor(c) } : undefined} />
             ))}
             <input type="color" title="원하는 색 고르기" aria-label="원하는 색 고르기"
-              value={rgbwToHex(COLOR.map((a) => o[a] ?? 0))} onChange={(e) => put(hexToRgbw(e.target.value))} />
+              value={rgbwToHex(cur)} onChange={(e) => put(hexToRgbw(e.target.value))} />
+            <div className="apply">
+              <span className="hint">지금: <b>{now ? now.name : rgbwToHex(cur)}</b></span>
+              <input className="name" value={colorName} placeholder="색 이름" maxLength={20} onChange={(e) => setColorName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && saveColor()} />
+              <button disabled={!colorName.trim()} onClick={saveColor}
+                title="지금 색(아래 빨강·초록·파랑·흰색 값)을 팔레트에 저장. '따뜻한 흰색'·'호박색'처럼 기본 색 이름으로 저장하면 그 버튼 값이 바뀝니다">내 색 저장</button>
+            </div>
           </div>
         )
       })()}

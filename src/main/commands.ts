@@ -1,5 +1,6 @@
 import type { Engine, FaderMode } from '../core/engine/engine'
-import type { CueStep, Venue } from '../core/engine/types'
+import type { CueStep, NamedColor, Venue } from '../core/engine/types'
+import { cleanColors } from '../core/engine/color'
 import { editFixture, editFixtureType, editVenue, swapFixtures, type FixtureEdit, type TypeEdit } from '../core/engine/patch'
 
 /** 화면 → 메인으로 보내는 명령 */
@@ -21,6 +22,7 @@ export type Command =
   | { t: 'deleteScene'; id: string }
   | { t: 'cue'; index: number }
   | { t: 'setCuelist'; list: CueStep[] }
+  | { t: 'setColors'; list: NamedColor[] } // 색 팔레트의 내 색(운영 모드에서도 가능)
   | { t: 'nextCue' }
   | { t: 'find'; id: string | null }
   | { t: 'findSet'; attr: string; value: number | null } // 기능 점검: 찾는 조명 채널 값 바꾸기(null = Locate 로)
@@ -54,6 +56,12 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
       e.show.default_scene = c.id
       return 'showChanged'
     case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
+    case 'setColors': {
+      const list = cleanColors(c.list)
+      if (list.length) e.show.colors = list
+      else delete e.show.colors // 다 지우면 쇼 파일에서도 뺀다
+      return 'showChanged'
+    }
     case 'editFixture': editFixture(e.show, c.id, c.edit); return 'showChanged'
     case 'swapFixtures': swapFixtures(e.show, c.a, c.b); return 'showChanged'
     case 'editVenue': editVenue(e.show, c.venue); return 'showChanged'

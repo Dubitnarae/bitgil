@@ -134,6 +134,9 @@ input[type=radio]:checked { border-color: #4d8dff; background: radial-gradient(#
 .palette { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
 .palette .swatch { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; cursor: pointer; }
 .palette .swatch:hover { outline: 2px solid #4da3ff; }
+.palette .swatch.mine { border: 2px dashed #cfd5df; }
+.palette .swatch.on { outline: 3px solid #ffd23f; outline-offset: 1px; }
+.palette .apply { width: 100%; margin-top: 4px; }
 .palette input[type=color] { width: 26px; height: 26px; padding: 0; border: 1px solid #3c414c; border-radius: 5px; background: none; cursor: pointer; }
 
 /* ── 가독성 점검(v0.1.13) ── */
