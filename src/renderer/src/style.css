@@ -167,3 +167,6 @@ footer > button { position: absolute; right: 10px; top: 6px; }
 .phone-note { position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 20000001; background: #2d6cdf; color: #fff; padding: 10px 18px; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.6); pointer-events: none; }
 .find .check { border-top: 1px solid #2a2e37; padding-top: 4px; margin-top: 4px; }
 .find .check .hint { margin: 2px 0; }
+
+.label.mark { color: #ffd23f; font-size: 12px; font-weight: bold; }
+.venue .apply label.on { color: #ffd23f; }

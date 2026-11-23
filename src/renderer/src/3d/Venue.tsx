@@ -1,12 +1,13 @@
 import { Html, Line } from '@react-three/drei'
 import type { Venue as V } from '../../../core/engine/types'
+import type { Mark } from '../panels/VenuePanel'
 import { floorY } from '../../../core/engine/visual'
 
 // 높은 단일수록 조금씩 밝게
 const TIER_COLORS = ['#4c505b', '#5b606c', '#6a707d', '#79808e']
 
 /** 예배당 공간: 바닥(무대·통로·좌석 단), 왼쪽·정면 벽, 배튼, 소품, 지붕 윤곽. 오른쪽·뒤쪽 벽은 보기 위해 비워 둔다. */
-export function Venue({ venue }: { venue: V }) {
+export function Venue({ venue, mark }: { venue: V; mark?: Mark | null }) {
   const { length_x: X, width_z: Z, eave_height: H, ridge_height: R } = venue.room
   const block = (z0: number, z1: number, h: number, color: string, key: string) => (
     <mesh key={key} position={[X / 2, Math.max(h, 0.02) / 2 - (h ? 0 : 0.02), (z0 + z1) / 2]}>
@@ -68,6 +69,24 @@ export function Venue({ venue }: { venue: V }) {
           <Html position={[0.05, t.y_center, t.z_center]} center className="label dim">{t.label}</Html>
         </group>
       ))}
+      {/* 공간 수정 중 고른 숫자 칸의 치수 선: 벽·바닥에 가려지지 않게 맨 위에 그린다 */}
+      {mark && (() => {
+        const a: [number, number, number] = [mark.a.x, mark.a.y, mark.a.z]
+        const b: [number, number, number] = [mark.b.x, mark.b.y, mark.b.z]
+        const len = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2])
+        return (
+          <group>
+            <Line points={[a, b]} color="#ffd23f" lineWidth={4} depthTest={false} renderOrder={10} />
+            {[a, b].map((p, i) => (
+              <mesh key={i} position={p} renderOrder={10}>
+                <sphereGeometry args={[0.12]} />
+                <meshBasicMaterial color="#ffd23f" depthTest={false} />
+              </mesh>
+            ))}
+            <Html position={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.3, (a[2] + b[2]) / 2]} center className="label mark">{mark.text} {len.toFixed(2)} m</Html>
+          </group>
+        )
+      })()}
     </group>
   )
 }

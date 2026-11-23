@@ -12,7 +12,7 @@ import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
 import { UpdateNotice } from './panels/UpdateNotice'
 import { ChannelTest, FindPanel } from './panels/FindPanel'
-import { VenuePanel } from './panels/VenuePanel'
+import { VenuePanel, type Mark } from './panels/VenuePanel'
 import { aimAt, withDrafts, type Aim } from './aim'
 
 /** 폰에서 버튼을 누르면 5초 동안 화면 위쪽 가운데에 알림 */
@@ -37,6 +37,7 @@ export default function App() {
   const [settings, setSettings] = useState(false)
   const [pin, setPin] = useState<'unlock' | 'set' | 'change' | 'off' | null>(null)
   const [aim, setAim] = useState<Aim | null>(null) // null = 빛 위치 찍기 꺼짐
+  const [venueDraft, setVenueDraft] = useState<{ venue: Show['venue']; mark: Mark | null } | null>(null) // 공간 수정 열려 있을 때
 
   useEffect(() => {
     window.bitgil.getShow().then(setShow)
@@ -73,13 +74,15 @@ export default function App() {
   const values = shown === 'live' ? st.live : st.previewOut
   const master = shown === 'live' ? (st.blackout ? 0 : finding ? 1 : st.master) : 1
   const pointing = aim !== null && selected.length > 0
+  const drafted = aim ? withDrafts(show, aim.drafts) : show
+  const draft = st.editMode ? venueDraft : null // 편집 모드가 끝나 패널이 사라지면 저장된 공간으로
 
   return (
     <div className="app">
       <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} />
       <main>
         <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
-          <Stage3D show={aim ? withDrafts(show, aim.drafts) : show} values={values} master={master} selected={finding ? [st.find!] : selected}
+          <Stage3D show={draft ? { ...drafted, venue: draft.venue } : drafted} mark={draft?.mark} values={values} master={master} selected={finding ? [st.find!] : selected}
             onSelect={onSelect} onClear={() => setSelected([])} quality={st.quality.used}
             onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p, aim!)) : undefined} />
           <span className="viewtag">{st.chTest ? `실제 출력 · 채널 ${st.chTest.ch} 시험 중 (3D는 채널 시험을 안 보여 줌)` : finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
@@ -94,7 +97,7 @@ export default function App() {
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} aim={aim} setAim={setAim} />
           {st.editMode && !finding && <FindPanel show={show} st={st} selected={selected} />}
           {st.editMode && !finding && <ChannelTest st={st} />}
-          {st.editMode && <VenuePanel show={show} />}
+          {st.editMode && <VenuePanel show={show} onDraft={setVenueDraft} />}
         </aside>
       </main>
       <footer>
