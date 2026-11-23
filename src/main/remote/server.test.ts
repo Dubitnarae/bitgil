@@ -19,7 +19,7 @@ describe('폰 원격', () => {
     const got: PhoneCmd[] = []
     const r = startRemote({
       code: () => '123456',
-      state: () => ({ scene: '찬양', cue: 0, total: 2, next: '말씀', blackout: false, master: 1, fading: false, output: false, edit: false }),
+      state: () => ({ scene: '찬양', cue: 0, total: 2, next: '말씀', prev: '', list: [{ name: '찬양', fade: 2 }, { name: '말씀', fade: 2 }], blackout: false, master: 1, fading: false, output: false, edit: false }),
       run: (c) => got.push(c),
       unlock: (pin) => pin === '1234',
       setup: (c) => ((c as { t: string }).t === 'find' ? '' : '안 되는 명령'),
@@ -32,8 +32,11 @@ describe('폰 원격', () => {
       expect((await fetch(base + '/cmd?code=000000&c=next', { method: 'POST' })).status).toBe(401)
       expect((await fetch(base + '/cmd?code=123456&c=next', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/cmd?code=123456&c=blackout&on=1', { method: 'POST' })).status).toBe(204)
+      expect((await fetch(base + '/cmd?code=123456&c=prev', { method: 'POST' })).status).toBe(204)
+      expect((await fetch(base + '/cmd?code=123456&c=master&v=150', { method: 'POST' })).status).toBe(204) // 100% 넘으면 100%
+      expect((await fetch(base + '/cmd?code=123456&c=master&v=', { method: 'POST' })).status).toBe(400)
       expect((await fetch(base + '/cmd?code=123456&c=이상한', { method: 'POST' })).status).toBe(400)
-      expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }])
+      expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }, { c: 'prev' }, { c: 'master', value: 1 }])
       // 폰 설정 모드: PIN, 명령 JSON(오류 문구는 그대로 돌려줌)
       expect((await fetch(base + '/unlock?code=123456&pin=0000', { method: 'POST' })).status).toBe(403)
       expect((await fetch(base + '/unlock?code=123456&pin=1234', { method: 'POST' })).status).toBe(204)
@@ -53,7 +56,7 @@ describe('폰 원격', () => {
     let asked = 0
     const r = startRemote({
       code: () => '123456',
-      state: () => ({ scene: '', cue: -1, total: 0, next: '', blackout: false, master: 1, fading: false, output: false, edit: false }),
+      state: () => ({ scene: '', cue: -1, total: 0, next: '', prev: '', list: [], blackout: false, master: 1, fading: false, output: false, edit: false }),
       run: () => {},
       unlock: (pin) => { asked++; return pin === '1234' },
       setup: () => '',
@@ -80,7 +83,7 @@ describe('폰 원격', () => {
     const calls: unknown[] = []
     const r = startRemote({
       code: () => '123456',
-      state: () => ({ scene: '', cue: -1, total: 0, next: '', blackout: false, master: 1, fading: false, output: false, edit: false }),
+      state: () => ({ scene: '', cue: -1, total: 0, next: '', prev: '', list: [], blackout: false, master: 1, fading: false, output: false, edit: false }),
       run: () => {}, unlock: () => false, setup: () => '',
       appDir: dir,
       api: (name, args) => { calls.push([name, ...args]); return name === 'unlock' ? args[0] === '1234' : { ok: name } },

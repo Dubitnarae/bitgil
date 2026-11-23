@@ -15,7 +15,7 @@ h1{font-size:18px;margin:0 0 12px}
 .hint{color:#9aa3b5;font-size:14px}
 button{display:block;width:100%;font-size:22px;padding:22px;margin-bottom:14px;border:0;border-radius:12px;color:#fff;background:#2d6cdf}
 button:disabled{opacity:.35}
-#def{background:#3a7d44}#bo{background:#8a1c1c}#bo.on{background:#ff3b3b}
+#pv{background:#2f3542;font-size:18px;padding:16px}#def{background:#3a7d44}#bo{background:#8a1c1c}#bo.on{background:#ff3b3b}
 input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin:8px 0;text-align:center;background:#262a33;color:#eee;border:1px solid #3a404c;border-radius:8px}
 #login,#main,#setup{display:none}
 #sent{text-align:center;color:#6ee07a;font-weight:bold;min-height:1.4em}
@@ -27,6 +27,8 @@ input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin
 .tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{margin:0;padding:12px 4px;font-size:15px}
 .tabs button.act{background:#2d6cdf}
 .fid{font-size:34px;font-weight:bold;color:#ffd54a}
+input[type=range]{padding:0;height:44px}
+#cues{margin:6px 0 0;padding-left:28px}#cues li{padding:4px 0;color:#9aa3b5}#cues li.now{color:#ffd54a;font-weight:bold}
 </style></head><body>
 <h1>빛길 원격</h1>
 <div id="login">
@@ -42,9 +44,12 @@ input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin
     <div id="state"></div>
   </div>
   <button id="nx">다음 씬 ▶</button>
+  <button id="pv">◀ 이전 씬</button>
   <button id="def">기본 조명</button>
   <button id="bo">블랙아웃</button>
   <div id="sent"></div>
+  <div class="box">전체 밝기 <b id="mVal"></b><input id="mRange" type="range" min="0" max="100" step="5"></div>
+  <div class="box">순서 목록 <span class="hint">(보기만, 진행은 위 버튼)</span><ol id="cues"></ol></div>
   <button id="toSetup">⚙ 설정 모드 (조명 확인·주소·위치)</button>
 </div>
 
@@ -113,11 +118,18 @@ function draw(){
   $('out').innerHTML=st.output?'장비로 출력 중':'<span class="warn">출력 대기(장비로 안 나감)</span>';
   $('state').innerHTML=st.blackout?'<span class="warn">블랙아웃 켜짐</span>':st.fading?'페이드 중…':'';
   $('nx').disabled=!st.next;
+  $('pv').disabled=!st.prev;
+  $('pv').textContent='◀ 이전 씬'+(st.prev?' ('+st.prev+')':'');
+  $('mVal').textContent=Math.round(st.master*100)+'%';
+  if(document.activeElement!==$('mRange')&&!mT)$('mRange').value=Math.round(st.master*100); // 끄는 중에는 덮어쓰지 않게
+  var cs=st.list.map(function(c,i){return '<li'+(i===st.cue?' class="now"':'')+'>'+esc(c.name)+' <span class="hint">'+c.fade+'초</span></li>'}).join('');
+  $('cues').innerHTML=cs||'<span class="hint">비어 있음 (노트북 편집 모드에서 추가)</span>';
   $('bo').className=st.blackout?'on':'';
   $('bo').textContent=st.blackout?'블랙아웃 끄기':'블랙아웃';
   drawSetup();
 }
-var sentT=0;
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var sentT=0,mT=0;
 function done(){
   if(navigator.vibrate)navigator.vibrate(40); // 눌렸다는 짧은 진동(아이폰은 안 됨)
   $('sent').textContent='보냄 ✓';clearTimeout(sentT);sentT=setTimeout(function(){$('sent').textContent=''},1500);
@@ -128,6 +140,9 @@ function cmd(q){fetch('/cmd?code='+encodeURIComponent(code)+'&'+q,{method:'POST'
 },function(){alert('노트북에 보내지 못했습니다')})}
 $('go').onclick=function(){code=$('code').value.trim();localStorage.setItem('bitgil-code',code);connect()};
 $('nx').onclick=function(){ if(st&&st.next&&confirm('"'+st.next+'"(으)로 진행할까요?\\n실제 조명이 바로 바뀝니다.'))cmd('c=next') };
+$('pv').onclick=function(){ if(st&&st.prev&&confirm('"'+st.prev+'"(으)로 돌아갈까요?\\n실제 조명이 바로 바뀝니다.'))cmd('c=prev') };
+// 전체 밝기: 끄는 동안 0.15초마다 한 번만 보낸다(Wi-Fi 요청 폭주 막기)
+$('mRange').oninput=function(){var v=this.value;$('mVal').textContent=v+'%';if(mT)return;mT=setTimeout(function(){mT=0;cmd('c=master&v='+$('mRange').value)},150)};
 $('def').onclick=function(){cmd('c=default')};
 $('bo').onclick=function(){cmd('c=blackout&on='+(st&&st.blackout?0:1))};
 

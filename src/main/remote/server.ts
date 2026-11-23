@@ -11,6 +11,8 @@ export interface PhoneState {
   cue: number // 순서 목록 위치(-1 = 시작 전)
   total: number
   next: string // 다음 줄 씬 이름, 없으면 ''
+  prev: string // 이전 줄 씬 이름, 없으면 ''
+  list: { name: string; fade: number }[] // 순서 목록(보기만)
   blackout: boolean
   master: number
   fading: boolean
@@ -27,8 +29,8 @@ export interface PhoneSetup {
   fixtures: { id: string; type: string; address: number; count: number; verified: boolean; batten: string; direction: string; position: { x: number; y: number; z: number }; aim: { x: number; y: number; z: number } | null; clash: string[] }[]
 }
 
-/** 폰에서 오는 명령 3가지 */
-export type PhoneCmd = { c: 'next' } | { c: 'default' } | { c: 'blackout'; on: boolean }
+/** 폰에서 오는 명령 */
+export type PhoneCmd = { c: 'next' } | { c: 'prev' } | { c: 'default' } | { c: 'blackout'; on: boolean } | { c: 'master'; value: number }
 
 export const REMOTE_PORT = 8130
 
@@ -122,8 +124,10 @@ export function startRemote(opts: {
     }
     if (req.method === 'POST' && url.pathname === '/cmd') {
       const c = url.searchParams.get('c')
-      if (c === 'next' || c === 'default') opts.run({ c })
+      const v = Number(url.searchParams.get('v'))
+      if (c === 'next' || c === 'prev' || c === 'default') opts.run({ c })
       else if (c === 'blackout') opts.run({ c, on: url.searchParams.get('on') === '1' })
+      else if (c === 'master' && url.searchParams.get('v') !== '' && Number.isFinite(v)) opts.run({ c, value: Math.max(0, Math.min(1, v / 100)) })
       else { res.writeHead(400); return res.end() }
       res.writeHead(204)
       return res.end()

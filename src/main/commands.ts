@@ -24,6 +24,7 @@ export type Command =
   | { t: 'setCuelist'; list: CueStep[] }
   | { t: 'setColors'; list: NamedColor[] } // 색 팔레트의 내 색(운영 모드에서도 가능)
   | { t: 'nextCue' }
+  | { t: 'prevCue' }
   | { t: 'find'; id: string | null }
   | { t: 'findSet'; attr: string; value: number | null } // 기능 점검: 찾는 조명 채널 값 바꾸기(null = Locate 로)
   | { t: 'chTest'; ch: number | null; value?: number }
@@ -71,6 +72,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'chTest': return e.setChTest(c.ch === null ? null : { ch: c.ch, value: c.value ?? 255 })
     case 'cue': return e.loadCue(c.index)
     case 'nextCue': return e.goNextCue(now)
+    case 'prevCue': return e.goPrevCue(now)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
     case 'clearManual': return e.clearManual(c.ids, c.attrs)

@@ -149,6 +149,12 @@ describe('순서 목록', () => {
     expect(e.currentFaders(3000)[b.id]).toBeCloseTo(0.5) // 4초 페이드의 가운데
     e.goNextCue(9000)
     expect(e.cue).toBe(1)
+    e.goPrevCue(10000) // [이전 씬]: 앞 줄을 그 줄 페이드(0)로
+    expect(e.cue).toBe(0)
+    expect(e.faders[a.id]).toBe(1)
+    expect(e.faders[b.id] ?? 0).toBe(0)
+    e.goPrevCue(11000) // 처음이면 그대로
+    expect(e.cue).toBe(0)
   })
   it('씬을 지우면 그 씬을 쓰던 줄도 빠지고 위치가 당겨진다', () => {
     const e = new Engine(structuredClone(show))

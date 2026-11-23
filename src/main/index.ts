@@ -113,6 +113,8 @@ function phoneState(): PhoneState {
     cue: engine.cue,
     total: engine.show.cuelist.length,
     next: sceneName(engine.show.cuelist[engine.cue + 1]?.scene),
+    prev: sceneName(engine.show.cuelist[engine.cue - 1]?.scene),
+    list: engine.show.cuelist.map((c) => ({ name: sceneName(c.scene), fade: c.fade })),
     blackout: engine.blackout,
     master: engine.master,
     fading: engine.fading,
@@ -155,10 +157,12 @@ function phoneSetup(c: unknown): string {
 // 폰에서 누른 것을 노트북 화면에 잠깐 알린다(노트북 앞 사람이 놀라지 않게)
 let phoneNote = { text: '', at: 0 }
 function phoneCmd(c: PhoneCmd) {
-  phoneNote = { text: c.c === 'blackout' ? (c.on ? '블랙아웃' : '블랙아웃 해제') : c.c === 'default' ? '기본 조명' : `다음 씬 — ${sceneName(engine.show.cuelist[engine.cue + 1]?.scene) || '없음'}`, at: Date.now() }
+  const cueName = (d: number) => sceneName(engine.show.cuelist[engine.cue + d]?.scene) || '없음'
+  phoneNote = { text: c.c === 'blackout' ? (c.on ? '블랙아웃' : '블랙아웃 해제') : c.c === 'default' ? '기본 조명' : c.c === 'master' ? `전체 밝기 ${Math.round(c.value * 100)}%` : c.c === 'prev' ? `이전 씬 — ${cueName(-1)}` : `다음 씬 — ${cueName(1)}`, at: Date.now() }
   try {
     if (c.c === 'blackout') engine.blackout = c.on
-    else runCommand(engine, { t: c.c === 'next' ? 'nextCue' : 'default' }, Date.now())
+    else if (c.c === 'master') runCommand(engine, { t: 'master', value: c.value }, Date.now())
+    else runCommand(engine, { t: c.c === 'next' ? 'nextCue' : c.c === 'prev' ? 'prevCue' : 'default' }, Date.now())
   } catch (err) { console.error(err) }
 }
 setRemote(settings.remoteOn)

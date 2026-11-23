@@ -214,9 +214,10 @@ export class Engine {
     this.cue = i
   }
 
-  /** 폰 [다음 씬]: 순서 목록 다음 줄을 올리고 그 줄 페이드로 바로 [적용]. 마지막 줄이면 아무것도 안 함. */
-  goNextCue(now: number) {
-    const i = this.cue + 1
+  /** 폰 [다음 씬]·[이전 씬]: 순서 목록 다음(이전) 줄을 올리고 그 줄 페이드로 바로 [적용]. 끝(처음)이면 아무것도 안 함. */
+  goNextCue(now: number) { this.goCue(now, this.cue + 1) }
+  goPrevCue(now: number) { this.goCue(now, this.cue - 1) }
+  private goCue(now: number, i: number) {
     if (!this.show.cuelist[i]) return
     this.loadCue(i)
     this.apply(now, this.show.cuelist[i].fade)
