@@ -69,8 +69,8 @@ const CHECK_HINT: Record<string, string> = {
   shutter: '어느 값에서 빛이 나오나요(열림)? 깜빡이는 값은 스트로브입니다.',
   red: '빨강만 나오나요?', green: '초록만 나오나요?', blue: '파랑만 나오나요?', white: '흰색만 나오나요?',
   zoom: '0과 255에서 3D 화면과 실물의 빛 크기가 같은 쪽으로 바뀌나요?',
-  pan: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 다르면 아래 공간 → 조명 종류에서 팬 범위를 고치세요.',
-  tilt: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 다르면 아래 공간 → 조명 종류에서 틸트 범위를 고치세요.'
+  pan: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 반대쪽으로 돌면 [반대 방향]을 켜고, 도는 양이 다르면 아래 공간 → 조명 종류에서 팬 범위를 고치세요.',
+  tilt: '0·127·255에서 3D 화면과 실물이 같은 쪽을 보나요? 반대쪽으로 기울면 [반대 방향]을 켜고, 기우는 양이 다르면 아래 공간 → 조명 종류에서 틸트 범위를 고치세요.'
 }
 
 /** 기능 점검(편집 모드, 조명 찾기 중): 찾는 조명의 채널 값을 하나씩 바로 바꿔 실물·3D를 비교하고, 다르면 고쳐 저장한다. */
@@ -105,6 +105,10 @@ function FunctionCheck({ show, st, f }: { show: Show; st: State; f: Fixture }) {
                   onClick={() => editType({ locate: { [c.attr]: val } })}>찾기 값으로 저장 ({c.locate ?? 0}→{val})</button>}
                 {c.attr === 'zoom' && <label title="실물에서 줌 0이 가장 넓으면 켜세요"><input type="checkbox" checked={!!type.zoom_wide_at_0}
                   onChange={(e) => editType({ zoom_wide_at_0: e.target.checked })} /> 0 = 넓게</label>}
+                {c.attr === 'pan' && <label title="값을 올릴 때 실물이 3D·설명과 반대쪽으로 돌면 켜세요(같은 종류 모두, 빛 위치 찍기 계산도 따라감)"><input type="checkbox" checked={!!type.pan_invert}
+                  onChange={(e) => editType({ pan_invert: e.target.checked })} /> 반대 방향</label>}
+                {c.attr === 'tilt' && <label title="값을 올릴 때 실물이 3D·설명과 반대쪽으로 기울면 켜세요(같은 종류 모두, 빛 위치 찍기 계산도 따라감)"><input type="checkbox" checked={!!type.tilt_invert}
+                  onChange={(e) => editType({ tilt_invert: e.target.checked })} /> 반대 방향</label>}
               </div>
               {CHECK_HINT[c.attr] && <p className="hint">{CHECK_HINT[c.attr]}</p>}
             </div>

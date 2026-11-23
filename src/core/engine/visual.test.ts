@@ -72,6 +72,22 @@ describe('셔터·팬 보정(실물 확인 2026-11-19)', () => {
     expect(shutterState(t('OV_300W_3'), { shutter: 120 })).toBe('strobe')
     expect(fixtureColor(t('8ch'), { dimmer: 255, shutter: 255 }).intensity).toBe(0)
   })
+  it('팬·틸트 반대 방향: 같은 값이면 3D 방향이 거울처럼 뒤집히고, 찍기 계산도 따라간다', () => {
+    const inv = { ...type, pan_invert: true, tilt_invert: true }
+    const v = { pan: 200, pan_fine: 0, tilt: 180, tilt_fine: 0 }
+    const a = beamDirection(f, type, v), b = beamDirection(f, inv, v)
+    const back = { pan: 255 - v.pan, pan_fine: 255, tilt: 255 - v.tilt, tilt_fine: 255 } // 가운데 기준 반대 값
+    const c = beamDirection(f, type, back)
+    expect(b.x).toBeCloseTo(c.x, 3)
+    expect(b.z).toBeCloseTo(c.z, 3)
+    expect(a.x).not.toBeCloseTo(b.x, 1)
+    const target = { x: 8, y: 0.5, z: 9 }
+    const d = beamDirection(f, inv, panTiltFor(inv, f.position, target, undefined)!)
+    const want = { x: 3, y: 0.5, z: 4 }, l = Math.hypot(3, 0.5, 4)
+    expect(d.x).toBeCloseTo(want.x / l, 3)
+    expect(d.z).toBeCloseTo(want.z / l, 3)
+  })
+
   it('무빙 팬 가운데 값 + 틸트 기울임 = 보정 90° 만큼 위에서 볼 때 반시계(+z → +x)', () => {
     const d = beamDirection(f, t('wash'), { pan: 127, pan_fine: 255, tilt: 200, tilt_fine: 0 })
     expect(d.x).toBeGreaterThan(0.5)

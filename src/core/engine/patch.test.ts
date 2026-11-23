@@ -124,6 +124,8 @@ describe('공간·조명 종류 수정', () => {
     editFixtureType(s, 'wash', { zoom_wide_at_0: true, locate: { shutter: 200 }, checked: ['dimmer', 'dimmer', 'zoom'] })
     const t = s.fixture_types.find((x) => x.id === 'wash')!
     expect(t.zoom_wide_at_0).toBe(true)
+    editFixtureType(s, 'wash', { pan_invert: true, tilt_invert: false })
+    expect([t.pan_invert, t.tilt_invert]).toEqual([true, undefined])
     expect(t.channels.find((c) => c.attr === 'shutter')!.locate).toBe(200)
     expect(t.checked).toEqual(['dimmer', 'zoom'])
     expect(() => editFixtureType(s, 'wash', { locate: { nope: 1 } })).toThrow()

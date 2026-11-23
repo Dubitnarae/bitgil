@@ -52,12 +52,15 @@ export function beamDirection(f: Fixture, type: FixtureType, v: Record<string, n
   if (f.direction === 'up') return { x: 0, y: 1, z: 0 }
   if (f.direction === 'pan_tilt') {
     const rad = Math.PI / 180
-    const pan = ((value16(v, 'pan') / 65535 - 0.5) * (type.pan_deg ?? 540) + (type.pan_offset_deg ?? 0)) * rad
-    const tilt = (value16(v, 'tilt') / 65535 - 0.5) * (type.tilt_deg ?? 270) * rad
+    const pan = ((value16(v, 'pan') / 65535 - 0.5) * sign(type.pan_invert) * (type.pan_deg ?? 540) + (type.pan_offset_deg ?? 0)) * rad
+    const tilt = (value16(v, 'tilt') / 65535 - 0.5) * sign(type.tilt_invert) * (type.tilt_deg ?? 270) * rad
     return { x: Math.sin(tilt) * Math.sin(pan), y: Math.cos(tilt), z: Math.sin(tilt) * Math.cos(pan) }
   }
   return { x: 0, y: -1, z: 0 }
 }
+
+/** 반대 방향(invert)이면 -1 */
+const sign = (invert?: boolean) => (invert ? -1 : 1)
 
 /** z 위치의 바닥 높이 (무대 / 통로 / 좌석 단) */
 export function floorY(venue: Venue, z: number) {
@@ -110,8 +113,9 @@ export function panTiltFor(type: FixtureType, origin: Vec3, target: Vec3, cur: R
   const deg = 180 / Math.PI
   const panR = type.pan_deg ?? 540
   const tiltR = type.tilt_deg ?? 270
-  const curPan = (value16(cur, 'pan') / 65535 - 0.5) * panR
-  const curTilt = (value16(cur, 'tilt') / 65535 - 0.5) * tiltR
+  const sP = sign(type.pan_invert), sT = sign(type.tilt_invert)
+  const curPan = (value16(cur, 'pan') / 65535 - 0.5) * sP * panR
+  const curTilt = (value16(cur, 'tilt') / 65535 - 0.5) * sT * tiltR
   const t = Math.acos(Math.max(-1, Math.min(1, d.y))) * deg
   const p = Math.atan2(d.x, d.z) * deg - (type.pan_offset_deg ?? 0)
   let best: { pan: number; tilt: number; cost: number } | null = null
@@ -125,7 +129,7 @@ export function panTiltFor(type: FixtureType, origin: Vec3, target: Vec3, cur: R
   if (!best) return null
   const out: Record<string, number> = {}
   const has = (a: string) => type.channels.some((c) => c.attr === a)
-  for (const [a, angle, range] of [['pan', best.pan, panR], ['tilt', best.tilt, tiltR]] as const) {
+  for (const [a, angle, range] of [['pan', best.pan * sP, panR], ['tilt', best.tilt * sT, tiltR]] as const) {
     const v = Math.max(0, Math.min(65535, Math.round((angle / range + 0.5) * 65535)))
     out[a] = v >> 8
     if (has(a + '_fine')) out[a + '_fine'] = v & 255

@@ -92,6 +92,7 @@ export function editVenue(show: Show, v: Venue) {
 export interface TypeEdit {
   beam_deg?: [number, number]; pan_deg?: number; tilt_deg?: number
   zoom_wide_at_0?: boolean
+  pan_invert?: boolean; tilt_invert?: boolean
   locate?: Record<string, number> // 채널별 찾기 값(Locate)
   checked?: string[] // 기능 점검에서 실물과 같다고 표시한 채널
 }
@@ -109,6 +110,9 @@ export function editFixtureType(show: Show, id: string, p: TypeEdit) {
   if (p.pan_deg !== undefined) next.pan_deg = num(p.pan_deg, '팬 범위', 720)
   if (p.tilt_deg !== undefined) next.tilt_deg = num(p.tilt_deg, '틸트 범위', 360)
   if (p.zoom_wide_at_0 !== undefined) next.zoom_wide_at_0 = !!p.zoom_wide_at_0
+  // 끄면 undefined → 쇼 파일에서 항목이 빠진다(JSON 저장 때)
+  if (p.pan_invert !== undefined) next.pan_invert = p.pan_invert ? true : undefined
+  if (p.tilt_invert !== undefined) next.tilt_invert = p.tilt_invert ? true : undefined
   const attrs = new Set(t.channels.map((c) => c.attr))
   const known = (a: string) => { if (!attrs.has(a)) throw new Error(`이 조명 종류에 없는 채널: ${a}`); return a }
   if (p.locate) {
