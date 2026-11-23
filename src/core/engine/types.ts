@@ -57,9 +57,10 @@ export interface Scene {
   effects?: Effect[]
 }
 
-/** 씬 효과 하나. 크기·퍼짐 0~100%, 속도 = 1분에 몇 번, 반복 = 조명 줄 안 물결 수, fixtures = 물결 순서 */
+/** 씬 효과 하나. 크기·퍼짐 0~100%, 속도 = 1분에 몇 번, 반복 = 조명 줄 안 물결 수, fixtures = 물결 순서
+ *  wave = 밝기 물결, flash = 깜빡임(켜짐/꺼짐), color = 색 돌기(색 있는 조명만) */
 export interface Effect {
-  type: 'wave'
+  type: 'wave' | 'flash' | 'color'
   fixtures: string[]
   size: number
   speed: number

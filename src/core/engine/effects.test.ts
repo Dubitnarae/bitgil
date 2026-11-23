@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import type { Effect, Show } from './types'
 import { Engine } from './engine'
-import { applyEffects, effectPhase, waveFactor } from './effects'
+import { applyEffects, colorAt, effectPhase, flashFactor, waveFactor } from './effects'
 import { value16 } from './values'
 
 const load = (): Show => JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
@@ -27,6 +27,29 @@ describe('효과 위상', () => {
     expect(waveFactor(wave([]), 0)).toBe(1)
     expect(waveFactor(wave([]), 0.5)).toBeCloseTo(0)
     expect(waveFactor(wave([], { size: 40 }), 0.5)).toBeCloseTo(0.6)
+  })
+})
+
+describe('깜빡임·색 돌기', () => {
+  it('깜빡임: 앞 반은 그대로, 뒤 반은 크기만큼 어둡게', () => {
+    expect(flashFactor(wave([]), 0.2)).toBe(1)
+    expect(flashFactor(wave([]), 0.7)).toBe(0)
+    expect(flashFactor(wave([], { size: 30 }), 0.7)).toBeCloseTo(0.7)
+  })
+  it('색 돌기: 빨강→초록→파랑, 크기 0 이면 씬 색 그대로, 밝기는 씬 최댓값', () => {
+    const e = wave([], { type: 'color' })
+    expect(colorAt(e, 0, [0, 0, 0])).toEqual([255, 0, 0])
+    expect(colorAt(e, 1 / 3, [0, 0, 0])).toEqual([0, 255, 0])
+    expect(colorAt(e, 2 / 3, [100, 0, 0])).toEqual([0, 0, 100])
+    expect(colorAt(wave([], { type: 'color', size: 0 }), 0.5, [1, 2, 3])).toEqual([1, 2, 3])
+  })
+  it('색 돌기는 색 있는 조명만, 밝기·W 는 그대로', () => {
+    const show = load()
+    show.scenes[0].effects = [wave(['a', 'b'], { type: 'color', spread: 0 })]
+    const v = { a: { dimmer: 200, red: 0, green: 0, blue: 0, white: 50 }, b: { dimmer: 200 } }
+    const out = applyEffects(show, v, { [show.scenes[0].id]: 1 }, 0)
+    expect(out.a).toEqual({ dimmer: 200, red: 255, green: 0, blue: 0, white: 50 })
+    expect(out.b).toBe(v.b)
   })
 })
 

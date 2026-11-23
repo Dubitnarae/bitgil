@@ -26,6 +26,17 @@ export function effectPhase(e: Effect, i: number, now: number): number {
 export const waveFactor = (e: Effect, phase: number) =>
   1 - (clamp(e.size, 0, 100) / 100) * (0.5 - 0.5 * Math.cos(2 * Math.PI * phase))
 
+/** 깜빡임: 한 바퀴의 앞 반은 씬 밝기 그대로, 뒤 반은 size 만큼 어둡게(100 = 꺼짐) */
+export const flashFactor = (e: Effect, phase: number) => (phase < 0.5 ? 1 : 1 - clamp(e.size, 0, 100) / 100)
+
+/** 색 돌기: 무지개 색(위상 = 색상환 각도)을 씬 색에 size 만큼 섞는다. 밝기는 씬 R·G·B 중 가장 큰 값(모두 0이면 255) */
+export function colorAt(e: Effect, phase: number, rgb: [number, number, number]): [number, number, number] {
+  const peak = Math.max(...rgb) || 255
+  const k = clamp(e.size, 0, 100) / 100
+  const hue = (h: number) => Math.max(0, Math.min(1, Math.abs(((phase * 6 + h) % 6) - 3) - 1)) // 빨강→초록→파랑
+  return [hue(0), hue(4), hue(2)].map((c, i) => Math.round(rgb[i] * (1 - k) + c * peak * k)) as [number, number, number]
+}
+
 /** 켜진(페이더 > 0) 씬의 효과를 값에 얹은 새 값. 효과가 없으면 같은 객체를 돌려준다. */
 export function applyEffects(show: Show, values: Values, levels: Levels, now: number): Values {
   const active = show.scenes.filter((s) => (levels[s.id] ?? 0) > 0 && s.effects?.length)
@@ -35,8 +46,15 @@ export function applyEffects(show: Show, values: Values, levels: Levels, now: nu
     for (const e of s.effects!) {
       e.fixtures.forEach((id, i) => {
         const v = out[id]
+        const phase = effectPhase(e, i, now)
+        if (e.type === 'color') {
+          if (!v || !('red' in v || 'green' in v || 'blue' in v)) return // 색 값이 없는 조명(흰색 전용 등)은 그대로
+          const [red, green, blue] = colorAt(e, phase, [v.red ?? 0, v.green ?? 0, v.blue ?? 0])
+          out[id] = { ...v, red, green, blue }
+          return
+        }
         if (!v || !('dimmer' in v)) return // 밝기 값이 없으면(꺼진 조명) 건드리지 않는다
-        const f = waveFactor(e, effectPhase(e, i, now))
+        const f = e.type === 'flash' ? flashFactor(e, phase) : waveFactor(e, phase)
         if ('dimmer_fine' in v) {
           const d = Math.round(value16(v, 'dimmer') * f)
           out[id] = { ...v, dimmer: d >> 8, dimmer_fine: d & 255 }
