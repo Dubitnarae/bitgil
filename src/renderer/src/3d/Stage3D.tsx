@@ -1,5 +1,5 @@
-import { useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { useEffect, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as Controls } from 'three-stdlib'
 import type { Show, Values, Vec3 } from '../../../core/engine/types'
@@ -7,6 +7,17 @@ import { Venue } from './Venue'
 import type { Mark } from '../panels/VenuePanel'
 import { FixtureLight } from './FixtureLight'
 import { PRESETS, type Quality } from '../../../main/quality'
+import { declutter } from './declutter'
+
+/** 그릴 때마다(이름표 자리가 정해진 뒤) 겹치는 이름표를 숨긴다 */
+function Declutter() {
+  const gl = useThree((s) => s.gl)
+  const run = () => { const v = gl.domElement.closest('.view'); if (v) declutter(v) }
+  useFrame(() => { setTimeout(run) })
+  // 이름표 글자·선택 표시는 그림보다 늦게 바뀌어서(따로 그려짐) 0.3초마다도 한 번
+  useEffect(() => { const t = setInterval(run, 300); return () => clearInterval(t) }, [gl])
+  return null
+}
 
 interface Props {
   show: Show
@@ -63,6 +74,7 @@ export function Stage3D({ show, values, master, selected, onSelect, onClear, onP
             venue={show.venue} selected={selected.includes(f.id)} onSelect={onSelect} segments={q.segments} />
         )
       })}
+      <Declutter />
       <OrbitControls ref={ctrl} target={[...home.target]} maxPolarAngle={Math.PI / 2 - 0.05} />
     </Canvas>
     <button className="resetview" onClick={resetView} title="돌리거나 확대한 화면을 처음 위치로">원위치</button>
