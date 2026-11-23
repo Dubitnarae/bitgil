@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import type { Effect, Show } from './types'
+import type { Effect, Show, Values } from './types'
 import { Engine } from './engine'
-import { applyEffects, colorAt, effectPhase, flashFactor, waveFactor } from './effects'
+import { applyEffects, circleDelta, colorAt, effectPhase, flashFactor, waveFactor } from './effects'
 import { value16 } from './values'
 
 const load = (): Show => JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
@@ -50,6 +50,36 @@ describe('깜빡임·색 돌기', () => {
     const out = applyEffects(show, v, { [show.scenes[0].id]: 1 }, 0)
     expect(out.a).toEqual({ dimmer: 200, red: 255, green: 0, blue: 0, white: 50 })
     expect(out.b).toBe(v.b)
+  })
+})
+
+describe('무빙 원', () => {
+  it('조준점 둘레로 돌고 한 바퀴면 제자리, 무빙이 아니거나 팬·틸트 값이 없으면 그대로', () => {
+    const show = load()
+    const id = show.fixtures.find((f) => f.direction === 'pan_tilt')!.id
+    const other = show.fixtures.find((f) => f.direction !== 'pan_tilt')!.id
+    show.scenes[0].effects = [wave([id, other, 'zz'], { type: 'circle', speed: 60 })]
+    const on = { [show.scenes[0].id]: 1 }
+    const v: Values = { [id]: { pan: 128, pan_fine: 0, tilt: 160, tilt_fine: 0, dimmer: 255 }, [other]: { pan: 9, dimmer: 9 } }
+    const a = applyEffects(show, v, on, 0)
+    const b = applyEffects(show, v, on, 250)
+    expect(value16(a[id], 'pan')).toBeGreaterThan(value16(v[id], 'pan')) // 0° = 팬 쪽
+    expect(value16(a[id], 'tilt')).toBe(value16(v[id], 'tilt'))
+    expect(value16(b[id], 'tilt')).toBeGreaterThan(value16(v[id], 'tilt')) // 90° = 틸트 쪽
+    expect(applyEffects(show, v, on, 1000)[id]).toEqual(a[id])
+    expect(a[id].dimmer).toBe(255)
+    expect(a[other]).toBe(v[other])
+  })
+  it('크기 0 이면 안 움직이고, 반대 방향이면 차이도 반대, 끝에서는 0~65535 로 막힌다', () => {
+    const t = load().fixture_types.find((x) => x.id === 'wash')!
+    expect(circleDelta(wave([], { size: 0 }), 0, t, 40000).pan).toBeCloseTo(0)
+    const d = circleDelta(wave([]), 0, t, 40000).pan
+    expect(circleDelta(wave([]), 0, { ...t, pan_invert: true }, 40000).pan).toBeCloseTo(-d)
+    const show = load()
+    const id = show.fixtures.find((f) => f.direction === 'pan_tilt')!.id
+    show.scenes[0].effects = [wave([id], { type: 'circle' })]
+    const out = applyEffects(show, { [id]: { pan: 255, pan_fine: 255, tilt: 128 } }, { [show.scenes[0].id]: 1 }, 0)
+    expect(value16(out[id], 'pan')).toBe(65535)
   })
 })
 

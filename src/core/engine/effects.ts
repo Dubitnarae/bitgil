@@ -1,4 +1,4 @@
-import type { Effect, Show, Values } from './types'
+import type { Effect, FixtureType, Show, Values } from './types'
 import { value16 } from './values'
 import type { Levels } from './faders'
 
@@ -37,6 +37,33 @@ export function colorAt(e: Effect, phase: number, rgb: [number, number, number])
   return [hue(0), hue(4), hue(2)].map((c, i) => Math.round(rgb[i] * (1 - k) + c * peak * k)) as [number, number, number]
 }
 
+/** 무빙 원 크기 100% = 반지름 30° */
+export const CIRCLE_MAX_DEG = 30
+
+/**
+ * 무빙 원: 지금 조준점(씬 팬·틸트) 둘레로 원을 그린다. 팬·틸트 값에 더할 16비트 차이를 돌려준다.
+ * 틸트가 작으면(빛이 거의 위·아래) 같은 팬 각도도 원이 작아지므로 팬 폭을 1/sin(틸트)로 키운다.
+ * 반대 방향(invert) 조명은 차이도 뒤집어 3D·실물에서 같은 쪽으로 돈다.
+ */
+// shortcut: 팬·틸트 평면의 원(틸트 0° 근처는 sin 0.3 으로 막아 둠), 천장·벽 설치 무빙이 생기면 빛 방향 벡터로 계산
+export function circleDelta(e: Effect, phase: number, type: FixtureType, tilt16: number): { pan: number; tilt: number } {
+  const r = (clamp(e.size, 0, 100) / 100) * CIRCLE_MAX_DEG
+  const panDeg = type.pan_deg ?? 540, tiltDeg = type.tilt_deg ?? 270
+  const tiltNow = Math.abs((tilt16 / 65535 - 0.5) * tiltDeg) * (Math.PI / 180)
+  const a = 2 * Math.PI * phase
+  return {
+    pan: ((r * Math.cos(a)) / Math.max(0.3, Math.sin(tiltNow)) / panDeg) * 65535 * (type.pan_invert ? -1 : 1),
+    tilt: ((r * Math.sin(a)) / tiltDeg) * 65535 * (type.tilt_invert ? -1 : 1),
+  }
+}
+
+/** 16비트 값을 attr(+_fine)에 넣는다. 미세 채널이 없는 종류면 굵은 값만 */
+function put16(out: Record<string, number>, attr: string, v16: number, hasFine: boolean) {
+  const v = Math.max(0, Math.min(65535, Math.round(v16)))
+  out[attr] = hasFine ? v >> 8 : Math.round(v / 257)
+  if (hasFine) out[attr + '_fine'] = v & 255
+}
+
 /** 켜진(페이더 > 0) 씬의 효과를 값에 얹은 새 값. 효과가 없으면 같은 객체를 돌려준다. */
 export function applyEffects(show: Show, values: Values, levels: Levels, now: number): Values {
   const active = show.scenes.filter((s) => (levels[s.id] ?? 0) > 0 && s.effects?.length)
@@ -47,6 +74,18 @@ export function applyEffects(show: Show, values: Values, levels: Levels, now: nu
       e.fixtures.forEach((id, i) => {
         const v = out[id]
         const phase = effectPhase(e, i, now)
+        if (e.type === 'circle') {
+          const f = show.fixtures.find((x) => x.id === id)
+          const type = f?.direction === 'pan_tilt' ? show.fixture_types.find((t) => t.id === f.type) : undefined
+          if (!v || !type || !('pan' in v || 'tilt' in v)) return // 팬·틸트 값이 없으면 중심을 모르니 그대로
+          const has = (a: string) => type.channels.some((c) => c.attr === a)
+          const d = circleDelta(e, phase, type, value16(v, 'tilt'))
+          const next = { ...v }
+          put16(next, 'pan', value16(v, 'pan') + d.pan, has('pan_fine'))
+          put16(next, 'tilt', value16(v, 'tilt') + d.tilt, has('tilt_fine'))
+          out[id] = next
+          return
+        }
         if (e.type === 'color') {
           if (!v || !('red' in v || 'green' in v || 'blue' in v)) return // 색 값이 없는 조명(흰색 전용 등)은 그대로
           const [red, green, blue] = colorAt(e, phase, [v.red ?? 0, v.green ?? 0, v.blue ?? 0])
