@@ -105,3 +105,18 @@ export function applyEffects(show: Show, values: Values, levels: Levels, now: nu
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Number(v) || 0))
+
+export const EFFECT_TYPES: Effect['type'][] = ['wave', 'flash', 'color', 'circle']
+
+/** 화면·파일에서 받은 효과 목록 다듬기: 모르는 종류·없는 조명은 빼고, 숫자는 범위 안으로. 조명이 하나도 없는 효과는 버린다. */
+export function cleanEffects(show: Show, list: Effect[]): Effect[] {
+  const ids = new Set(show.fixtures.map((f) => f.id))
+  return (Array.isArray(list) ? list : [])
+    .filter((e) => EFFECT_TYPES.includes(e?.type))
+    .map((e) => ({
+      type: e.type,
+      fixtures: [...new Set((e.fixtures ?? []).filter((id) => ids.has(id)))],
+      size: clamp(e.size, 0, 100), speed: clamp(e.speed, 0, 600), repeat: Math.max(1, Math.round(clamp(e.repeat, 1, 36))), spread: clamp(e.spread, 0, 100)
+    }))
+    .filter((e) => e.fixtures.length > 0)
+}

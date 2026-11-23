@@ -58,6 +58,8 @@ describe('편집 모드 PIN', () => {
     expect(allowedInOperation({ t: 'pinEnabled', on: true }, show)).toBe(false)
     expect(allowedInOperation({ t: 'updateChoice', choice: 'skip' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'setCuelist', list: [] }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'setEffects', id: 'T-01', effects: [] }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'effectDraft', id: null }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editVenue', venue: {} as never }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editFixtureType', id: 'wash', edit: {} }, show)).toBe(false)
     expect(allowedInOperation({ t: 'cue', index: 0 }, show)).toBe(true)

@@ -1,5 +1,5 @@
 import type { Engine, FaderMode } from '../core/engine/engine'
-import type { CueStep, NamedColor, Venue } from '../core/engine/types'
+import type { CueStep, Effect, NamedColor, Venue } from '../core/engine/types'
 import { cleanColors } from '../core/engine/color'
 import { editFixture, editFixtureType, editVenue, swapFixtures, type FixtureEdit, type TypeEdit } from '../core/engine/patch'
 
@@ -20,6 +20,8 @@ export type Command =
   | { t: 'saveScene'; name: string; id?: string; temp?: boolean }
   | { t: 'renameScene'; id: string; name: string }
   | { t: 'deleteScene'; id: string }
+  | { t: 'setEffects'; id: string; effects: Effect[] } // 씬 효과 저장(편집 모드)
+  | { t: 'effectDraft'; id: string | null; effects?: Effect[] } // 효과 편집 중 미리보기(null = 끝, 편집 모드)
   | { t: 'cue'; index: number }
   | { t: 'setCuelist'; list: CueStep[] }
   | { t: 'setColors'; list: NamedColor[] } // 색 팔레트의 내 색(운영 모드에서도 가능)
@@ -52,6 +54,8 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'
     case 'renameScene': e.renameScene(c.id, c.name); return 'showChanged'
     case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
+    case 'setEffects': e.setEffects(c.id, c.effects); return 'showChanged'
+    case 'effectDraft': return e.setEffectDraft(c.id ? { scene: c.id, effects: c.effects ?? [] } : null)
     case 'defaultScene':
       if (!e.show.scenes.some((s) => s.id === c.id)) throw new Error(`씬을 찾을 수 없음: ${c.id}`)
       e.show.default_scene = c.id

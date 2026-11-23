@@ -1,8 +1,8 @@
-import type { CueStep, Show, Values } from './types'
+import type { CueStep, Effect, Show, Values } from './types'
 import { clone, lerpFixture } from './values'
 import { buildFrame } from './frame'
 import { layerScenes, lerpLevels, type Levels } from './faders'
-import { applyEffects } from './effects'
+import { applyEffects, cleanEffects } from './effects'
 
 export type FaderMode = 'live' | 'preview'
 
@@ -24,6 +24,7 @@ export class Engine {
   find: string | null = null // 조명 찾기: 이 조명만 Locate 값으로 켜고 나머지는 끈다(바로 LIVE)
   findSet: Record<string, number> = {} // 기능 점검: 찾는 조명의 채널 값을 Locate 대신 이 값으로
   chTest: { ch: number; value: number } | null = null // 채널 시험: 이 DMX 채널 하나만 이 값으로 내보낸다(나머지 0)
+  effectDraft: { scene: string; effects: Effect[] } | null = null // 효과 편집 중: 미리보기에만 이 효과로(저장 전, LIVE 는 그대로)
   private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
@@ -109,7 +110,24 @@ export class Engine {
 
   /** 미리보기 화면에 보일 값 (PREVIEW + 미리보기 페이더 + 그 시각의 효과) */
   previewOutput(now: number): Values {
-    return applyEffects(this.show, this.previewBase(), this.previewFaders, now)
+    const d = this.effectDraft
+    const show = d ? { ...this.show, scenes: this.show.scenes.map((s) => (s.id === d.scene ? { ...s, effects: d.effects } : s)) } : this.show
+    return applyEffects(show, this.previewBase(), this.previewFaders, now)
+  }
+
+  /** 효과 편집 중 미리보기(null = 끝). 쇼 파일은 안 바뀐다. */
+  setEffectDraft(d: { scene: string; effects: Effect[] } | null) {
+    if (d) this.scene(d.scene)
+    this.effectDraft = d && { scene: d.scene, effects: cleanEffects(this.show, d.effects) }
+  }
+
+  /** 씬 효과 저장(빈 목록이면 효과 없앰). 편집 미리보기도 끝낸다. */
+  setEffects(sceneId: string, effects: Effect[]) {
+    const s = this.scene(sceneId)
+    const list = cleanEffects(this.show, effects)
+    if (list.length) s.effects = list
+    else delete s.effects
+    this.effectDraft = null
   }
 
   /** 효과를 뺀 값(씬 저장용: 효과는 씬에 따로 남는다) */
@@ -248,6 +266,7 @@ export class Engine {
     this.setCuelist(this.show.cuelist) // 지운 씬을 쓰던 순서 줄도 뺀다
     for (const m of [this.faders, this.previewFaders, this.raised]) delete m[id]
     if (this.show.default_scene === id) delete this.show.default_scene
+    if (this.effectDraft?.scene === id) this.effectDraft = null
   }
 
   private only(sceneId: string): Levels {

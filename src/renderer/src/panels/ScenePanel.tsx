@@ -4,9 +4,9 @@ import type { State } from '../api'
 import { send } from '../api'
 import { SceneManager } from './SceneManager'
 
-interface Props { show: Show; st: State; fade: number; setFade: (n: number) => void }
+interface Props { show: Show; st: State; fade: number; setFade: (n: number) => void; selected: string[] }
 
-export function ScenePanel({ show, st, fade, setFade }: Props) {
+export function ScenePanel({ show, st, fade, setFade, selected }: Props) {
   const [name, setName] = useState('')
   const [manage, setManage] = useState(false)
   const save = (temp: boolean) => { send({ t: 'saveScene', name, temp }); setName('') }
@@ -18,9 +18,9 @@ export function ScenePanel({ show, st, fade, setFade }: Props) {
         {show.scenes.map((s) => (
           // 실제로 나가는 씬 = 빨간 점(onair), 미리보기에 올린 씬 = 파란 바탕(cued)
           <button key={s.id} className={[s.temp && 'temp', st.faders[s.id] > 0 && 'onair', st.previewFaders[s.id] > 0 && 'cued'].filter(Boolean).join(' ')}
-            title={(s.temp ? '임시 씬' : s.id) + (st.faders[s.id] > 0 ? ' · 실제 출력 중' : '') + (st.previewFaders[s.id] > 0 ? ' · 미리보기에 올림' : '')}
+            title={(s.temp ? '임시 씬' : s.id) + (st.faders[s.id] > 0 ? ' · 실제 출력 중' : '') + (st.previewFaders[s.id] > 0 ? ' · 미리보기에 올림' : '') + (s.effects?.length ? ` · 효과 ${s.effects.length}개` : '')}
             onClick={() => { send({ t: 'selectScene', id: s.id }); setFade(s.fade_seconds) }}>
-            {s.temp ? '임시 · ' : ''}{s.name}
+            {s.temp ? '임시 · ' : ''}{s.name}{s.effects?.length ? ' 〰' : ''}
           </button>
         ))}
       </div>
@@ -42,7 +42,7 @@ export function ScenePanel({ show, st, fade, setFade }: Props) {
       </div>
       {st.saveError && <p className="warn">{st.saveError}</p>}
       {!st.editMode && <p className="hint">운영 모드: 임시 씬만 저장·고칠 수 있습니다. 정식 씬은 [편집 모드]에서.</p>}
-      {manage && <SceneManager show={show} edit={st.editMode} />}
+      {manage && <SceneManager show={show} edit={st.editMode} selected={selected} />}
     </section>
   )
 }

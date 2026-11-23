@@ -109,7 +109,7 @@ function phoneState(): PhoneState {
   const f = engine.currentFaders(Date.now())
   const top = Object.entries(f).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0]
   return {
-    scene: top ? sceneName(top[0]) : '없음',
+    scene: top ? sceneName(top[0]) + (engine.show.scenes.find((s) => s.id === top[0])?.effects?.length ? ' 〰' : '') : '없음',
     cue: engine.cue,
     total: engine.show.cuelist.length,
     next: sceneName(engine.show.cuelist[engine.cue + 1]?.scene),
@@ -179,7 +179,7 @@ setInterval(() => {
 }, 25)
 
 /** 편집 모드가 닫히면(직접 닫기·10분 경과) 조명 찾기도 끝내고 원래 조명으로 돌아간다 */
-function endFind() { if (engine.find) engine.setFind(Date.now(), null); engine.setChTest(null) }
+function endFind() { if (engine.find) engine.setFind(Date.now(), null); engine.setChTest(null); engine.effectDraft = null }
 
 const quality = () => resolveQuality(settings.quality, cpus().length, totalmem() / 1024 ** 3)
 
