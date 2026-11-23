@@ -1,7 +1,7 @@
 import type { Show } from '../../../core/engine/types'
 import type { State } from '../api'
 import { send } from '../api'
-import { aimSave, aimStart, aimUndo, type Aim } from '../aim'
+import { aimSave, aimStart, aimUndo, canUndo, type Aim } from '../aim'
 import { PALETTE, hexToRgbw, rgbwToHex } from '../../../core/engine/color'
 
 const ATTRS: [string, string][] = [
@@ -51,10 +51,10 @@ export function FixturePanel({ show, st, selected, setSelected, aim, setAim }: P
         }} title="켜고 3D 화면의 바닥·벽·무대를 누르면 고른 조명이 그곳을 비춥니다">
           {aim ? '빛 위치 찍기 끄기' : '빛 위치 찍기'}
         </button>
-        {aim && <button disabled={!aim.history.length} onClick={() => setAim(aimUndo(aim))}
-          title="한 번 찍기 전으로(여러 번 가능): 무빙은 원래 팬·틸트로(미리보기), 고정 조명은 저장 안 한 조준점을 되돌림">
+        {aim && <button disabled={!canUndo(aim, st.editMode)} onClick={() => setAim(aimUndo(aim))}
+          title="한 번 전으로(여러 번 가능): 무빙은 원래 팬·틸트로(미리보기), 고정 조명은 찍은 조준점을, [저장] 바로 뒤면 저장 전 방향·조준점으로 되돌림(편집 모드)">
           되돌리기{aim.history.length ? ` (${aim.history.length})` : ''}</button>}
-        {aim && unsaved > 0 && <button className="aimbtn on" disabled={!st.editMode} onClick={() => setAim(aimSave(aim))}
+        {aim && unsaved > 0 && <button className="aimbtn on" disabled={!st.editMode} onClick={() => setAim(aimSave(aim, show))}
           title="찍은 고정 조명 조준점을 쇼 파일에 저장">저장 ({unsaved}대)</button>}
         {aim && <p className="hint">{!st.editMode && unsaved ? '편집 모드가 닫혀 저장할 수 없습니다. [편집 모드]를 다시 여세요. · ' : ''}
           {aim.msg || '3D 화면에서 비출 곳(바닥·벽·무대)을 누르세요. 무빙은 그쪽으로 돌고([적용] 필요), 고정 조명은 편집 모드에서 찍은 뒤 [저장]을 눌러야 저장됩니다.'}</p>}
