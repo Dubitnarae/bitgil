@@ -189,7 +189,7 @@ function buildState() {
   return {
     live: engine.output(now),
     preview: engine.preview,
-    previewOut: engine.previewOutput(),
+    previewOut: engine.previewOutput(now),
     faders: engine.currentFaders(now),
     previewFaders: engine.previewFaders,
     faderMode: engine.faderMode,

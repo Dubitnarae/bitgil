@@ -53,6 +53,18 @@ export interface Scene {
   values: Values
   /** 운영 중에 저장한 임시 씬(정식 씬과 구분해 표시) */
   temp?: boolean
+  /** 씬 효과(씬 값이 기준, 시간에 따라 바뀜). 계산은 effects.ts */
+  effects?: Effect[]
+}
+
+/** 씬 효과 하나. 크기·퍼짐 0~100%, 속도 = 1분에 몇 번, 반복 = 조명 줄 안 물결 수, fixtures = 물결 순서 */
+export interface Effect {
+  type: 'wave'
+  fixtures: string[]
+  size: number
+  speed: number
+  repeat: number
+  spread: number
 }
 
 export interface Box { id: string; label: string; x: number; z: number; w: number; d: number; h: number }

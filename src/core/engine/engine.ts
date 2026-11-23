@@ -2,6 +2,7 @@ import type { CueStep, Show, Values } from './types'
 import { clone, lerpFixture } from './values'
 import { buildFrame } from './frame'
 import { layerScenes, lerpLevels, type Levels } from './faders'
+import { applyEffects } from './effects'
 
 export type FaderMode = 'live' | 'preview'
 
@@ -70,7 +71,8 @@ export class Engine {
   /** 실제로 나가는 값 (LIVE + 씬 페이더). 조명 찾기 중이면 찾는 조명만, 끝난 직후 2초는 원래 상태로 페이드. */
   output(now: number): Values {
     if (this.find) return this.findValues()
-    const out = layerScenes(this.show, this.current(now), this.currentFaders(now), this.raised)
+    const levels = this.currentFaders(now)
+    const out = applyEffects(this.show, layerScenes(this.show, this.current(now), levels, this.raised), levels, now)
     const r = this.findReturn
     if (!r) return out
     const t = (now - r.start) / r.ms
@@ -105,8 +107,13 @@ export class Engine {
     return { [f.id]: { ...Object.fromEntries(type.channels.filter((c) => c.locate !== undefined).map((c) => [c.attr, c.locate!])), ...this.findSet } }
   }
 
-  /** 미리보기 화면에 보일 값 (PREVIEW + 미리보기 페이더) */
-  previewOutput(): Values { return layerScenes(this.show, this.preview, this.previewFaders, this.raised) }
+  /** 미리보기 화면에 보일 값 (PREVIEW + 미리보기 페이더 + 그 시각의 효과) */
+  previewOutput(now: number): Values {
+    return applyEffects(this.show, this.previewBase(), this.previewFaders, now)
+  }
+
+  /** 효과를 뺀 값(씬 저장용: 효과는 씬에 따로 남는다) */
+  private previewBase(): Values { return layerScenes(this.show, this.preview, this.previewFaders, this.raised) }
 
   // 찾기 중에는 전체 밝기를 무시(0%여도 보여야 함). 블랙아웃은 그대로 우선.
   frame(now: number) {
@@ -194,7 +201,7 @@ export class Engine {
    * id를 주면 그 씬을 덮어쓰고(이름은 그대로), 없으면 새 씬을 만든다. 저장한 씬 id를 돌려준다.
    */
   saveScene(name: string, opts: { id?: string; temp?: boolean } = {}): string {
-    const values = clone(this.previewOutput())
+    const values = clone(this.previewBase())
     if (opts.id) {
       this.scene(opts.id).values = values
       return opts.id

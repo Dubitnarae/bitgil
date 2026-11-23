@@ -71,7 +71,7 @@ describe('페이더 반영 방식', () => {
     e.faderMode = 'preview'
     e.setFader(0, 'A', 1)
     expect(e.output(0)['2-1']).toBeUndefined()
-    expect(e.previewOutput()['2-1'].dimmer).toBe(200)
+    expect(e.previewOutput(0)['2-1'].dimmer).toBe(200)
     expect(e.pending).toBe(true)
     e.apply(1000, 2)
     expect(e.output(2000)['2-1'].dimmer).toBe(100) // 페이드 절반

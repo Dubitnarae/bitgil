@@ -104,7 +104,7 @@ describe('씬 저장', () => {
     const s = e.show.scenes.find((x) => x.id === id)!
     expect(id).toBe('U-01')
     expect(s.name).toBe('설교')
-    expect(s.values).toEqual(e.previewOutput())
+    expect(s.values).toEqual(e.previewOutput(0))
     expect(s.values['1-1'].red).toBe(7)
     expect(e.saveScene('임시', { temp: true })).toBe('T-01')
     expect(e.saveScene('')).toBe('U-02')
