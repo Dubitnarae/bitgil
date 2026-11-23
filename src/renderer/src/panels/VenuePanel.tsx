@@ -22,7 +22,7 @@ function check(run: () => void) {
 }
 
 /** 공간·조명 종류 수정(편집 모드 전용): 방·무대·좌석 단·배튼·소품 치수, 조명 종류의 빛 각도·팬·틸트 범위 */
-export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue: Venue; mark: Mark | null } | null) => void }) {
+export function VenuePanel({ show, onDraft, pick }: { show: Show; onDraft: (p: { venue: Venue; mark: Mark | null } | null) => void; pick?: { key: string; at: number } | null }) {
   const [open, setOpen] = useState(false)
   const [focus, setFocus] = useState<{ label: string; seg: Seg } | null>(null)
   const [d, setD] = useState<Venue>(() => structuredClone(show.venue))
@@ -45,6 +45,13 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
     onDraft({ venue, mark: c && c.every(Number.isFinite) ? { a: P(c[0], c[1], c[2]), b: P(c[3], c[4], c[5]), text: focus!.label } : null })
   }, [open, d, focus, error, show.venue])
   useEffect(() => () => onDraft(null), [])
+  // 3D에서 누른 물체의 줄로 내려가 첫 숫자 칸을 고른다(칸을 고르면 노란 선도 같이 보인다)
+  useEffect(() => {
+    if (!open || !pick) return
+    const row = document.querySelector(`.venue [data-pick="${CSS.escape(pick.key)}"]`)
+    row?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    row?.querySelector<HTMLInputElement>('input[type=number]')?.focus({ preventScroll: true })
+  }, [pick])
 
   if (!open) {
     return (
@@ -59,11 +66,11 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
   return (
     <section className="panel venue">
       <h3>공간·조명 종류 수정 <button className="close" onClick={() => setOpen(false)}>닫기</button></h3>
-      <p className="hint">단위 m. 기준점 = 왼쪽 벽·정면 벽 모서리 통로 바닥. x 오른쪽 · z 좌석 쪽. 숫자 칸을 누르면 3D에 그 길이가 노란 선으로 보입니다. 고치는 값은 3D에 바로 보이고, [공간 저장]을 눌러야 쇼 파일에 남습니다.</p>
+      <p className="hint">단위 m. 기준점 = 왼쪽 벽·정면 벽 모서리 통로 바닥. x 오른쪽 · z 좌석 쪽. 숫자 칸을 누르면 3D에 그 길이가 노란 선으로 보이고, 3D에서 배튼·무대·단·소품을 누르면 그 칸으로 갑니다. 고치는 값은 3D에 바로 보이고, [공간 저장]을 눌러야 쇼 파일에 남습니다.</p>
       <div className="settings">
         <div className="group">
           <h4>방</h4>
-          <div className="apply">
+          <div className="apply" data-pick="room">
             {n('길이 x', d.room.length_x, (v, x) => { v.room.length_x = x }, (v) => [0, 0.05, v.room.width_z, v.room.length_x, 0.05, v.room.width_z], '방 길이 x')}
             {n('폭 z', d.room.width_z, (v, x) => { v.room.width_z = x }, (v) => [v.room.length_x, 0.05, 0, v.room.length_x, 0.05, v.room.width_z], '방 폭 z')}
             {n('처마 높이', d.room.eave_height, (v, x) => { v.room.eave_height = x }, (v) => [v.room.length_x, 0, 0, v.room.length_x, v.room.eave_height, 0])}
@@ -72,7 +79,7 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
         </div>
         <div className="group">
           <h4>무대(강대)</h4>
-          <div className="apply">
+          <div className="apply" data-pick="stage">
             {n('z 시작', d.stage.z_from, (v, x) => { v.stage.z_from = x }, (v) => [v.room.length_x / 2, v.stage.height, 0, v.room.length_x / 2, v.stage.height, v.stage.z_from], '무대 z 시작')}
             {n('z 끝', d.stage.z_to, (v, x) => { v.stage.z_to = x }, (v) => [v.room.length_x / 2, v.stage.height, 0, v.room.length_x / 2, v.stage.height, v.stage.z_to], '무대 z 끝')}
             {n('높이', d.stage.height, (v, x) => { v.stage.height = x }, (v) => [v.room.length_x / 2, 0, v.stage.z_to, v.room.length_x / 2, v.stage.height, v.stage.z_to], '무대 높이')}
@@ -81,7 +88,7 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
         <div className="group">
           <h4>좌석 단</h4>
           {d.seating_tiers.map((t, i) => (
-            <div className="apply" key={i}>
+            <div className="apply" key={i} data-pick={'tier' + i}>
               <b>{i + 1}단</b>
               {n(`z 시작 `, t.z_from, (v, x) => { v.seating_tiers[i].z_from = x }, (v) => { const s = v.seating_tiers[i]; return [v.room.length_x / 2, s.height, 0, v.room.length_x / 2, s.height, s.z_from] }, `${i + 1}단 z 시작`)}
               {n(`z 끝 `, t.z_to, (v, x) => { v.seating_tiers[i].z_to = x }, (v) => { const s = v.seating_tiers[i]; return [v.room.length_x / 2, s.height, 0, v.room.length_x / 2, s.height, s.z_to] }, `${i + 1}단 z 끝`)}
@@ -93,7 +100,7 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
           <h4>배튼(천장 조명 줄)</h4>
           <p className="hint">배튼을 옮겨도 조명 위치는 따로입니다(조명 찾기에서 고치기).</p>
           {d.battens.map((b, i) => (
-            <div className="apply" key={b.id}>
+            <div className="apply" key={b.id} data-pick={'batten:' + b.id}>
               <b>{b.id}</b>
               {n('z 위치', b.z, (v, x) => { v.battens[i].z = x }, (v) => { const t = v.battens[i]; return [t.x_from, t.height, 0, t.x_from, t.height, t.z] }, `${b.id} z 위치`)}
               {n('x 시작', b.x_from, (v, x) => { v.battens[i].x_from = x }, (v) => { const t = v.battens[i]; return [0, t.height, t.z, t.x_from, t.height, t.z] }, `${b.id} x 시작`)}
@@ -106,7 +113,7 @@ export function VenuePanel({ show, onDraft }: { show: Show; onDraft: (p: { venue
           <h4>소품 상자</h4>
           <p className="hint">x·z = 상자 가운데. 높이 0이면 3D에 그리지 않습니다(자리 표시만).</p>
           {d.props.map((p, i) => (
-            <div className="apply" key={p.id}>
+            <div className="apply" key={p.id} data-pick={'prop:' + p.id}>
               <input className="name" value={p.label} onChange={(e) => upd((v) => { v.props[i].label = e.target.value })} />
               {n('x', p.x, (v, x) => { v.props[i].x = x }, (v) => { const o = v.props[i], y = floorY(v, o.z); return [0, y, o.z, o.x, y, o.z] }, `${p.label} x`)}
               {n('z', p.z, (v, x) => { v.props[i].z = x }, (v) => { const o = v.props[i], y = floorY(v, o.z); return [o.x, y, 0, o.x, y, o.z] }, `${p.label} z`)}

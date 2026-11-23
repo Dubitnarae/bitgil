@@ -21,10 +21,12 @@ interface Props {
   quality: Quality
   /** 공간 수정 중 고르는 숫자 칸의 치수 선 */
   mark?: Mark | null
+  /** 공간 수정 중: 3D에서 누른 배튼·단·소품(그 칸으로 이동) */
+  onVenuePick?: (key: string) => void
 }
 
 /** 3D 화면: 엔진 값을 받아 그리기만 한다. 값이 바뀔 때만 다시 그린다(내장 그래픽 배려). */
-export function Stage3D({ show, values, master, selected, onSelect, onClear, onPoint, quality, mark }: Props) {
+export function Stage3D({ show, values, master, selected, onSelect, onClear, onPoint, quality, mark, onVenuePick }: Props) {
   const { length_x: X, width_z: Z } = show.venue.room
   const types = new Map(show.fixture_types.map((t) => [t.id, t]))
   const home = { position: [X * 0.8, 8, Z + 6] as const, target: [X / 2, 1.5, Z / 3] as const }
@@ -52,7 +54,7 @@ export function Stage3D({ show, values, master, selected, onSelect, onClear, onP
         const r = (n: number) => Math.round(n * 100) / 100
         onPoint({ x: r(e.point.x), y: r(e.point.y), z: r(e.point.z) })
       })}>
-        <Venue venue={show.venue} mark={mark} />
+        <Venue venue={show.venue} mark={mark} onPick={onPoint ? undefined : onVenuePick} />
       </group>
       {show.fixtures.map((f) => {
         const type = types.get(f.type)

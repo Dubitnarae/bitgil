@@ -37,6 +37,7 @@ export default function App() {
   const [settings, setSettings] = useState(false)
   const [pin, setPin] = useState<'unlock' | 'set' | 'change' | 'off' | null>(null)
   const [aim, setAim] = useState<Aim | null>(null) // null = 빛 위치 찍기 꺼짐
+  const [venuePick, setVenuePick] = useState<{ key: string; at: number } | null>(null) // 3D에서 누른 공간 물체
   const [venueDraft, setVenueDraft] = useState<{ venue: Show['venue']; mark: Mark | null } | null>(null) // 공간 수정 열려 있을 때
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function App() {
       <main>
         <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
           <Stage3D show={draft ? { ...drafted, venue: draft.venue } : drafted} mark={draft?.mark} values={values} master={master} selected={finding ? [st.find!] : selected}
+            onVenuePick={draft ? (key) => setVenuePick({ key, at: Date.now() }) : undefined}
             onSelect={onSelect} onClear={() => setSelected([])} quality={st.quality.used}
             onPoint={pointing ? (p) => setAim(aimAt(show, st, selected, p, aim!)) : undefined} />
           <span className="viewtag">{st.chTest ? `실제 출력 · 채널 ${st.chTest.ch} 시험 중 (3D는 채널 시험을 안 보여 줌)` : finding ? '실제 출력 · 조명 찾기 중' : shown === 'live' ? '실제 출력' : '미리보기'}</span>
@@ -97,7 +99,7 @@ export default function App() {
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} aim={aim} setAim={setAim} />
           {st.editMode && !finding && <FindPanel show={show} st={st} selected={selected} />}
           {st.editMode && !finding && <ChannelTest st={st} />}
-          {st.editMode && <VenuePanel show={show} onDraft={setVenueDraft} />}
+          {st.editMode && <VenuePanel show={show} onDraft={setVenueDraft} pick={venuePick} />}
         </aside>
       </main>
       <footer>
