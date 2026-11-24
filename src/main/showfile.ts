@@ -46,6 +46,28 @@ function stamp(d: Date) {
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${p(d.getMilliseconds(), 3)}`
 }
 
+const BACKUP_NAME = /^show-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\d{3}\.bitgil\.json$/
+
+/** 백업 목록(최근 것 먼저). 깨진 파일은 scenes -1 */
+export function listBackups(dir: string) {
+  const bdir = join(dir, BACKUP_DIR)
+  if (!existsSync(bdir)) return []
+  return readdirSync(bdir).filter((n) => BACKUP_NAME.test(n)).sort().reverse().map((name) => {
+    const [, y, mo, d, h, mi, se] = BACKUP_NAME.exec(name)!
+    let scenes = -1
+    try { scenes = parseShow(readFileSync(join(bdir, name), 'utf-8')).scenes.length } catch { /* 깨진 백업 */ }
+    return { name, when: `${y}-${mo}-${d} ${h}:${mi}:${se}`, scenes }
+  })
+}
+
+/** 백업으로 되돌리기: 지금 쇼는 새 백업으로 남는다(되돌리기도 되돌릴 수 있게). 이름은 목록 형식만 받는다(다른 폴더 파일 못 열게) */
+export function restoreBackup(dir: string, name: string, now = new Date()) {
+  if (!BACKUP_NAME.test(name)) throw new Error('백업 파일 이름이 아닙니다')
+  const show = parseShow(readFileSync(join(dir, BACKUP_DIR, name), 'utf-8'))
+  saveShowFile(dir, show, now)
+  return show
+}
+
 /** 가져올 쇼 파일 검사: 빛길 쇼 형식이 아니면 이유를 던진다(USB로 옮긴 파일이 깨졌거나 다른 파일일 때) */
 export function parseShow(text: string): Show {
   const s = JSON.parse(text)

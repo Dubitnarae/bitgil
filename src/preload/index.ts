@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('bitgil', {
   xhdExport: call('xhdExport'),
   showExport: call('showExport'),
   showImport: call('showImport'),
+  backupList: call('backupList'),
+  backupRestore: call('backupRestore'),
   onShow: (cb: (s: unknown) => void) => {
     const h = (_e: unknown, s: unknown) => cb(s)
     ipcRenderer.on('show', h)

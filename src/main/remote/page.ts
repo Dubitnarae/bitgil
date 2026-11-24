@@ -260,6 +260,6 @@ function open(){es=new EventSource('/app-events?code='+enc);
   es.onerror=function(){document.title='빛길 (연결 끊김 — 다시 연결 중)'};es.onopen=function(){document.title='빛길 (원격)'}}
 function on(k){return function(cb){subs[k].push(cb);if(!es)open();return function(){subs[k]=subs[k].filter(function(x){return x!==cb})}}}
 var b={send:function(c){call('send',c).catch(function(e){console.error(e)})},onState:on('state'),onShow:on('show')};
-['getShow','getState','listPorts','udmxDriverState','udmxInstallDriver','unlock','setPin','pinEnabled','lock','xhdImport','xhdExport','showExport','showImport'].forEach(function(n){b[n]=call.bind(null,n)});
+['getShow','getState','listPorts','udmxDriverState','udmxInstallDriver','unlock','setPin','pinEnabled','lock','xhdImport','xhdExport','showExport','showImport','backupList','backupRestore'].forEach(function(n){b[n]=call.bind(null,n)});
 window.bitgil=b;
 })()`

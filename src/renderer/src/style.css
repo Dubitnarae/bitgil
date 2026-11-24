@@ -76,6 +76,8 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .scene-manager input.name { background: #0d0f13; color: inherit; border: 1px solid #3c414c; border-radius: 4px; }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 20000000; } /* 3D 이름표(drei Html z-index 최대 16777271) 위로 */
 .modal .panel { width: 340px; background: #15181d; border: 1px solid #2a2e37; border-radius: 8px; }
+.backups { list-style: none; padding: 0; margin: 6px 0; }
+.backups li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 3px 0; }
 .modal .panel.ready { width: 520px; }
 .ready ul { list-style: none; padding: 0; margin: 8px 0; }
 .ready li { display: grid; grid-template-columns: 110px 1fr; gap: 8px; padding: 8px; border-radius: 6px; margin-bottom: 4px; background: #1a1d24; }

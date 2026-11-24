@@ -60,6 +60,8 @@ declare global {
       xhdExport(): Promise<string>
       showExport(): Promise<string>
       showImport(): Promise<string>
+      backupList(): Promise<{ name: string; when: string; scenes: number }[]> // scenes -1 = 깨진 백업
+      backupRestore(name: string): Promise<string> // 성공하면 빛길이 다시 켜짐
       onState(cb: (s: State) => void): () => void
       onShow(cb: (s: import('../../core/engine/types').Show) => void): () => void
     }

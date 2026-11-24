@@ -11,7 +11,7 @@ import { ConnTest } from './dmx/conntest'
 import { execFile } from 'node:child_process'
 import { runCommand, type Command } from './commands'
 import { loadSettings, saveSettings } from './settings'
-import { loadShowFile, parseShow, saveShowFile } from './showfile'
+import { listBackups, loadShowFile, parseShow, restoreBackup, saveShowFile } from './showfile'
 import { allowedInOperation, canSetPinEnabled, canUnlock, checkPin, EditMode, hashPin, isPin } from './editmode'
 import { randomInt } from 'node:crypto'
 import { lanUrls, startRemote, type PhoneCmd, type PhoneState } from './remote/server'
@@ -343,6 +343,15 @@ api.showImport = async () => {
   app.exit(0)
   return ''
 }
+// 백업 되돌리기(편집 모드): 고른 백업을 쇼 파일로 쓰고 다시 켠다(가져오기와 같은 이유)
+api.backupList = () => listBackups(showDir)
+api.backupRestore = (name: string) => {
+  if (!edit.isOpen(Date.now())) return '편집 모드에서만 할 수 있습니다'
+  try { restoreBackup(showDir, String(name)) } catch (err) { return `되돌리지 못했습니다: ${err instanceof Error ? err.message : err}` }
+  app.relaunch()
+  app.exit(0)
+  return ''
+}
 
 api.send = (c: Command) => {
   try {
@@ -370,7 +379,7 @@ api.send = (c: Command) => {
 ipcMain.handle('api', (_e, name: string, ...args: unknown[]) => api[name]?.(...args))
 ipcMain.on('cmd', (_e, c: Command) => api.send(c))
 // 원격 전체 화면에서 부를 때. 파일 고르기 창이 뜨는 기능·드라이버 설치는 노트북 앞에서만(원격에서는 창이 노트북에 떠서 아무도 못 봄)
-const LOCAL_ONLY = ['udmxInstallDriver', 'xhdImport', 'xhdExport', 'showExport', 'showImport']
+const LOCAL_ONLY = ['udmxInstallDriver', 'xhdImport', 'xhdExport', 'showExport', 'showImport', 'backupRestore']
 function remoteApi(name: string, args: unknown[], trusted: boolean) {
   if (LOCAL_ONLY.includes(name)) return '이 기능은 빛길 노트북 화면에서만 할 수 있습니다'
   if (!Object.hasOwn(api, name)) throw new Error('없는 기능입니다')

@@ -10,6 +10,28 @@ function RemoteQr({ url }: { url: string }) {
   return src ? <img src={src} alt="폰 원격 QR" width={180} height={180} style={{ display: 'block', margin: '6px 0' }} /> : null
 }
 
+/** 백업 되돌리기: 저장할 때마다 남는 최근 10개 중 하나로 쇼를 되돌린다 */
+function BackupBox() {
+  const [list, setList] = useState<Awaited<ReturnType<typeof window.bitgil.backupList>> | null>(null)
+  const [msg, setMsg] = useState('')
+  const restore = (b: { name: string; when: string }) => confirm(`${b.when} 백업으로 되돌릴까요?
+지금 쇼는 백업 폴더에 남아 다시 되돌릴 수 있고, 빛길이 다시 켜집니다.
+예배 중에는 하지 마세요.`) &&
+    window.bitgil.backupRestore(b.name).then(setMsg)
+  return (
+    <div className="group">
+      <h4>백업 되돌리기</h4>
+      <p className="hint">쇼를 저장할 때마다 바로 전 쇼가 백업으로 남습니다(최근 10개). 잘못 고쳤을 때 예전 쇼로 돌아갑니다</p>
+      <button onClick={() => window.bitgil.backupList().then(setList)}>{list ? '목록 새로 보기' : '백업 목록 보기'}</button>
+      {list && (list.length ? <ul className="backups">{list.map((b) => <li key={b.name}>
+        <span>{b.when}</span><span>{b.scenes < 0 ? '깨진 파일' : `씬 ${b.scenes}개`}</span>
+        <button disabled={b.scenes < 0} onClick={() => restore(b)}>되돌리기</button></li>)}</ul>
+        : <p className="hint">아직 백업이 없습니다.</p>)}
+      {msg && <p className="hint"><b>{msg}</b></p>}
+    </div>
+  )
+}
+
 /** 연결 시험: 출력을 켜고 정해진 시간 동안 끊김·거절을 센다(끝나면 출력은 시험 전 상태로) */
 function ConnTestBox({ t }: { t: State['output']['test'] }) {
   const [, tick] = useState(0)
@@ -151,6 +173,8 @@ export function SettingsPanel({ show, st, onClose, onPin }: { show: import('../.
       <button onClick={() => confirm('쇼 파일을 가져올까요?\n지금 쇼는 백업 폴더에 남고, 빛길이 다시 켜집니다(출력은 설정대로 다시 시작).\n예배 중에는 하지 마세요.') && window.bitgil.showImport().then(setShowMsg)}>쇼 파일 가져오기</button>
       {showMsg && <p className="hint"><b>{showMsg}</b></p>}
       </div>
+
+      <BackupBox />
 
       <div className="group">
       <h4>기존 콘솔 (Mini Pearl 1024 Pro) 백업 파일</h4>

@@ -3,7 +3,7 @@ import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { Show } from '../core/engine/types'
-import { BACKUP_DIR, loadShowFile, parseShow, saveShowFile, SHOW_FILE } from './showfile'
+import { BACKUP_DIR, listBackups, loadShowFile, parseShow, restoreBackup, saveShowFile, SHOW_FILE } from './showfile'
 
 const starter = 'data/starter-show.bitgil.json'
 
@@ -48,5 +48,23 @@ describe('쇼 파일 가져오기 검사', () => {
     expect(parseShow(text).scenes.length).toBeGreaterThan(0)
     expect(() => parseShow('{"scenes":[]}')).toThrow('빛길 쇼 파일이 아닙니다')
     expect(() => parseShow('{깨짐')).toThrow()
+  })
+})
+
+describe('백업 되돌리기', () => {
+  it('목록은 최근 것 먼저, 되돌리면 그 쇼가 되고 지금 쇼는 백업으로 남는다', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bitgil-'))
+    const show = (name: string, n: number) => ({ name, fixture_types: [], fixtures: [], scenes: Array(n).fill({}), cuelist: [], venue: {} }) as unknown as Show
+    saveShowFile(dir, show('가', 1), new Date(2026, 10, 1, 9, 0, 0))
+    saveShowFile(dir, show('나', 2), new Date(2026, 10, 2, 9, 0, 0))
+    saveShowFile(dir, show('다', 3), new Date(2026, 10, 3, 9, 0, 0))
+    writeFileSync(join(dir, BACKUP_DIR, 'show-20261101-000000000.bitgil.json'), '깨짐')
+    const list = listBackups(dir)
+    expect(list.map((b) => [b.when, b.scenes])).toEqual([['2026-11-03 09:00:00', 2], ['2026-11-02 09:00:00', 1], ['2026-11-01 00:00:00', -1]])
+    expect(restoreBackup(dir, list[1].name, new Date(2026, 10, 4, 9, 0, 0)).name).toBe('가')
+    expect(loadShowFile(dir, starter).name).toBe('가')
+    expect(listBackups(dir)[0].scenes).toBe(3) // 되돌리기 직전 쇼(다)
+    expect(() => restoreBackup(dir, '../show.bitgil.json')).toThrow()
+    expect(() => restoreBackup(dir, list[2].name)).toThrow()
   })
 })
