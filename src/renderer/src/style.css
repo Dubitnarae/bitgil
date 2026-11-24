@@ -74,8 +74,13 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .scene-manager { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow: auto; }
 .scene-manager .row { display: flex; align-items: center; gap: 6px; }
 .scene-manager input.name { background: #0d0f13; color: inherit; border: 1px solid #3c414c; border-radius: 4px; }
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 10; }
-.modal .panel { width: 340px; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 20000000; } /* 3D 이름표(drei Html z-index 최대 16777271) 위로 */
+.modal .panel { width: 340px; background: #15181d; border: 1px solid #2a2e37; border-radius: 8px; }
+.modal .panel.ready { width: 520px; }
+.ready ul { list-style: none; padding: 0; margin: 8px 0; }
+.ready li { display: grid; grid-template-columns: 110px 1fr; gap: 8px; padding: 8px; border-radius: 6px; margin-bottom: 4px; background: #1a1d24; }
+.ready li.bad { background: #4a1a1a; }
+.ready li.warn { background: #4a4126; }
 .modal input { display: block; width: 100%; margin: 6px 0; font-size: 20px; letter-spacing: 8px; text-align: center; }
 .resetview { position: absolute; right: 10px; top: 8px; }
 .view.pointing canvas { cursor: crosshair; }

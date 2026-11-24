@@ -10,6 +10,7 @@ import { ChannelMonitor } from './panels/ChannelMonitor'
 import { FaderPanel } from './panels/FaderPanel'
 import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
+import { ReadyCheck } from './panels/ReadyCheck'
 import { UpdateNotice } from './panels/UpdateNotice'
 import { ChannelTest, FindPanel } from './panels/FindPanel'
 import { VenuePanel, type Mark } from './panels/VenuePanel'
@@ -35,6 +36,7 @@ export default function App() {
   const [fade, setFade] = useState(2)
   const [monitor, setMonitor] = useState(false)
   const [settings, setSettings] = useState(false)
+  const [ready, setReady] = useState(false)
   const [pin, setPin] = useState<'unlock' | 'set' | 'change' | 'off' | null>(null)
   const [aim, setAim] = useState<Aim | null>(null) // null = 빛 위치 찍기 꺼짐
   const [venuePick, setVenuePick] = useState<{ key: string; at: number } | null>(null) // 3D에서 누른 공간 물체
@@ -80,7 +82,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} />
+      <TopBar st={st} view={view} setView={setView} onSettings={() => setSettings(!settings)} onPin={setPin} onReady={() => setReady(true)} />
       <main>
         <div className={'view ' + shown + (pointing ? ' pointing' : '')}>
           <Stage3D show={draft ? { ...drafted, venue: draft.venue } : drafted} mark={draft?.mark} values={values} master={master} selected={finding ? [st.find!] : selected}
@@ -107,6 +109,7 @@ export default function App() {
         <button onClick={() => setMonitor(!monitor)}>{monitor ? '채널 모니터 닫기' : '채널 모니터 열기'}</button>
         {monitor && <ChannelMonitor show={show} frame={st.frame} selected={selected} />}
       </footer>
+      {ready && <ReadyCheck st={st} show={show} onClose={() => setReady(false)} />}
       {pin && <PinDialog mode={pin} onClose={() => setPin(null)} />}
       <UpdateNotice st={st} />
       <PhoneNote note={st.phone} />

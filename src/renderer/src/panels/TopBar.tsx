@@ -1,10 +1,10 @@
 import type { State } from '../api'
 import { send } from '../api'
 
-interface Props { st: State; view: 'live' | 'preview'; setView: (v: 'live' | 'preview') => void; onSettings: () => void; onPin: (m: 'unlock' | 'set') => void }
+interface Props { st: State; view: 'live' | 'preview'; setView: (v: 'live' | 'preview') => void; onSettings: () => void; onPin: (m: 'unlock' | 'set') => void; onReady: () => void }
 
 /** 상단: 블랙아웃·기본 조명·전체 밝기는 바로 LIVE에 반영(안전 규칙의 예외) */
-export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
+export function TopBar({ st, view, setView, onSettings, onPin, onReady }: Props) {
   return (
     <header className="topbar">
       <strong className="logo">빛길 <small className="dev">v{st.version} · 개발자 KIM YEONGDO</small>
@@ -21,6 +21,7 @@ export function TopBar({ st, view, setView, onSettings, onPin }: Props) {
       </label>
       {/* 출력 상태는 앞쪽에: 창이 좁아 줄이 넘어가도 덜 중요한 오른쪽 것들이 아래로 간다 */}
       <OutputStatus o={st.output} />
+      <button onClick={onReady} title="출력·쇼 파일·기본 조명·PIN·폰 원격을 한 번에 확인">예배 준비 점검</button>
       <div className="spacer" />
       <QualityPicker q={st.quality} />
       <div className="seg">
