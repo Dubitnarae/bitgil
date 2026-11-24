@@ -153,6 +153,7 @@ describe('효과 편집', () => {
     const id = Object.keys(s.values).find((k) => s.values[k].dimmer > 0)!
     e.setFader(0, s.id, 1) // 바로 반영 모드: LIVE 와 미리보기 둘 다 올라감
     const before = e.output(500)[id]
+    expect(e.effectsRunning(500)).toBe(false)
     e.setEffectDraft({ scene: s.id, effects: [wave([id], { spread: 0 })] })
     expect(e.previewOutput(500)[id].dimmer).toBeLessThan(before.dimmer)
     expect(e.output(500)[id]).toEqual(before) // LIVE 는 그대로
@@ -161,6 +162,9 @@ describe('효과 편집', () => {
     expect(e.effectDraft).toBeNull()
     expect(s.effects).toHaveLength(1)
     expect(e.output(500)[id].dimmer).toBeLessThan(before.dimmer)
+    expect(e.effectsRunning(500)).toBe(true)
+    e.setFader(0, s.id, 0)
+    expect(e.effectsRunning(500)).toBe(false) // 페이더 내리면 효과도 멈춘 것
     e.setEffects(s.id, [])
     expect(s.effects).toBeUndefined()
     expect(() => e.setEffectDraft({ scene: 'nope', effects: [] })).toThrow()

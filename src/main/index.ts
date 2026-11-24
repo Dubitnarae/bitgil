@@ -234,7 +234,9 @@ function sendState() {
       lastSent = json
     }
   } catch (err) { logError('화면 상태 전송', err) } // 여기서 멈추면 화면이 굳으므로 다음 번을 꼭 예약한다
-  setTimeout(sendState, PRESETS[quality()].stateMs)
+  // 효과가 돌 때는 낮은 품질이어도 33ms 로 보낸다(100ms 면 빠른 깜빡임이 건너뛰어 끊겨 보임)
+  const ms = PRESETS[quality()].stateMs
+  setTimeout(sendState, engine.effectsRunning(Date.now()) ? Math.min(ms, 33) : ms)
 }
 sendState()
 

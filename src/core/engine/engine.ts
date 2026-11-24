@@ -115,6 +115,13 @@ export class Engine {
     return applyEffects(show, this.previewBase(), this.previewFaders, now)
   }
 
+  /** 지금 효과가 돌고 있나(LIVE 페이더·미리보기 페이더에 올라간 효과 씬, 또는 효과 편집 중) — 화면 갱신을 빠르게 할지 판단 */
+  effectsRunning(now: number): boolean {
+    if (this.effectDraft?.effects.length) return true
+    const live = this.currentFaders(now)
+    return this.show.scenes.some((s) => s.effects?.length && ((live[s.id] ?? 0) > 0 || (this.previewFaders[s.id] ?? 0) > 0))
+  }
+
   /** 효과 편집 중 미리보기(null = 끝). 쇼 파일은 안 바뀐다. */
   setEffectDraft(d: { scene: string; effects: Effect[] } | null) {
     if (d) this.scene(d.scene)
