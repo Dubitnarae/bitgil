@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import type { Effect, Show, Values } from './types'
 import { Engine } from './engine'
-import { applyEffects, circleDelta, cleanEffects, colorAt, effectPhase, flashFactor, waveFactor } from './effects'
+import { applyEffects, circleDelta, cleanEffects, colorAt, effectPhase, flashFactor, tapTempo, waveFactor } from './effects'
 import { value16 } from './values'
 
 const load = (): Show => JSON.parse(readFileSync('data/starter-show.bitgil.json', 'utf-8'))
@@ -168,5 +168,16 @@ describe('효과 편집', () => {
     e.setEffects(s.id, [])
     expect(s.effects).toBeUndefined()
     expect(() => e.setEffectDraft({ scene: 'nope', effects: [] })).toThrow()
+  })
+})
+
+describe('탭 템포', () => {
+  it('0.5초 간격 = 120, 두 번 미만은 null, 2초 넘게 쉬면 새로 센다, 240 넘지 않음', () => {
+    expect(tapTempo([0])).toBeNull()
+    expect(tapTempo([0, 500, 1000, 1500])).toBe(120)
+    expect(tapTempo([0, 1000, 5000, 5500])).toBe(120)
+    expect(tapTempo([0, 1000, 5000])).toBeNull()
+    expect(tapTempo([0, 10, 20])).toBe(240)
+    expect(tapTempo([0, 9000, 9000 + 300, 9600, 9900, 10200, 10500, 10800, 11100, 11400, 11700])).toBe(200) // 최근 8번만
   })
 })

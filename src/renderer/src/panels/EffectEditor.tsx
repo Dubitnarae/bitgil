@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Effect, Scene } from '../../../core/engine/types'
 import { send } from '../api'
+import { tapTempo } from '../../../core/engine/effects'
 
 const TYPES: [Effect['type'], string][] = [['wave', '밝기 물결'], ['flash', '깜빡임'], ['color', '색 돌기'], ['circle', '무빙 원']]
 // [속성, 이름, 최소, 최대, 단위]
@@ -19,6 +20,14 @@ export function EffectEditor({ scene, selected, onClose }: { scene: Scene; selec
   useEffect(() => () => send({ t: 'effectDraft', id: null }), [])
 
   const change = (i: number, p: Partial<Effect>) => setList(list.map((e, j) => (j === i ? { ...e, ...p } : e)))
+  const taps = useRef<{ i: number; times: number[] }>({ i: -1, times: [] })
+  const tap = (i: number) => {
+    const t = taps.current
+    if (t.i !== i) taps.current = { i, times: [] }
+    taps.current.times = [...taps.current.times.slice(-15), performance.now()]
+    const bpm = tapTempo(taps.current.times)
+    if (bpm) change(i, { speed: bpm })
+  }
   const add = () => {
     if (!selected.length) return alert('3D 화면에서 효과를 줄 조명을 먼저 고르세요 (Shift·Ctrl+클릭, 누른 순서 = 물결 순서)')
     setList([...list, { type: 'wave', fixtures: [...selected], size: 100, speed: 30, repeat: 1, spread: 100 }])
@@ -42,6 +51,7 @@ export function EffectEditor({ scene, selected, onClose }: { scene: Scene; selec
               <span className="bar-name">{label}</span>
               <input type="range" min={min} max={max} value={e[k]} onChange={(ev) => change(i, { [k]: Number(ev.target.value) })} />
               <span className="bar-val">{e[k]} {unit}</span>
+              {k === 'speed' && <button onClick={(ev) => { ev.preventDefault(); tap(i) }} title="찬양 박자에 맞춰 여러 번 누르세요. 누른 간격으로 속도를 정합니다(2초 넘게 쉬면 새로 셈)">박자 두드리기</button>}
             </label>
           ))}
         </div>

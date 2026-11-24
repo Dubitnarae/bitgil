@@ -120,3 +120,12 @@ export function cleanEffects(show: Show, list: Effect[]): Effect[] {
     }))
     .filter((e) => e.fixtures.length > 0)
 }
+
+/** 탭 템포: 두드린 시각(ms) 목록 → 분당 박자. 2초 넘게 쉬면 거기서부터 새로 세고, 최근 8번만 평균. 두 번 미만이면 null. */
+export function tapTempo(times: number[]): number | null {
+  let start = times.length - 1
+  while (start > 0 && times[start] - times[start - 1] <= 2000 && times.length - start < 8) start--
+  const run = times.slice(start)
+  if (run.length < 2) return null
+  return Math.round(clamp(60000 / ((run[run.length - 1] - run[0]) / (run.length - 1)), 1, 240))
+}
