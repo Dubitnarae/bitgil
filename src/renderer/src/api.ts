@@ -11,6 +11,7 @@ export interface State {
   faderMode: FaderMode
   pending: boolean
   cue: number // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 시작 전)
+  autoAt: number | null // 자동 진행: 다음 줄로 넘어갈 시각(null = 꺼짐)
   find: string | null // 조명 찾기 중인 조명(null = 찾기 아님)
   chTest: { ch: number; value: number } | null // 채널 시험 중인 채널(null = 아님)
   master: number

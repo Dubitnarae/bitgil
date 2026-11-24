@@ -21,6 +21,7 @@ export class Engine {
   previewFaders: Levels = {}
   faderMode: FaderMode = 'live'
   cue = -1 // 순서 목록에서 마지막으로 미리보기에 올린 줄(-1 = 아직 시작 전)
+  autoAt: number | null = null // 자동 진행 중이면 다음 줄로 넘어갈 시각(null = 꺼짐)
   find: string | null = null // 조명 찾기: 이 조명만 Locate 값으로 켜고 나머지는 끈다(바로 LIVE)
   findSet: Record<string, number> = {} // 기능 점검: 찾는 조명의 채널 값을 Locate 대신 이 값으로
   chTest: { ch: number; value: number } | null = null // 채널 시험: 이 DMX 채널 하나만 이 값으로 내보낸다(나머지 0)
@@ -257,13 +258,34 @@ export class Engine {
     this.loadCue(i)
     this.apply(now, this.show.cuelist[i].fade)
     this.preview = pending
+    // 자동 진행 중: 이 줄에 초가 있으면 그 뒤 다음 줄로, 없거나 마지막 줄이면 멈춤
+    const auto = this.show.cuelist[i].auto
+    if (this.autoAt !== null) this.autoAt = auto && this.show.cuelist[i + 1] ? now + auto * 1000 : null
+  }
+
+  /** 자동 진행 시작(다음 줄부터 바로 실제 조명) / 멈춤 */
+  setAuto(now: number, on: boolean) {
+    this.autoAt = null
+    if (!on || !this.show.cuelist[this.cue + 1]) return
+    this.autoAt = now
+    this.goNextCue(now)
+  }
+
+  /** 출력 루프가 부른다: 시간이 되면 다음 줄로. 블랙아웃을 켜면 자동 진행도 멈춘다(비상 때 혼자 바뀌지 않게) */
+  tickAuto(now: number) {
+    if (this.autoAt === null) return
+    if (this.blackout) this.autoAt = null
+    else if (now >= this.autoAt) this.goNextCue(now)
   }
 
   /** 순서 목록 통째로 바꾸기(추가·삭제·순서·페이드). 없는 씬은 뺀다. */
   setCuelist(list: CueStep[]) {
     this.show.cuelist = list
       .filter((c) => this.show.scenes.some((s) => s.id === c.scene))
-      .map((c) => ({ scene: c.scene, fade: Math.max(0, Math.min(60, Number(c.fade) || 0)) }))
+      .map((c) => {
+        const auto = Math.max(0, Math.min(3600, Number(c.auto) || 0))
+        return { scene: c.scene, fade: Math.max(0, Math.min(60, Number(c.fade) || 0)), ...(auto ? { auto } : {}) }
+      })
     this.cue = Math.min(this.cue, this.show.cuelist.length - 1)
   }
 

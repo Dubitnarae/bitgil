@@ -27,6 +27,7 @@ export type Command =
   | { t: 'setColors'; list: NamedColor[] } // 색 팔레트의 내 색(운영 모드에서도 가능)
   | { t: 'nextCue' }
   | { t: 'prevCue' }
+  | { t: 'autoCue'; on: boolean } // 순서 목록 자동 진행 시작(다음 줄부터 실제 조명)·멈춤
   | { t: 'find'; id: string | null }
   | { t: 'findSet'; attr: string; value: number | null } // 기능 점검: 찾는 조명 채널 값 바꾸기(null = Locate 로)
   | { t: 'chTest'; ch: number | null; value?: number }
@@ -74,9 +75,10 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'find': return e.setFind(now, c.id)
     case 'findSet': return e.setFindValue(c.attr, c.value)
     case 'chTest': return e.setChTest(c.ch === null ? null : { ch: c.ch, value: c.value ?? 255 })
-    case 'cue': return e.loadCue(c.index)
+    case 'cue': e.autoAt = null; return e.loadCue(c.index) // 손으로 고르면 자동 진행은 멈춤
     case 'nextCue': return e.goNextCue(now)
     case 'prevCue': return e.goPrevCue(now)
+    case 'autoCue': return e.setAuto(now, c.on)
     case 'set': return e.setPreview(c.ids, c.attr, c.value)
     case 'selectScene': return e.selectScene(c.id)
     case 'clearManual': return e.clearManual(c.ids, c.attrs)

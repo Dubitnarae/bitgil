@@ -169,6 +169,32 @@ describe('순서 목록', () => {
     expect(e.live[id].dimmer).toBe(200)
     expect(e.preview[id].dimmer).toBe(50)
   })
+  it('자동 진행: 줄마다 정한 초 뒤 다음 줄, 초 없는 줄·끝·블랙아웃에서 멈춤', () => {
+    const e = new Engine(structuredClone(show))
+    const [a, b] = e.show.scenes
+    e.setCuelist([{ scene: a.id, fade: 0, auto: 5 }, { scene: b.id, fade: 0, auto: 3 }, { scene: a.id, fade: 0 }, { scene: b.id, fade: 0, auto: 2 }])
+    expect(e.show.cuelist[2].auto).toBeUndefined()
+    e.setAuto(0, true) // 첫 줄 바로 나감
+    expect(e.cue).toBe(0)
+    expect(e.faders[a.id]).toBe(1)
+    e.tickAuto(4999)
+    expect(e.cue).toBe(0)
+    e.tickAuto(5000)
+    expect(e.cue).toBe(1)
+    expect(e.faders[b.id]).toBe(1)
+    e.tickAuto(8000) // 셋째 줄은 초가 없어 여기서 멈춤
+    expect(e.cue).toBe(2)
+    expect(e.autoAt).toBeNull()
+    e.setAuto(9000, true) // 다시 시작 → 넷째(마지막) 줄, 끝이라 멈춤
+    expect(e.cue).toBe(3)
+    expect(e.autoAt).toBeNull()
+    e.loadCue(0)
+    e.setAuto(10000, true)
+    e.blackout = true
+    e.tickAuto(20000)
+    expect(e.autoAt).toBeNull()
+    expect(e.cue).toBe(1)
+  })
   it('씬을 지우면 그 씬을 쓰던 줄도 빠지고 위치가 당겨진다', () => {
     const e = new Engine(structuredClone(show))
     const [a, b] = e.show.scenes

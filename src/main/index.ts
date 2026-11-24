@@ -171,6 +171,7 @@ setRemote(settings.remoteOn)
 // 한 번 오류가 나도 루프는 계속 돈다(조명이 멈추지 않게). 오류 난 프레임만 건너뛰고 장비는 마지막 값을 유지.
 setInterval(() => {
   try {
+    engine.tickAuto(Date.now())
     const frame = engine.frame(Date.now())
     output.send(frame)
     enttec.send(frame)
@@ -195,6 +196,7 @@ function buildState() {
     faderMode: engine.faderMode,
     pending: engine.pending,
     cue: engine.cue,
+    autoAt: engine.autoAt,
     find: engine.find,
     chTest: engine.chTest,
     master: engine.master,

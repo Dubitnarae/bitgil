@@ -95,7 +95,8 @@ export interface Show {
 export interface NamedColor { name: string; rgbw: [number, number, number, number] }
 
 /** 순서 목록 한 줄: 어떤 씬을 몇 초 페이드로 */
-export interface CueStep { scene: string; fade: number }
+/** auto = 자동 진행 중 이 줄이 나간 뒤 n초 지나면 다음 줄로(없으면 자동 진행이 여기서 멈춤) */
+export interface CueStep { scene: string; fade: number; auto?: number }
 
 /** 조명 id → 속성 이름 → 0~255 */
 export type Values = Record<string, Record<string, number>>
