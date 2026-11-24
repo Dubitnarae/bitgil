@@ -72,9 +72,11 @@ export function startRemote(opts: {
   unlock: (pin: string) => boolean
   /** 폰 설정 모드 명령(JSON). 오류 문구를 돌려준다(빈 값 = 됨) */
   setup: (cmd: unknown) => string
+  /** 노트북 편집 모드가 열려 있는지(닫히면 PIN을 넣었던 기기 목록을 비운다) */
+  editOpen: () => boolean
   /** 원격 전체 화면: 빛길 화면 파일 폴더(out/renderer)와, 화면이 부르는 기능(window.bitgil 의 이름 → 결과) */
   appDir: string
-  api: (name: string, args: unknown[]) => unknown
+  api: (name: string, args: unknown[], trusted: boolean) => unknown
   onError: (msg: string) => void
 }) {
   const lock = new Lockout()
@@ -84,6 +86,9 @@ export function startRemote(opts: {
   const clients = new Set<ServerResponse>()
   const appClients = new Set<ServerResponse>()
   const pinLock = (ip: string) => { const l = pinLocks.get(ip) ?? new Lockout(); pinLocks.set(ip, l); return l }
+  // 이번 편집 모드에서 직접 PIN을 넣은 기기(IP). 노트북이 편집 모드를 열었다고 폰까지 열리면 안 된다
+  const trustedIps = new Set<string>()
+  const trusted = (ip: string) => opts.editOpen() && trustedIps.has(ip)
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://x')
     if (req.method === 'GET' && url.pathname === '/') {
@@ -149,9 +154,10 @@ export function startRemote(opts: {
           if (!Array.isArray(args)) throw new Error()
           if (PIN_CALLS.includes(name)) {
             // PIN 을 받는 기능은 폰 /unlock 과 같이 접속 IP별로 5번 틀리면 1분 잠김
-            const l = pinLock(req.socket.remoteAddress ?? ''), now = Date.now()
-            out = !l.locked(now) && l.check((await opts.api(name, args)) === true, now)
-          } else out = await opts.api(name, args)
+            const ip = req.socket.remoteAddress ?? '', l = pinLock(ip), now = Date.now()
+            out = !l.locked(now) && l.check((await opts.api(name, args, trusted(ip))) === true, now)
+            if (out === true && name !== 'pinEnabled') trustedIps.add(ip)
+          } else out = await opts.api(name, args, trusted(req.socket.remoteAddress ?? ''))
         } catch (err) {
           res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' })
           return res.end(err instanceof Error ? err.message : '요청 형식이 이상합니다')
@@ -162,10 +168,13 @@ export function startRemote(opts: {
       return
     }
     if (req.method === 'POST' && url.pathname === '/unlock') {
-      const l = pinLock(req.socket.remoteAddress ?? '')
+      const ip = req.socket.remoteAddress ?? ''
+      const l = pinLock(ip)
       const now = Date.now()
       // 잠긴 동안에는 PIN 검사 자체를 하지 않는다(검사하면 맞는 PIN일 때 403을 주면서도 편집 모드가 열려 버림)
-      res.writeHead(!l.locked(now) && l.check(opts.unlock(url.searchParams.get('pin') ?? ''), now) ? 204 : 403)
+      const ok = !l.locked(now) && l.check(opts.unlock(url.searchParams.get('pin') ?? ''), now)
+      if (ok) trustedIps.add(ip)
+      res.writeHead(ok ? 204 : 403)
       return res.end()
     }
     if (req.method === 'POST' && url.pathname === '/setup') {
@@ -173,7 +182,8 @@ export function startRemote(opts: {
       req.on('data', (d) => { body += d; if (body.length > 10_000) req.destroy() })
       req.on('end', () => {
         let err: string
-        try { err = opts.setup(JSON.parse(body)) } catch { err = '명령 형식이 이상합니다' }
+        if (!trusted(req.socket.remoteAddress ?? '')) err = '이 폰에서 PIN을 넣어 설정 모드를 열어 주세요'
+        else try { err = opts.setup(JSON.parse(body)) } catch { err = '명령 형식이 이상합니다' }
         res.writeHead(err ? 400 : 204, { 'Content-Type': 'text/plain; charset=utf-8' })
         res.end(err)
       })
@@ -190,6 +200,7 @@ export function startRemote(opts: {
   let last = ''
   let quiet = 0
   const timer = setInterval(() => {
+    if (!opts.editOpen()) trustedIps.clear()
     const json = JSON.stringify(opts.state())
     const msg = json !== last ? `data: ${json}\n\n` : ++quiet >= 60 ? ':\n\n' : ''
     if (msg) { quiet = 0; for (const r of clients) r.write(msg) }

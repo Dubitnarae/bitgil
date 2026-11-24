@@ -159,9 +159,12 @@ $('back').onclick=function(){view='main';show(false)};
 $('pinGo').onclick=function(){
   fetch('/unlock?code='+encodeURIComponent(code)+'&pin='+encodeURIComponent($('pin').value),{method:'POST'}).then(function(r){
     $('pin').value='';$('pinMsg').textContent=r.ok?'':'PIN이 틀렸습니다(5번 틀리면 1분 잠김)';
+    if(r.ok){mine=true;drawSetup()}
   },function(){$('pinMsg').textContent='노트북에 보내지 못했습니다'});
 };
-$('lock').onclick=function(){ if(st&&st.edit)setup({t:'lock'}); view='main';show(false) };
+// 노트북이 편집 모드여도 이 폰에서 PIN을 넣어야 설정 모드(서버도 폰마다 따로 검사)
+var mine=false;
+$('lock').onclick=function(){ if(st&&st.edit&&mine)setup({t:'lock'}); view='main';show(false) };
 var tabs=document.querySelectorAll('.tabs button');
 for(var i=0;i<tabs.length;i++)tabs[i].onclick=function(){
   tab=this.getAttribute('data-t');
@@ -201,8 +204,10 @@ $('chEnd').onclick=function(){$('chIn').value=st.setup.chTest.ch;setup({t:'chTes
 
 function drawSetup(){
   if(!st||view!=='setup')return;
-  vis('pinBox',!st.edit);vis('work',st.edit);$('lock').disabled=!st.edit;
-  if(!st.edit){form=null;vis('pin',!st.pinOff);$('pinTxt').textContent=st.pinOff?'PIN 사용이 꺼져 있어 PIN 없이 열립니다.':'편집 모드 PIN(노트북과 같은 4자리)을 넣으세요.';return}
+  if(!st.edit)mine=false;
+  var ed=st.edit&&mine;
+  vis('pinBox',!ed);vis('work',ed);$('lock').disabled=!ed;
+  if(!ed){form=null;vis('pin',!st.pinOff);$('pinTxt').textContent=st.pinOff?'PIN 사용이 꺼져 있어 PIN 없이 열립니다.':'편집 모드 PIN(노트북과 같은 4자리)을 넣으세요.';return}
   var s=st.setup,f=cur();
   $('sWarn').innerHTML=(st.output?'':'<div class="warn">출력 대기 중이라 실제 조명은 안 켜집니다. 노트북에서 [출력 켜기]를 누르세요.</div>')+(st.blackout?'<div class="warn">블랙아웃 중이라 조명이 꺼져 있습니다.</div>':'');
   for(var i=0;i<tabs.length;i++)tabs[i].className=tabs[i].getAttribute('data-t')===tab?'act':'';

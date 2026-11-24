@@ -23,7 +23,7 @@ describe('폰 원격', () => {
       run: (c) => got.push(c),
       unlock: (pin) => pin === '1234',
       setup: (c) => ((c as { t: string }).t === 'find' ? '' : '안 되는 명령'),
-      appDir: '.', api: () => null,
+      appDir: '.', api: () => null, editOpen: () => true,
       onError: (m) => { throw new Error(m) }
     })
     try {
@@ -38,6 +38,9 @@ describe('폰 원격', () => {
       expect((await fetch(base + '/cmd?code=123456&c=이상한', { method: 'POST' })).status).toBe(400)
       expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }, { c: 'prev' }, { c: 'master', value: 1 }])
       // 폰 설정 모드: PIN, 명령 JSON(오류 문구는 그대로 돌려줌)
+      // 노트북이 편집 모드여도 이 폰에서 PIN을 넣기 전에는 설정 명령 거절
+      const early = await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"find","id":"1-1"}' })
+      expect([early.status, await early.text()]).toEqual([400, '이 폰에서 PIN을 넣어 설정 모드를 열어 주세요'])
       expect((await fetch(base + '/unlock?code=123456&pin=0000', { method: 'POST' })).status).toBe(403)
       expect((await fetch(base + '/unlock?code=123456&pin=1234', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"find","id":"1-1"}' })).status).toBe(204)
@@ -60,7 +63,7 @@ describe('폰 원격', () => {
       run: () => {},
       unlock: (pin) => { asked++; return pin === '1234' },
       setup: () => '',
-      appDir: '.', api: () => null,
+      appDir: '.', api: () => null, editOpen: () => true,
       onError: (m) => { throw new Error(m) }
     })
     // 보내는 쪽 주소를 정해서 다른 폰인 척한다(127.x.x.x 는 모두 이 컴퓨터)
@@ -85,8 +88,8 @@ describe('폰 원격', () => {
       code: () => '123456',
       state: () => ({ scene: '', cue: -1, total: 0, next: '', prev: '', list: [], blackout: false, master: 1, fading: false, output: false, edit: false }),
       run: () => {}, unlock: () => false, setup: () => '',
-      appDir: dir,
-      api: (name, args) => { calls.push([name, ...args]); return name === 'unlock' ? args[0] === '1234' : { ok: name } },
+      appDir: dir, editOpen: () => true,
+      api: (name, args, t) => { calls.push([name, ...args, t]); return name === 'unlock' ? args[0] === '1234' : { ok: name } },
       onError: (m) => { throw new Error(m) }
     })
     const base = `http://127.0.0.1:${REMOTE_PORT}`
@@ -98,7 +101,7 @@ describe('폰 원격', () => {
       expect((await fetch(base + '/app/..%2f..%2fpackage.json')).status).toBe(404) // 폴더 밖 파일 막음
       expect((await post('/api/getShow?code=000000', [])).status).toBe(401)
       expect(await (await post('/api/send?code=123456', [{ t: 'blackout', on: true }])).json()).toEqual({ ok: 'send' })
-      expect(calls).toEqual([['send', { t: 'blackout', on: true }]])
+      expect(calls).toEqual([['send', { t: 'blackout', on: true }, false]]) // PIN 안 넣은 기기 = false
       expect((await post('/api/send?code=123456', {} as never)).status).toBe(400) // 인자는 배열만
       for (let i = 0; i < 5; i++) expect(await (await post('/api/unlock?code=123456', ['0000'])).json()).toBe(false)
       expect(await (await post('/api/unlock?code=123456', ['1234'])).json()).toBe(false) // PIN 5번 틀려 잠김

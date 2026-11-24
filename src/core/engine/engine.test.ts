@@ -156,6 +156,19 @@ describe('순서 목록', () => {
     e.goPrevCue(11000) // 처음이면 그대로
     expect(e.cue).toBe(0)
   })
+  it('폰 [다음 씬]은 노트북에서 [적용] 안 한 수동 값을 내보내지 않고 미리보기에 남긴다', () => {
+    const e = new Engine(structuredClone(show))
+    const [a, b] = e.show.scenes
+    const id = e.show.fixtures[0].id
+    e.setCuelist([{ scene: a.id, fade: 0 }, { scene: b.id, fade: 0 }])
+    e.setPreview([id], 'dimmer', 200)
+    e.apply(0, 0) // 이미 적용한 수동 값은 계속 나간다
+    e.setPreview([id], 'dimmer', 50) // 적용 안 한 값
+    e.goNextCue(1000)
+    expect(e.faders[a.id]).toBe(1)
+    expect(e.live[id].dimmer).toBe(200)
+    expect(e.preview[id].dimmer).toBe(50)
+  })
   it('씬을 지우면 그 씬을 쓰던 줄도 빠지고 위치가 당겨진다', () => {
     const e = new Engine(structuredClone(show))
     const [a, b] = e.show.scenes

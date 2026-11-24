@@ -244,8 +244,12 @@ export class Engine {
   goPrevCue(now: number) { this.goCue(now, this.cue - 1) }
   private goCue(now: number, i: number) {
     if (!this.show.cuelist[i]) return
+    // 노트북에서 손으로 조정하고 [적용] 안 한 값은 내보내지 않고, 미리보기에 그대로 남겨 둔다
+    const pending = this.preview
+    this.preview = clone(this.live)
     this.loadCue(i)
     this.apply(now, this.show.cuelist[i].fade)
+    this.preview = pending
   }
 
   /** 순서 목록 통째로 바꾸기(추가·삭제·순서·페이드). 없는 씬은 뺀다. */

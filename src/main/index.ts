@@ -102,7 +102,7 @@ function setRemote(on: boolean) {
   remote?.close()
   remote = null
   remoteError = ''
-  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, appDir: join(__dirname, '../renderer'), api: remoteApi, onError: (m) => { remoteError = m; console.error(m) } })
+  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, editOpen: () => edit.isOpen(Date.now()), appDir: join(__dirname, '../renderer'), api: remoteApi, onError: (m) => { remoteError = m; console.error(m) } })
 }
 const sceneName = (id?: string) => engine.show.scenes.find((s) => s.id === id)?.name ?? ''
 function phoneState(): PhoneState {
@@ -369,9 +369,11 @@ ipcMain.handle('api', (_e, name: string, ...args: unknown[]) => api[name]?.(...a
 ipcMain.on('cmd', (_e, c: Command) => api.send(c))
 // 원격 전체 화면에서 부를 때. 파일 고르기 창이 뜨는 기능·드라이버 설치는 노트북 앞에서만(원격에서는 창이 노트북에 떠서 아무도 못 봄)
 const LOCAL_ONLY = ['udmxInstallDriver', 'xhdImport', 'xhdExport', 'showExport', 'showImport']
-function remoteApi(name: string, args: unknown[]) {
+function remoteApi(name: string, args: unknown[], trusted: boolean) {
   if (LOCAL_ONLY.includes(name)) return '이 기능은 빛길 노트북 화면에서만 할 수 있습니다'
   if (!Object.hasOwn(api, name)) throw new Error('없는 기능입니다')
+  // 노트북이 편집 모드여도 이 기기에서 PIN을 넣지 않았으면 운영 모드 명령만
+  if (name === 'send' && !trusted && !allowedInOperation(args[0] as Command, engine.show)) return console.warn('원격: PIN 안 넣은 기기라 막은 명령', (args[0] as Command)?.t)
   const r = api[name](...args)
   if (name === 'send') phoneNote = { text: '원격 화면에서 조작', at: Date.now() }
   if (name === 'unlock' && r === true) phoneNote = { text: '원격 화면에서 편집 모드 열림', at: Date.now() }

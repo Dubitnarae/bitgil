@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { pickPort, UsbDmxOutput } from './enttec'
 
 const ports = [
@@ -47,5 +47,20 @@ describe('UsbDmxOutput 전송 모양', () => {
     expect(log.length).toBe(1)
     const b = log[0] as Buffer
     expect([b[0], b[1], b[b.length - 1]]).toEqual([0x7e, 0x06, 0xe7])
+  })
+
+  it('장비가 굳어 전송이 1초 넘게 안 끝나면 끊김으로 바꾼다', () => {
+    const out = new UsbDmxOutput('', 'pro')
+    const port = { write: () => {}, isOpen: false } // 응답(콜백)이 영영 안 옴
+    Object.assign(out, { port, enabled: true, connected: true })
+    vi.useFakeTimers()
+    out.send(frame)
+    out.send(frame)
+    expect(out.connected).toBe(true) // 잠깐 밀린 건 기다린다
+    vi.advanceTimersByTime(1500)
+    out.send(frame)
+    vi.useRealTimers()
+    expect(out.connected).toBe(false)
+    expect(out.error).toBe('장비가 응답하지 않습니다')
   })
 })

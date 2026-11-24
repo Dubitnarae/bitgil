@@ -16,6 +16,7 @@ export const listPorts = (): Promise<PortInfo[]> => SerialPort.list()
  * udmx = uDMX(Anyma 호환, COM 포트 없음 — udmx.ts 의 UdmxOutput 이 맡음) */
 export type DmxType = 'pro' | 'open' | 'udmx'
 export type SerialDmxType = Exclude<DmxType, 'udmx'>
+export const BUSY_LIMIT_MS = 1000
 
 /**
  * USB-DMX 실제 출력. 출력이 켜졌을 때만 포트를 열고 보낸다.
@@ -30,6 +31,7 @@ export class UsbDmxOutput implements DmxOutput {
   private port: SerialPort | null = null
   private opening = false
   private busy = false
+  private busyAt = 0
   stats = newStats()
 
   constructor(public preferred = '', public type: SerialDmxType = 'pro') {
@@ -57,9 +59,19 @@ export class UsbDmxOutput implements DmxOutput {
   send(frame: Uint8Array) {
     // 앞 전송이 아직 안 끝났으면 건너뛴다(장비가 막혔을 때 쌓이지 않게)
     const port = this.port
-    if (!this.enabled || !this.connected || !port || this.busy) return
+    if (!this.enabled || !this.connected || !port) return
+    if (this.busy) {
+      // 장비가 굳어 전송이 1초 넘게 안 끝나면 끊긴 것으로 보고 다시 연결한다(안 그러면 화면은 '출력 중'인데 조명은 멈춤)
+      if (Date.now() - this.busyAt > BUSY_LIMIT_MS) this.lost(port, '장비가 응답하지 않습니다')
+      return
+    }
     this.busy = true
-    const done = (err?: Error | null) => { this.busy = false; if (err) this.stats.fail++; else this.stats.ok++ }
+    this.busyAt = Date.now()
+    const done = (err?: Error | null) => {
+      if (this.port !== port) return // 이미 끊김 처리한 옛 포트의 늦은 응답
+      this.busy = false
+      if (err) this.stats.fail++; else this.stats.ok++
+    }
     if (this.type === 'pro') return void port.write(Buffer.from(enttecPacket(frame)), done)
     // Open DMX: 브레이크(선을 잠깐 0으로, USB 왕복 시간만큼 → 88µs 이상) → 시작 코드 0 + 512채널
     // drain = 실제로 선에 다 나갈 때까지 기다림. 안 기다리면 다음 브레이크가 앞 프레임 끝 채널을 잘라 먹는다
