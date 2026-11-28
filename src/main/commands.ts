@@ -14,6 +14,7 @@ export type Command =
   | { t: 'master'; value: number }
   | { t: 'sound'; on: boolean } // 소리 반응 켜기/끄기(운영 모드에서도 가능)
   | { t: 'soundLevel'; factor: number } // 화면이 마이크로 잰 밝기 배율(0~1), 초당 25번
+  | { t: 'effectRate'; value: number } // 효과 전체 속도 배율(0~3, 운영 모드에서도 가능)
   | { t: 'default' }
   | { t: 'defaultScene'; id: string } // 기본 조명으로 켤 씬 정하기(편집 모드)
   | { t: 'fader'; id: string; value: number }
@@ -99,6 +100,7 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
     case 'master': e.master = Math.max(0, Math.min(1, c.value)); return
     case 'sound': return e.setSound(c.on)
     case 'soundLevel': return e.setSoundLevel(now, c.factor)
+    case 'effectRate': return e.setEffectRate(now, c.value)
     case 'fader': return e.setFader(now, c.id, c.value)
     case 'fadersDown': for (const s of e.show.scenes) e.setFader(now, s.id, 0); return
     case 'faderMode': e.faderMode = c.mode; return

@@ -12,6 +12,15 @@ export function FaderPanel({ show, st }: { show: Show; st: State }) {
         <strong>씬 페이더</strong>
         <span className={'mode ' + st.faderMode}>{live ? '바로 반영' : '미리보기 → [적용]'}</span>
         <button onClick={() => send({ t: 'fadersDown' })}>모두 내리기</button>
+        {show.scenes.some((s) => s.effects?.length) && (
+          <label className={'effrate' + (st.effectRate !== 1 ? ' changed' : '')} title="돌고 있는 효과(〰) 전체를 한 번에 빠르게·느리게. 저장한 효과 속도는 그대로이고, 프로그램을 다시 켜면 1배로 돌아옵니다">
+            〰 효과 속도
+            <input type="range" min={0} max={300} step={5} value={Math.round(st.effectRate * 100)}
+              onChange={(e) => send({ t: 'effectRate', value: Number(e.target.value) / 100 })} />
+            <span>{st.effectRate === 0 ? '멈춤' : `×${st.effectRate.toFixed(2)}`}</span>
+            {st.effectRate !== 1 && <button onClick={() => send({ t: 'effectRate', value: 1 })}>1배로</button>}
+          </label>
+        )}
       </div>
       <div className="fader-row">
         {show.scenes.map((s) => {

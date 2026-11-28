@@ -227,6 +227,7 @@ function buildState() {
     chTest: engine.chTest,
     master: engine.master,
     sound: engine.soundOn ? engine.soundFactor(now) : null,
+    effectRate: engine.effectRate,
     blackout: engine.blackout,
     resume: resumeOffer ? { at: resumeOffer.at } : null,
     fading: engine.fading,

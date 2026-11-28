@@ -202,3 +202,7 @@ footer > button { position: absolute; right: 10px; top: 6px; }
 .sound.on meter { width: 60px; }
 .sound.on input[type=range] { width: 70px; }
 @keyframes sound-on { 50% { background: #c26a00; } }
+/* 효과 전체 속도: 1배가 아니면 노랗게(바꿔 둔 걸 잊지 않게) */
+.effrate { display: flex; align-items: center; gap: 6px; margin-left: 12px; }
+.effrate input[type=range] { width: 120px; }
+.effrate.changed span { color: #ffd23f; font-weight: bold; }

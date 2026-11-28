@@ -313,3 +313,19 @@ describe('소리 반응', () => {
     expect(sum(e.frame(10_700))).toBe(full)
   })
 })
+
+describe('효과 전체 속도', () => {
+  it('배율만큼 효과 시계가 흐르고, 바꾸는 순간 시각이 이어진다', () => {
+    const e = new Engine(structuredClone(show))
+    expect(e.effectTime(5000)).toBe(5000) // 1배면 그대로
+    e.setEffectRate(5000, 2)
+    expect(e.effectTime(5000)).toBe(5000) // 튀지 않음
+    expect(e.effectTime(6000)).toBe(7000)
+    e.setEffectRate(6000, 0) // 멈춤
+    expect(e.effectTime(9000)).toBe(7000)
+    e.setEffectRate(9000, 99)
+    expect(e.effectRate).toBe(3)
+    e.setEffectRate(9000, NaN)
+    expect(e.effectRate).toBe(3)
+  })
+})

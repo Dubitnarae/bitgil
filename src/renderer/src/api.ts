@@ -16,6 +16,7 @@ export interface State {
   chTest: { ch: number; value: number } | null // 채널 시험 중인 채널(null = 아님)
   master: number
   sound: number | null // 소리 반응 켜짐이면 지금 전체 밝기에 곱하는 배율(0~1), 꺼짐 = null
+  effectRate: number // 효과 전체 속도 배율(1 = 저장한 속도 그대로, 0 = 멈춤)
   blackout: boolean
   resume: { at: number } | null // 갑자기 꺼졌던 뒤 이어갈 기록(at = 마지막 기록 시각)
   fading: boolean

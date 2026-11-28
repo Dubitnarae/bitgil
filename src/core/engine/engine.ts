@@ -29,6 +29,8 @@ export class Engine {
   effectDraft: { scene: string; effects: Effect[] } | null = null // 효과 편집 중: 미리보기에만 이 효과로(저장 전, LIVE 는 그대로)
   soundOn = false // 소리 반응: 화면(노트북 마이크)이 보낸 배율을 전체 밝기에 곱한다
   private soundLevel = { factor: 1, at: 0 }
+  effectRate = 1 // 효과 전체 속도 배율(0 = 멈춤). 효과 시계가 이 배율로 흐른다
+  private effClock = { base: 0, at: 0 } // 효과 시각 = base + (now - at) × effectRate (배율 1 이면 now 그대로)
   private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
@@ -77,7 +79,7 @@ export class Engine {
   output(now: number): Values {
     if (this.find) return this.findValues()
     const levels = this.currentFaders(now)
-    const out = applyEffects(this.show, layerScenes(this.show, this.current(now), levels, this.raised), levels, now)
+    const out = applyEffects(this.show, layerScenes(this.show, this.current(now), levels, this.raised), levels, this.effectTime(now))
     const r = this.findReturn
     if (!r) return out
     const t = (now - r.start) / r.ms
@@ -116,7 +118,17 @@ export class Engine {
   previewOutput(now: number): Values {
     const d = this.effectDraft
     const show = d ? { ...this.show, scenes: this.show.scenes.map((s) => (s.id === d.scene ? { ...s, effects: d.effects } : s)) } : this.show
-    return applyEffects(show, this.previewBase(), this.previewFaders, now)
+    return applyEffects(show, this.previewBase(), this.previewFaders, this.effectTime(now))
+  }
+
+  /** 효과에 쓰는 시각. 배율을 바꿔도 그 순간 위상이 이어져서 효과가 튀지 않는다 */
+  effectTime(now: number) { return this.effClock.base + (now - this.effClock.at) * this.effectRate }
+
+  /** 효과 전체 속도 배율(0~3, 0 = 멈춤) */
+  setEffectRate(now: number, rate: number) {
+    if (!Number.isFinite(rate)) return
+    this.effClock = { base: this.effectTime(now), at: now }
+    this.effectRate = Math.max(0, Math.min(3, rate))
   }
 
   /** 지금 효과가 돌고 있나(LIVE 페이더·미리보기 페이더에 올라간 효과 씬, 또는 효과 편집 중) — 화면 갱신을 빠르게 할지 판단 */
