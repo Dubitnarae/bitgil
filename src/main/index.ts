@@ -226,6 +226,7 @@ function buildState() {
     find: engine.find,
     chTest: engine.chTest,
     master: engine.master,
+    sound: engine.soundOn ? engine.soundFactor(now) : null,
     blackout: engine.blackout,
     resume: resumeOffer ? { at: resumeOffer.at } : null,
     fading: engine.fading,
@@ -265,7 +266,7 @@ function sendState() {
   } catch (err) { logError('화면 상태 전송', err) } // 여기서 멈추면 화면이 굳으므로 다음 번을 꼭 예약한다
   // 효과가 돌 때는 낮은 품질이어도 33ms 로 보낸다(100ms 면 빠른 깜빡임이 건너뛰어 끊겨 보임)
   const ms = PRESETS[quality()].stateMs
-  setTimeout(sendState, engine.effectsRunning(Date.now()) ? Math.min(ms, 33) : ms)
+  setTimeout(sendState, engine.soundOn || engine.effectsRunning(Date.now()) ? Math.min(ms, 33) : ms)
 }
 sendState()
 
@@ -388,7 +389,7 @@ api.send = (c: Command) => {
   try {
     const now = Date.now()
     if (!edit.isOpen(now) && !allowedInOperation(c, engine.show)) return console.warn('운영 모드라 막은 명령', c.t)
-    edit.touch(now)
+    if (c.t !== 'soundLevel') edit.touch(now) // 마이크 값은 저절로 오므로 편집 모드 10분 닫힘을 미루지 않게
     if (c.t === 'output') { if (connTest) finishConnTest(now); enttec.setEnabled(c.on); return keepAwake() }
     if (c.t === 'dmxTest') return startConnTest(c.secs)
     if (c.t === 'dmxType') { setDmxType(c.type); return saveSettings({ ...settings, dmxType: (settings.dmxType = c.type) }) }

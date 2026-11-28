@@ -292,3 +292,24 @@ describe('갑자기 꺼졌을 때 이어가기', () => {
     expect(e.live).toEqual({})
   })
 })
+
+describe('소리 반응', () => {
+  const sum = (f: Uint8Array) => f.reduce((a, b) => a + b, 0)
+  it('켜면 배율만큼 어두워지고, 0.5초 소식 없거나 끄면 원래 밝기', () => {
+    const e = new Engine(structuredClone(show))
+    e.goScene(0, show.scenes[0].id)
+    const full = sum(e.frame(10_000))
+    e.setSoundLevel(10_000, 0.2) // 꺼져 있으면 무시
+    expect(e.soundFactor(10_000)).toBe(1)
+    e.setSound(true)
+    e.setSoundLevel(10_000, 0.2)
+    expect(e.soundFactor(10_100)).toBe(0.2)
+    expect(sum(e.frame(10_100))).toBeLessThan(full)
+    expect(e.soundFactor(10_600)).toBe(1) // 화면이 멈춰도 어두운 채로 남지 않음
+    e.setSoundLevel(10_600, 9)
+    expect(e.soundFactor(10_600)).toBe(1) // 범위 밖은 막음
+    e.setSoundLevel(10_700, 0.3)
+    e.setSound(false)
+    expect(sum(e.frame(10_700))).toBe(full)
+  })
+})

@@ -196,3 +196,9 @@ footer > button { position: absolute; right: 10px; top: 6px; }
 .guide li p { margin: 4px 0 0; line-height: 1.5; } .guide .ok { color: #6ee07a; line-height: 1.5; }
 .guide-hl { outline: 3px solid #ffd23f !important; outline-offset: 2px; animation: guidehl 1s ease-in-out infinite; }
 @keyframes guidehl { 50% { outline-color: transparent; } }
+/* 소리 반응 켜짐: 설교 전에 끄는 걸 잊지 않게 주황으로 깜빡임 */
+.sound.on { display: flex; align-items: center; gap: 6px; padding: 2px 6px; border-radius: 6px; background: #8a4a00; animation: sound-on 1.2s ease-in-out infinite; }
+.sound.on > button { background: #f80; color: #000; font-weight: bold; }
+.sound.on meter { width: 60px; }
+.sound.on input[type=range] { width: 70px; }
+@keyframes sound-on { 50% { background: #c26a00; } }

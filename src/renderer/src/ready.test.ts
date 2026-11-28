@@ -17,6 +17,7 @@ describe('예배 준비 점검', () => {
     expect(levels(st({ output: { enabled: false } }), show())[0]).toBe('warn')
     expect(levels(st({ output: { connected: false } }), show())[0]).toBe('bad')
     expect(levels(st({ blackout: true }), show())[0]).toBe('warn')
+    expect(levels(st({ sound: 0.5 }), show())[0]).toBe('warn')
     expect(levels(st({ saveError: 'x' }), show())[1]).toBe('bad')
     expect(levels(st(), show({ default_scene: undefined }))[2]).toBe('warn')
     expect(levels(st(), show({ default_scene: '지운씬' }))[2]).toBe('warn')

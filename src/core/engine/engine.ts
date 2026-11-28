@@ -27,6 +27,8 @@ export class Engine {
   findSet: Record<string, number> = {} // 기능 점검: 찾는 조명의 채널 값을 Locate 대신 이 값으로
   chTest: { ch: number; value: number } | null = null // 채널 시험: 이 DMX 채널 하나만 이 값으로 내보낸다(나머지 0)
   effectDraft: { scene: string; effects: Effect[] } | null = null // 효과 편집 중: 미리보기에만 이 효과로(저장 전, LIVE 는 그대로)
+  soundOn = false // 소리 반응: 화면(노트북 마이크)이 보낸 배율을 전체 밝기에 곱한다
+  private soundLevel = { factor: 1, at: 0 }
   private findReturn: { from: Values; start: number; ms: number } | null = null
   private fade: { from: Values; start: number; ms: number } | null = null
   private faderFade: { from: Levels; start: number; ms: number } | null = null
@@ -149,7 +151,23 @@ export class Engine {
       if (!this.blackout) f[this.chTest.ch - 1] = this.chTest.value
       return f
     }
-    return buildFrame(this.show, this.output(now), this.find ? 1 : this.master, this.blackout)
+    return buildFrame(this.show, this.output(now), this.find ? 1 : this.master * this.soundFactor(now), this.blackout)
+  }
+
+  /** 소리 반응 켜기/끄기. 끄면 바로 전체 밝기 그대로 */
+  setSound(on: boolean) {
+    this.soundOn = on
+    this.soundLevel = { factor: 1, at: 0 }
+  }
+
+  /** 화면이 마이크 크기로 계산한 배율(0~1, 최소 밝기 포함). 꺼져 있으면 무시 */
+  setSoundLevel(now: number, factor: number) {
+    if (this.soundOn && Number.isFinite(factor)) this.soundLevel = { factor: Math.max(0, Math.min(1, factor)), at: now }
+  }
+
+  /** 전체 밝기에 곱할 소리 배율. 0.5초 넘게 소식이 없으면(창 멈춤·마이크 끊김) 1 — 조명이 어두워진 채로 남지 않게 */
+  soundFactor(now: number): number {
+    return this.soundOn && now - this.soundLevel.at <= 500 ? this.soundLevel.factor : 1
   }
 
   /** 채널 시험 시작·바꾸기 또는 끝내기(null). 끝내면 바로 원래 출력으로 돌아간다. */

@@ -13,8 +13,11 @@ describe('기본 조명 씬', () => {
     expect(runCommand(e, { t: 'defaultScene', id }, 0)).toBe('showChanged')
     expect(e.show.default_scene).toBe(id)
     e.blackout = true
+    runCommand(e, { t: 'sound', on: true }, 0)
+    expect(allowedInOperation({ t: 'sound', on: true }, e.show)).toBe(true) // 찬양 중 운영 모드에서 켬
     runCommand(e, { t: 'default' }, 0)
     expect(e.blackout).toBe(false)
+    expect(e.soundOn).toBe(false) // 기본 조명은 소리 반응도 끈다
     expect(e.currentFaders(10_000)[id]).toBe(1)
   })
   it('없는 씬은 거부, 운영 모드에서는 막힘', () => {

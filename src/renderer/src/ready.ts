@@ -15,6 +15,7 @@ export function readyChecks(st: State, show: Show): Check[] {
       ...(!o.enabled ? { level: 'warn' as Level, text: '출력 대기 중입니다. 위쪽 [출력 켜기]를 눌러야 조명이 나갑니다.' }
         : !o.connected ? { level: 'bad' as Level, text: `DMX 장비가 연결되지 않았습니다. USB 선을 확인해 주세요.${o.error ? ' — ' + o.error : ''}` }
         : st.blackout ? { level: 'warn' as Level, text: `출력 중(${o.port})이지만 블랙아웃이 켜져 있습니다.` }
+        : st.sound != null ? { level: 'warn' as Level, text: `출력 중(${o.port})이지만 소리 반응이 켜져 있습니다. 찬양 때만 켜고 설교 전에는 끄세요.` }
         : { level: 'ok' as Level, text: `출력 중 · ${o.port}${st.master < 1 ? ` · 전체 밝기 ${Math.round(st.master * 100)}%` : ''}` })
     },
     {

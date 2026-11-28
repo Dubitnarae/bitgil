@@ -78,7 +78,7 @@ export default function App() {
   const shown = finding ? 'live' : view
   // 미리보기 화면은 전체 밝기·블랙아웃을 빼고 편집 값(+미리보기 페이더)만 보여준다
   const values = shown === 'live' ? st.live : st.previewOut
-  const master = shown === 'live' ? (st.blackout ? 0 : finding ? 1 : st.master) : 1
+  const master = shown === 'live' ? (st.blackout ? 0 : finding ? 1 : st.master * (st.sound ?? 1)) : 1
   const pointing = aim !== null && selected.length > 0
   const drafted = aim ? withDrafts(show, aim.drafts) : show
   const draft = st.editMode ? venueDraft : null // 편집 모드가 끝나 패널이 사라지면 저장된 공간으로
