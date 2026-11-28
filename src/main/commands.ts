@@ -44,6 +44,7 @@ export type Command =
   | { t: 'autoUpdate'; on: boolean }
   | { t: 'pinEnabled'; on: boolean } // 편집 모드 PIN 사용(결과를 돌려줘야 해서 ipc 'edit:pinEnabled' 로 받는다)
   | { t: 'checkUpdate' } // 설정의 [지금 확인]
+  | { t: 'resume'; on: boolean } // 갑자기 꺼졌던 뒤: 직전 조명 상태로 이어가기(true) / 처음 상태로(false). 운영 모드에서도 가능
   | { t: 'updateChoice'; choice: import('./updater').UpdateChoice } // 운영 모드에서도 가능
   | { t: 'remote'; on: boolean }
   | { t: 'remoteNewCode' } // 원격 접속 코드 새로 만들기(편집 모드)

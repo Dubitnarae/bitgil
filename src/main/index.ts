@@ -19,6 +19,8 @@ import { cpus, totalmem } from 'node:os'
 import { PRESETS, resolveQuality } from './quality'
 import { checkNow, chooseUpdate, setAutoInstall, startUpdater, update } from './updater'
 import { makeErrorLog } from './errorlog'
+import { makeLastState } from './laststate'
+import { cleanSnapshot, isDark } from '../core/engine/snapshot'
 
 // 빛길은 하나만 켠다(둘이 같은 DMX 포트·쇼 파일을 잡지 않게). 두 번째는 아무것도 열기 전에 바로 끝내고, 먼저 켜진 창이 앞으로 나온다.
 if (!app.requestSingleInstanceLock()) process.exit(0)
@@ -58,6 +60,20 @@ const serial = new UsbDmxOutput(settings.dmxPort, settings.dmxType === 'udmx' ? 
 const udmx = new UdmxOutput()
 let enttec: UsbDmxOutput | UdmxOutput = settings.dmxType === 'udmx' ? udmx : serial
 enttec.setEnabled(settings.outputOnStart)
+
+// 갑자기 꺼졌을 때 이어가기: 기록이 남아 있고(정상으로 끄면 지움) 켜진 조명이 있었으면 화면에서 묻는다
+const lastState = makeLastState(join(app.getPath('appData'), '빛길', 'last-state.json'))
+const prevRun = lastState.load()
+const prevSnap = prevRun && cleanSnapshot(engine.show, prevRun.state)
+let resumeOffer = prevSnap && !isDark(prevSnap) ? prevRun : null
+setInterval(() => {
+  try {
+    const snap = engine.snapshot()
+    if (resumeOffer && isDark(snap)) return // 묻는 중에 또 꺼져도 앞의 기록이 남게
+    lastState.save(snap)
+  } catch (err) { logError('이어가기 기록', err) }
+}, 2000)
+app.on('will-quit', () => lastState.clear())
 // 연결 시험(설정): 출력을 켜고 정해진 시간 동안 끊김·거절을 센 뒤, 출력을 시험 전 상태로 돌린다
 let connTest: ConnTest | null = null
 let connTestResult = ''
@@ -201,6 +217,7 @@ function buildState() {
     chTest: engine.chTest,
     master: engine.master,
     blackout: engine.blackout,
+    resume: resumeOffer ? { at: resumeOffer.at } : null,
     fading: engine.fading,
     output: {
       enabled: enttec.enabled,
@@ -340,7 +357,8 @@ api.showImport = async () => {
   try {
     saveShowFile(showDir, parseShow(readFileSync(r.filePaths[0], 'utf-8'))) // 지금 쇼는 백업 폴더로
   } catch (err) { return `가져오지 못했습니다: ${err instanceof Error ? err.message : err}` }
-  // 씬·조명이 통째로 바뀌므로 엔진을 새로 만들도록 다시 켠다(옛 값·페이더가 섞이지 않게)
+  // 씬·조명이 통째로 바뀌므로 엔진을 새로 만들도록 다시 켠다(옛 값·페이더가 섞이지 않게). app.exit 는 will-quit 가 없어 직접 지움
+  lastState.clear()
   app.relaunch()
   app.exit(0)
   return ''
@@ -350,6 +368,7 @@ api.backupList = () => listBackups(showDir)
 api.backupRestore = (name: string) => {
   if (!edit.isOpen(Date.now())) return '편집 모드에서만 할 수 있습니다'
   try { restoreBackup(showDir, String(name)) } catch (err) { return `되돌리지 못했습니다: ${err instanceof Error ? err.message : err}` }
+  lastState.clear()
   app.relaunch()
   app.exit(0)
   return ''
@@ -369,6 +388,7 @@ api.send = (c: Command) => {
       saveSettings({ ...settings, remoteCode: (settings.remoteCode = String(randomInt(1_000_000)).padStart(6, '0')) })
       return setRemote(!!remote) // 다시 열어 옛 코드로 붙어 있던 폰 연결을 끊는다
     }
+    if (c.t === 'resume') { if (c.on && resumeOffer) engine.restore(resumeOffer.state); resumeOffer = null; return }
     if (c.t === 'checkUpdate') return checkNow()
     if (c.t === 'updateChoice') { const skip = chooseUpdate(c.choice); if (skip) saveSettings({ ...settings, skipVersion: (settings.skipVersion = skip) }); return }
     if (c.t === 'autoUpdate') { setAutoInstall(c.on); return saveSettings({ ...settings, autoUpdate: (settings.autoUpdate = c.on) }) }

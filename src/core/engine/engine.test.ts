@@ -223,3 +223,37 @@ describe('채널 시험', () => {
   })
   it('1~512 밖 채널은 거부', () => expect(() => new Engine(show).setChTest({ ch: 513, value: 1 })).toThrow())
 })
+
+describe('갑자기 꺼졌을 때 이어가기', () => {
+  const id = show.fixtures[0].id
+  const sc = show.scenes[0].id
+  it('남긴 상태를 새 엔진에 되돌리면 같은 프레임이 나간다(페이드 중이면 끝 값)', () => {
+    const a = new Engine(show)
+    a.setPreview([id], 'dimmer', 200)
+    a.selectScene(sc)
+    a.apply(0, 5) // 페이드 중
+    a.master = 0.5
+    const snap = JSON.parse(JSON.stringify(a.snapshot()))
+    const b = new Engine(show)
+    expect(b.restore(snap)).toBe(true)
+    expect(b.frame(0)).toEqual(a.frame(10_000))
+    expect(b.pending).toBe(false)
+  })
+  it('자동 진행은 이어가지 않고, 없는 조명·씬·이상한 값은 걸러낸다', () => {
+    const e = new Engine(show)
+    e.autoAt = 123
+    expect(e.restore({ live: { [id]: { dimmer: 999, pan: 'x' }, 없는조명: { dimmer: 1 } }, faders: { [sc]: 5, 없는씬: 1 }, master: -1, cue: 9999, blackout: 'yes' })).toBe(true)
+    expect(e.live).toEqual({ [id]: { dimmer: 255 } })
+    expect(e.faders).toEqual({ [sc]: 1 })
+    expect(e.master).toBe(0)
+    expect(e.cue).toBe(show.cuelist.length - 1)
+    expect(e.blackout).toBe(false)
+    expect(e.autoAt).toBeNull()
+  })
+  it('깨진 파일 내용이면 아무것도 안 바꾼다', () => {
+    const e = new Engine(show)
+    expect(e.restore(null)).toBe(false)
+    expect(e.restore('abc')).toBe(false)
+    expect(e.live).toEqual({})
+  })
+})

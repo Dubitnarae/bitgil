@@ -16,6 +16,7 @@ export interface State {
   chTest: { ch: number; value: number } | null // 채널 시험 중인 채널(null = 아님)
   master: number
   blackout: boolean
+  resume: { at: number } | null // 갑자기 꺼졌던 뒤 이어갈 기록(at = 마지막 기록 시각)
   fading: boolean
   output: {
     enabled: boolean // 출력 켜짐(false = 출력 대기)

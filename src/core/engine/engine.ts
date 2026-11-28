@@ -3,6 +3,7 @@ import { clone, lerpFixture } from './values'
 import { buildFrame } from './frame'
 import { layerScenes, lerpLevels, type Levels } from './faders'
 import { applyEffects, cleanEffects } from './effects'
+import { cleanSnapshot, type Snapshot } from './snapshot'
 
 export type FaderMode = 'live' | 'preview'
 
@@ -204,6 +205,29 @@ export class Engine {
   cancel() {
     this.preview = clone(this.live)
     this.previewFaders = { ...this.faders }
+  }
+
+  /** 지금 나가는 상태(페이드 중이면 끝났을 때 값). 갑자기 꺼졌을 때 이어가기용으로 메인이 몇 초마다 파일에 남긴다 */
+  snapshot(): Snapshot {
+    return { live: clone(this.live), faders: { ...this.faders }, raised: { ...this.raised }, master: this.master, blackout: this.blackout, cue: this.cue }
+  }
+
+  /** 이어가기: 남겨 둔 상태를 바로 LIVE로(페이드 없음). 자동 진행은 이어가지 않는다(혼자 넘어가지 않게). 쓸 수 없는 파일이면 false */
+  restore(raw: unknown): boolean {
+    const s = cleanSnapshot(this.show, raw)
+    if (!s) return false
+    this.live = s.live
+    this.preview = clone(s.live)
+    this.faders = s.faders
+    this.previewFaders = { ...s.faders }
+    this.raised = s.raised
+    this.tick = Math.max(0, ...Object.values(s.raised))
+    this.master = s.master
+    this.blackout = s.blackout
+    this.cue = s.cue
+    this.fade = this.faderFade = null
+    this.autoAt = null
+    return true
   }
 
   /**

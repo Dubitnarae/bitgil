@@ -12,6 +12,7 @@ import { SettingsPanel } from './panels/SettingsPanel'
 import { PinDialog } from './panels/PinDialog'
 import { ReadyCheck } from './panels/ReadyCheck'
 import { UpdateNotice } from './panels/UpdateNotice'
+import { ResumeNotice } from './panels/ResumeNotice'
 import { ChannelTest, FindPanel } from './panels/FindPanel'
 import { VenuePanel, type Mark } from './panels/VenuePanel'
 import { aimAt, withDrafts, type Aim } from './aim'
@@ -111,7 +112,7 @@ export default function App() {
       </footer>
       {ready && <ReadyCheck st={st} show={show} onClose={() => setReady(false)} />}
       {pin && <PinDialog mode={pin} onClose={() => setPin(null)} />}
-      <UpdateNotice st={st} />
+      {st.resume ? <ResumeNotice st={st} /> : <UpdateNotice st={st} />}
       <PhoneNote note={st.phone} />
     </div>
   )
