@@ -40,6 +40,7 @@ input[type=range]{padding:0;height:44px}
 </div>
 <div id="main">
   <div class="box">
+    <img id="thumb" alt="" style="display:none;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:6px">
     <div>지금: <span class="big" id="scene"></span></div>
     <div>순서: <span id="pos"></span> · 다음: <span id="next"></span></div>
     <div>전체 밝기 <span id="master"></span> · <span id="out"></span></div>
@@ -115,6 +116,8 @@ function connect(){
 }
 function draw(){
   $('scene').textContent=st.scene;
+  var tu=st.thumb?'/thumb?code='+encodeURIComponent(code)+'&'+st.thumb:'';
+  if($('thumb').dataset.u!==tu){$('thumb').dataset.u=tu;if(tu)$('thumb').src=tu;vis('thumb',!!tu)} // 바뀔 때만 다시 받는다
   $('pos').textContent=st.total? (st.cue+1)+' / '+st.total : '순서 목록 없음';
   $('next').textContent=st.next||'없음';
   $('master').textContent=Math.round(st.master*100)+'%';

@@ -55,6 +55,8 @@ export interface Scene {
   temp?: boolean
   /** 씬 효과(씬 값이 기준, 시간에 따라 바뀜). 계산은 effects.ts */
   effects?: Effect[]
+  /** 저장할 때 찍은 3D 미리보기 그림(작은 JPEG data URL). 씬 버튼·폰에 보임 */
+  thumb?: string
 }
 
 /** 씬 효과 하나. 크기·퍼짐 0~100%, 속도 = 1분에 몇 번, 반복 = 조명 줄 안 물결 수, fixtures = 물결 순서

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Show } from '../../core/engine/types'
 import { send, type State } from './api'
-import { Stage3D } from './3d/Stage3D'
+import { Stage3D, snapshot3D } from './3d/Stage3D'
 import { TopBar } from './panels/TopBar'
 import { FixturePanel } from './panels/FixturePanel'
 import { ScenePanel } from './panels/ScenePanel'
@@ -97,7 +97,7 @@ export default function App() {
           {settings && st.editMode && <SettingsPanel show={show} st={st} onClose={() => setSettings(false)} onPin={setPin} />}
           {/* 조명 찾기 중일 때만 맨 위. 평소에는 예배 때 쓰는 씬·순서·조명 선택이 먼저 보이게 편집 도구는 아래로 */}
           {st.editMode && finding && <FindPanel show={show} st={st} selected={selected} />}
-          <ScenePanel show={show} st={st} fade={fade} setFade={setFade} selected={selected} />
+          <ScenePanel show={show} st={st} fade={fade} setFade={setFade} selected={selected} thumb={() => (shown === 'preview' ? snapshot3D() : undefined)} />
           <CuePanel show={show} st={st} setFade={setFade} />
           <FixturePanel show={show} st={st} selected={selected} setSelected={setSelected} aim={aim} setAim={setAim} />
           {st.editMode && !finding && <FindPanel show={show} st={st} selected={selected} />}

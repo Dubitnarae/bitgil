@@ -109,6 +109,17 @@ describe('씬 저장', () => {
     expect(e.saveScene('임시', { temp: true })).toBe('T-01')
     expect(e.saveScene('')).toBe('U-02')
   })
+  it('씬 그림: 맞는 JPEG 만 저장, 덮어쓸 때 그림 없으면 옛 그림 지움', () => {
+    const e = new Engine(structuredClone(show))
+    const jpg = 'data:image/jpeg;base64,/9j/AA=='
+    const id = e.saveScene('a', { thumb: jpg })
+    const s = () => e.show.scenes.find((x) => x.id === id)!
+    expect(s().thumb).toBe(jpg)
+    e.saveScene('', { id, thumb: 'data:text/html;base64,PGI+' })
+    expect(s().thumb).toBeUndefined()
+    expect(e.saveScene('b', { thumb: 'data:image/jpeg;base64,' + 'A'.repeat(60000) })).toBe('U-02')
+    expect(e.show.scenes.at(-1)!.thumb).toBeUndefined()
+  })
   it('덮어쓰기·이름 바꾸기·삭제', () => {
     const e = new Engine(structuredClone(show))
     e.setPreview(['1-1'], 'red', 9)

@@ -24,6 +24,7 @@ describe('폰 원격', () => {
       unlock: (pin) => pin === '1234',
       setup: (c) => ((c as { t: string }).t === 'find' ? '' : '안 되는 명령'),
       appDir: '.', api: () => null, editOpen: () => true,
+      thumb: (id) => (id === 'U-01' ? 'data:image/jpeg;base64,/9j/AA==' : undefined),
       onError: (m) => { throw new Error(m) }
     })
     try {
@@ -48,6 +49,11 @@ describe('폰 원격', () => {
       const bad = await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"editVenue"}' })
       expect([bad.status, await bad.text()]).toEqual([400, '안 되는 명령'])
       expect((await fetch(base + '/setup?code=123456', { method: 'POST', body: '{깨짐' })).status).toBe(400)
+      // 씬 그림: 코드 필요, 없는 씬은 404
+      expect((await fetch(base + '/thumb?code=000000&id=U-01')).status).toBe(401)
+      expect((await fetch(base + '/thumb?code=123456&id=U-02')).status).toBe(404)
+      const img = await fetch(base + '/thumb?code=123456&id=U-01')
+      expect([img.headers.get('content-type'), [...new Uint8Array(await img.arrayBuffer())]]).toEqual(['image/jpeg', [0xff, 0xd8, 0xff, 0]])
       const ev = await fetch(base + '/events?code=123456')
       const first = await ev.body!.getReader().read()
       expect(new TextDecoder().decode(first.value)).toContain('"scene":"찬양"')

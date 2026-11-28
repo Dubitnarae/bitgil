@@ -250,16 +250,21 @@ export class Engine {
    * 지금 미리보기 화면에 보이는 값(PREVIEW + 미리보기 페이더)을 씬으로 저장한다.
    * id를 주면 그 씬을 덮어쓰고(이름은 그대로), 없으면 새 씬을 만든다. 저장한 씬 id를 돌려준다.
    */
-  saveScene(name: string, opts: { id?: string; temp?: boolean } = {}): string {
+  saveScene(name: string, opts: { id?: string; temp?: boolean; thumb?: unknown } = {}): string {
     const values = clone(this.previewBase())
+    const thumb = cleanThumb(opts.thumb)
     if (opts.id) {
-      this.scene(opts.id).values = values
+      const s = this.scene(opts.id)
+      s.values = values
+      // 값이 바뀌었으니 옛 그림은 버린다(실제 출력 화면에서 저장하면 그림 없음)
+      if (thumb) s.thumb = thumb
+      else delete s.thumb
       return opts.id
     }
     const prefix = opts.temp ? 'T-' : 'U-'
     const n = Math.max(0, ...this.show.scenes.filter((x) => x.id.startsWith(prefix)).map((x) => Number(x.id.slice(2)) || 0)) + 1
     const id = prefix + String(n).padStart(2, '0')
-    this.show.scenes.push({ id, name: name.trim() || id, fade_seconds: 2, values, ...(opts.temp ? { temp: true } : {}) })
+    this.show.scenes.push({ id, name: name.trim() || id, fade_seconds: 2, values, ...(opts.temp ? { temp: true } : {}), ...(thumb ? { thumb } : {}) })
     return id
   }
 
@@ -341,4 +346,9 @@ export class Engine {
     if (!s) throw new Error(`씬을 찾을 수 없음: ${id}`)
     return s
   }
+}
+
+/** 씬 그림 검사: 화면·원격 전체 화면에서 오므로 JPEG data URL 이고 작은 것만 받는다 */
+export function cleanThumb(t: unknown): string | undefined {
+  return typeof t === 'string' && t.length <= 60000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(t) ? t : undefined
 }

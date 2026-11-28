@@ -118,9 +118,14 @@ function setRemote(on: boolean) {
   remote?.close()
   remote = null
   remoteError = ''
-  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, editOpen: () => edit.isOpen(Date.now()), appDir: join(__dirname, '../renderer'), api: remoteApi, onError: (m) => { remoteError = m; console.error(m) } })
+  if (on) remote = startRemote({ code: () => settings.remoteCode, state: phoneState, run: phoneCmd, unlock: phoneUnlock, setup: phoneSetup, editOpen: () => edit.isOpen(Date.now()), appDir: join(__dirname, '../renderer'), api: remoteApi, thumb: (id) => engine.show.scenes.find((s) => s.id === id)?.thumb, onError: (m) => { remoteError = m; console.error(m) } })
 }
 const sceneName = (id?: string) => engine.show.scenes.find((s) => s.id === id)?.name ?? ''
+// shortcut: 판 표시는 그림 길이 — 덮어써도 길이가 같으면 폰이 옛 그림을 보일 수 있음, 문제되면 해시로
+const thumbKey = (id?: string) => {
+  const t = engine.show.scenes.find((s) => s.id === id)?.thumb
+  return t && `id=${encodeURIComponent(id!)}&v=${t.length}`
+}
 function phoneState(): PhoneState {
   const f = engine.currentFaders(Date.now())
   const top = Object.entries(f).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0]
@@ -137,6 +142,7 @@ function phoneState(): PhoneState {
     output: enttec.enabled && enttec.connected,
     auto: engine.autoAt === null ? undefined : Math.max(0, Math.ceil((engine.autoAt - Date.now()) / 1000)),
     lost: enttec.enabled && !enttec.connected ? enttec.error || '장비에 연결 중' : undefined,
+    thumb: thumbKey(top?.[0]),
     edit: edit.isOpen(Date.now()),
     pinOff: !settings.pinEnabled,
     setup: edit.isOpen(Date.now()) ? {

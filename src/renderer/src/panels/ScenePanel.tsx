@@ -4,12 +4,12 @@ import type { State } from '../api'
 import { send } from '../api'
 import { SceneManager } from './SceneManager'
 
-interface Props { show: Show; st: State; fade: number; setFade: (n: number) => void; selected: string[] }
+interface Props { show: Show; st: State; fade: number; setFade: (n: number) => void; selected: string[]; /** 지금 3D 미리보기 그림(실제 출력 화면이면 undefined) */ thumb: () => string | undefined }
 
-export function ScenePanel({ show, st, fade, setFade, selected }: Props) {
+export function ScenePanel({ show, st, fade, setFade, selected, thumb }: Props) {
   const [name, setName] = useState('')
   const [manage, setManage] = useState(false)
-  const save = (temp: boolean) => { send({ t: 'saveScene', name, temp }); setName('') }
+  const save = (temp: boolean) => { send({ t: 'saveScene', name, temp, thumb: thumb() }); setName('') }
   return (
     <section className="panel">
       <h3>씬 <button className="close" onClick={() => setManage(!manage)}>{manage ? '관리 닫기' : '씬 관리'}</button></h3>
@@ -20,6 +20,7 @@ export function ScenePanel({ show, st, fade, setFade, selected }: Props) {
           <button key={s.id} className={[s.temp && 'temp', st.faders[s.id] > 0 && 'onair', st.previewFaders[s.id] > 0 && 'cued'].filter(Boolean).join(' ')}
             title={(s.temp ? '임시 씬' : s.id) + (st.faders[s.id] > 0 ? ' · 실제 출력 중' : '') + (st.previewFaders[s.id] > 0 ? ' · 미리보기에 올림' : '') + (s.effects?.length ? ` · 효과 ${s.effects.length}개` : '')}
             onClick={() => { send({ t: 'selectScene', id: s.id }); setFade(s.fade_seconds) }}>
+            {s.thumb && <img src={s.thumb} alt="" />}
             {s.temp ? '임시 · ' : ''}{s.name}{s.effects?.length ? ' 〰' : ''}
           </button>
         ))}
@@ -34,7 +35,7 @@ export function ScenePanel({ show, st, fade, setFade, selected }: Props) {
       {st.pending && <p className="warn">적용하지 않은 변경이 있습니다.</p>}
       <p className="hint legend"><span className="dot" /> 실제 출력 중 · <span className="box" /> 미리보기에 올림</p>
 
-      <p className="hint">지금 미리보기 화면에 보이는 조명을 씬으로 저장합니다.</p>
+      <p className="hint">지금 미리보기 화면에 보이는 조명을 씬으로 저장합니다(3D 미리보기 화면이면 그림도 같이 찍혀 씬 버튼에 보입니다).</p>
       <div className="apply">
         <input className="name" placeholder="씬 이름 (예: 설교)" value={name} onChange={(e) => setName(e.target.value)} />
         {st.editMode && <button onClick={() => save(false)}>새 씬으로 저장</button>}
@@ -42,7 +43,7 @@ export function ScenePanel({ show, st, fade, setFade, selected }: Props) {
       </div>
       {st.saveError && <p className="warn">{st.saveError}</p>}
       {!st.editMode && <p className="hint">운영 모드: 임시 씬만 저장·고칠 수 있습니다. 정식 씬은 [편집 모드]에서.</p>}
-      {manage && <SceneManager show={show} edit={st.editMode} selected={selected} />}
+      {manage && <SceneManager show={show} edit={st.editMode} selected={selected} thumb={thumb} />}
     </section>
   )
 }

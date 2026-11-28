@@ -17,7 +17,7 @@ export type Command =
   | { t: 'fader'; id: string; value: number }
   | { t: 'fadersDown' }
   | { t: 'faderMode'; mode: FaderMode }
-  | { t: 'saveScene'; name: string; id?: string; temp?: boolean }
+  | { t: 'saveScene'; name: string; id?: string; temp?: boolean; thumb?: string } // thumb = 3D 미리보기 그림
   | { t: 'renameScene'; id: string; name: string }
   | { t: 'deleteScene'; id: string }
   | { t: 'setEffects'; id: string; effects: Effect[] } // 씬 효과 저장(편집 모드)
@@ -53,7 +53,7 @@ export type Command =
 /** 쇼(씬 목록)를 바꾼 명령이면 'showChanged'를 돌려준다 → 메인이 파일에 저장 */
 export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | void {
   switch (c.t) {
-    case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp }); return 'showChanged'
+    case 'saveScene': e.saveScene(c.name, { id: c.id, temp: c.temp, thumb: c.thumb }); return 'showChanged'
     case 'renameScene': e.renameScene(c.id, c.name); return 'showChanged'
     case 'deleteScene': e.deleteScene(c.id); return 'showChanged'
     case 'setEffects': e.setEffects(c.id, c.effects); return 'showChanged'

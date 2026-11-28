@@ -29,7 +29,7 @@ main { flex: 1; display: flex; min-height: 0; }
 aside { width: 360px; overflow-y: auto; border-left: 1px solid #2a2e37; background: #15181d; }
 .panel { padding: 10px 12px; border-bottom: 1px solid #2a2e37; }
 .panel h3 { margin: 4px 0 8px; font-size: 15px; }
-.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: flex-start; } /* 그림 있는 버튼 옆 버튼이 늘어나지 않게 */
 .hint { color: #9aa3b5; font-size: 12px; margin: 6px 0; }
 .warn { color: #ffd23f; margin: 6px 0 0; }
 .slider { display: grid; grid-template-columns: 90px 1fr 56px; align-items: center; gap: 6px; margin: 4px 0; }
@@ -61,6 +61,7 @@ footer { border-top: 1px solid #2a2e37; padding: 6px 10px; }
 .settings .radio { display: block; margin: 6px 0; cursor: pointer; }
 .settings .close, h3 .close { float: right; padding: 2px 8px; font-size: 12px; }
 .clear { margin-top: 6px; font-size: 12px; }
+.chips button img { display: block; width: 96px; height: 54px; object-fit: cover; border-radius: 3px; margin: 0 auto 3px; }
 .chips button.temp { border-style: dashed; color: #ffd23f; }
 .apply input.name, .effect-editor { border-top: 1px solid #3c414c; margin-top: 6px; padding-top: 6px; display: flex; flex-direction: column; gap: 6px; }
 .effect-editor h4 { margin: 0; }

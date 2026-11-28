@@ -19,6 +19,7 @@ export interface PhoneState {
   output: boolean // 실제 장비로 나가는 중
   auto?: number // 자동 진행 중이면 다음 줄까지 남은 초(노트북 시계로 계산), 아니면 없음
   lost?: string // 출력을 켜 뒀는데 장비와 끊김(이유), 아니면 없음
+  thumb?: string // 지금 씬 그림 주소 뒷부분(id=…&v=…), 그림 없으면 없음. 그림은 GET /thumb 로 따로(상태가 무거워지지 않게)
   edit: boolean // 편집 모드 열림(폰 설정 모드를 쓸 수 있음)
   pinOff?: boolean // 'PIN 사용'이 꺼짐 → 폰도 PIN 없이 설정 모드를 연다
   setup?: PhoneSetup // 편집 모드일 때만
@@ -79,6 +80,8 @@ export function startRemote(opts: {
   /** 원격 전체 화면: 빛길 화면 파일 폴더(out/renderer)와, 화면이 부르는 기능(window.bitgil 의 이름 → 결과) */
   appDir: string
   api: (name: string, args: unknown[], trusted: boolean) => unknown
+  /** 씬 그림(JPEG data URL), 없으면 undefined */
+  thumb?: (id: string) => string | undefined
   onError: (msg: string) => void
 }) {
   const lock = new Lockout()
@@ -138,6 +141,13 @@ export function startRemote(opts: {
       else { res.writeHead(400); return res.end() }
       res.writeHead(204)
       return res.end()
+    }
+    if (req.method === 'GET' && url.pathname === '/thumb') {
+      const t = opts.thumb?.(url.searchParams.get('id') ?? '')
+      if (!t) { res.writeHead(404); return res.end() }
+      // 주소에 그림 판(v)이 들어 있어서 오래 기억해도 된다
+      res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, max-age=86400' })
+      return res.end(Buffer.from(t.slice(t.indexOf(',') + 1), 'base64'))
     }
     if (req.method === 'GET' && url.pathname === '/app-events') {
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' })

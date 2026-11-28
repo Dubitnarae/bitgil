@@ -19,6 +19,30 @@ function Declutter() {
   return null
 }
 
+let capture: (() => string) | null = null
+/** 지금 3D 화면을 작은 JPEG(192×108)로 찍는다. 3D가 없으면 undefined */
+export const snapshot3D = () => capture?.() || undefined
+
+function Capture() {
+  const { gl, scene, camera } = useThree()
+  useEffect(() => {
+    capture = () => {
+      gl.render(scene, camera) // 그림 버퍼를 안 남기는 설정이라 찍기 직전에 한 번 그린다
+      const src = gl.domElement
+      const c = document.createElement('canvas')
+      c.width = 192
+      c.height = 108
+      // 가운데를 16:9 로 잘라 줄인다
+      const s = Math.min(src.width / 16, src.height / 9)
+      const w = s * 16, h = s * 9
+      c.getContext('2d')!.drawImage(src, (src.width - w) / 2, (src.height - h) / 2, w, h, 0, 0, 192, 108)
+      return c.toDataURL('image/jpeg', 0.7)
+    }
+    return () => { capture = null }
+  }, [gl, scene, camera])
+  return null
+}
+
 interface Props {
   show: Show
   values: Values
@@ -75,6 +99,7 @@ export function Stage3D({ show, values, master, selected, onSelect, onClear, onP
         )
       })}
       <Declutter />
+      <Capture />
       <OrbitControls ref={ctrl} target={[...home.target]} maxPolarAngle={Math.PI / 2 - 0.05} />
     </Canvas>
     <button className="resetview" onClick={resetView} title="돌리거나 확대한 화면을 처음 위치로">원위치</button>
