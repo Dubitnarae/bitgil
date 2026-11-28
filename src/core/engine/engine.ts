@@ -318,6 +318,45 @@ export class Engine {
     this.cue = Math.min(this.cue, this.show.cuelist.length - 1)
   }
 
+  /** 지금 쓰는 순서 목록 이름 */
+  cuelistName() { return this.show.cuelist_name || '기본 순서' }
+
+  /** 다른 순서 목록(other_cuelists[i])으로 바꾼다. 쓰던 목록은 다른 목록 칸으로. 처음부터, 자동 진행 멈춤 */
+  useCuelist(i: number) {
+    const others = this.show.other_cuelists ?? []
+    const pick = others[i]
+    if (!pick || !Array.isArray(pick.cuelist)) throw new Error(`순서 목록을 찾을 수 없음: ${i}`)
+    others[i] = { name: this.cuelistName(), cuelist: this.show.cuelist }
+    this.show.cuelist_name = pick.name
+    this.cue = -1
+    this.setCuelist(pick.cuelist)
+    this.autoAt = null
+  }
+
+  /** 새 빈 순서 목록을 만들어 바로 쓴다(쓰던 목록은 다른 목록 칸으로) */
+  newCuelist(name: string) {
+    this.show.other_cuelists = [...(this.show.other_cuelists ?? []), { name: this.cuelistName(), cuelist: this.show.cuelist }]
+    this.show.cuelist = []
+    this.show.cuelist_name = cleanName(name) || '새 순서'
+    this.cue = -1
+    this.autoAt = null
+  }
+
+  renameCuelist(name: string) {
+    if (cleanName(name)) this.show.cuelist_name = cleanName(name)
+  }
+
+  /** 지금 쓰는 순서 목록을 지우고 다른 목록 첫째를 쓴다(다른 목록이 없으면 빈 기본 순서) */
+  deleteCuelist() {
+    const next = this.show.other_cuelists?.shift()
+    this.show.cuelist = next?.cuelist ?? []
+    if (next) this.show.cuelist_name = next.name
+    else delete this.show.cuelist_name
+    if (!this.show.other_cuelists?.length) delete this.show.other_cuelists
+    this.cue = -1
+    this.autoAt = null
+  }
+
   renameScene(id: string, name: string) {
     if (name.trim()) this.scene(id).name = name.trim()
   }
@@ -326,6 +365,7 @@ export class Engine {
     this.scene(id)
     this.show.scenes = this.show.scenes.filter((x) => x.id !== id)
     this.setCuelist(this.show.cuelist) // 지운 씬을 쓰던 순서 줄도 뺀다
+    for (const o of this.show.other_cuelists ?? []) o.cuelist = o.cuelist.filter((c) => c.scene !== id)
     for (const m of [this.faders, this.previewFaders, this.raised]) delete m[id]
     if (this.show.default_scene === id) delete this.show.default_scene
     if (this.effectDraft?.scene === id) this.effectDraft = null
@@ -347,6 +387,9 @@ export class Engine {
     return s
   }
 }
+
+/** 순서 목록 이름: 화면·원격에서 오므로 글자만, 40자까지 */
+const cleanName = (n: unknown) => (typeof n === 'string' ? n.trim().slice(0, 40) : '')
 
 /** 씬 그림 검사: 화면·원격 전체 화면에서 오므로 JPEG data URL 이고 작은 것만 받는다 */
 export function cleanThumb(t: unknown): string | undefined {

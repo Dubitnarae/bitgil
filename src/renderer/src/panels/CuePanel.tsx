@@ -9,6 +9,11 @@ interface Props { show: Show; st: State; setFade: (n: number) => void }
 export function CuePanel({ show, st, setFade }: Props) {
   const [editing, setEditing] = useState(false)
   const [add, setAdd] = useState('')
+  const [listName, setListName] = useState('')
+  const cur = show.cuelist_name || '기본 순서'
+  const others = show.other_cuelists ?? []
+  // 고르는 칸은 이름순(목록을 바꿀 때마다 자리가 섞이지 않게). -1 = 지금 쓰는 목록
+  const lists = [{ i: -1, name: cur }, ...others.map((o, i) => ({ i, name: o.name }))].sort((a, b) => a.name.localeCompare(b.name, 'ko'))
   const list = show.cuelist
   const name = (id: string) => show.scenes.find((s) => s.id === id)?.name ?? id
   const load = (i: number) => { send({ t: 'cue', index: i }); setFade(list[i].fade) }
@@ -32,6 +37,27 @@ export function CuePanel({ show, st, setFade }: Props) {
         순서 목록
         {st.editMode && <button className="close" onClick={() => setEditing(!editing)}>{edit ? '편집 닫기' : '순서 편집'}</button>}
       </h3>
+      {(others.length > 0 || edit) && (
+        <div className="apply">
+          <select value={-1} title="예배 종류별 순서 목록 고르기(처음부터 시작, 실제 조명은 그대로)"
+            onChange={(e) => Number(e.target.value) >= 0 && send({ t: 'useCuelist', index: Number(e.target.value) })}>
+            {lists.map((l) => <option key={l.i} value={l.i}>{l.name}</option>)}
+          </select>
+          {!edit && <span className="hint">목록 {others.length + 1}개</span>}
+        </div>
+      )}
+      {edit && (
+        <>
+        <div className="apply">
+          <input placeholder="목록 이름 (예: 수요예배)" style={{ flex: 1, width: 'auto' }} value={listName} onChange={(e) => setListName(e.target.value)} />
+        </div>
+        <div className="apply">
+          <button disabled={!listName.trim()} onClick={() => { send({ t: 'editCuelists', op: 'new', name: listName }); setListName('') }}>새 목록</button>
+          <button disabled={!listName.trim()} title={`'${cur}' 이름을 바꿉니다`} onClick={() => { send({ t: 'editCuelists', op: 'rename', name: listName }); setListName('') }}>이름 바꾸기</button>
+          <button onClick={() => confirm(`'${cur}' 순서 목록을 지울까요? (백업 폴더에는 남습니다)`) && send({ t: 'editCuelists', op: 'delete' })}>목록 지우기</button>
+        </div>
+        </>
+      )}
       {list.length === 0 ? (
         <p className="hint">순서 목록이 비어 있습니다. [편집 모드]에서 씬을 차례대로 추가하세요.</p>
       ) : (

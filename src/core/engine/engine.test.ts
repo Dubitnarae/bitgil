@@ -120,6 +120,30 @@ describe('씬 저장', () => {
     expect(e.saveScene('b', { thumb: 'data:image/jpeg;base64,' + 'A'.repeat(60000) })).toBe('U-02')
     expect(e.show.scenes.at(-1)!.thumb).toBeUndefined()
   })
+  it('순서 목록 여러 개: 새로 만들기·바꾸기·이름·지우기, 지운 씬은 다른 목록에서도 빠짐', () => {
+    const e = new Engine(structuredClone(show))
+    const a = e.show.scenes[0].id, b = e.show.scenes[1].id
+    e.setCuelist([{ scene: a, fade: 1 }, { scene: b, fade: 2 }])
+    e.loadCue(1)
+    e.autoAt = 5
+    e.newCuelist('  수요예배 ')
+    expect([e.cuelistName(), e.show.cuelist, e.cue, e.autoAt]).toEqual(['수요예배', [], -1, null])
+    expect(e.show.other_cuelists).toEqual([{ name: '기본 순서', cuelist: [{ scene: a, fade: 1 }, { scene: b, fade: 2 }] }])
+    e.setCuelist([{ scene: b, fade: 3 }])
+    e.useCuelist(0)
+    expect([e.cuelistName(), e.show.cuelist.length]).toEqual(['기본 순서', 2])
+    expect(e.show.other_cuelists).toEqual([{ name: '수요예배', cuelist: [{ scene: b, fade: 3 }] }])
+    expect(() => e.useCuelist(1)).toThrow()
+    e.renameCuelist('주일 1부')
+    e.renameCuelist('   ') // 빈 이름은 무시
+    expect(e.cuelistName()).toBe('주일 1부')
+    e.deleteScene(b)
+    expect(e.show.other_cuelists![0].cuelist).toEqual([])
+    e.deleteCuelist()
+    expect([e.cuelistName(), e.show.other_cuelists]).toEqual(['수요예배', undefined])
+    e.deleteCuelist() // 마지막 목록을 지우면 빈 기본 순서
+    expect([e.cuelistName(), e.show.cuelist, e.show.cuelist_name]).toEqual(['기본 순서', [], undefined])
+  })
   it('덮어쓰기·이름 바꾸기·삭제', () => {
     const e = new Engine(structuredClone(show))
     e.setPreview(['1-1'], 'red', 9)

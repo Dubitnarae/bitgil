@@ -13,6 +13,7 @@ export interface PhoneState {
   next: string // 다음 줄 씬 이름, 없으면 ''
   prev: string // 이전 줄 씬 이름, 없으면 ''
   list: { name: string; fade: number }[] // 순서 목록(보기만)
+  listName?: string // 지금 쓰는 순서 목록 이름
   blackout: boolean
   master: number
   fading: boolean

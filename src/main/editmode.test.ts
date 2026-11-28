@@ -58,6 +58,8 @@ describe('편집 모드 PIN', () => {
     expect(allowedInOperation({ t: 'pinEnabled', on: true }, show)).toBe(false)
     expect(allowedInOperation({ t: 'updateChoice', choice: 'skip' }, show)).toBe(true)
     expect(allowedInOperation({ t: 'setCuelist', list: [] }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'editCuelists', op: 'delete' }, show)).toBe(false)
+    expect(allowedInOperation({ t: 'useCuelist', index: 0 }, show)).toBe(true) // 예배 종류 고르기는 운영 중에도
     expect(allowedInOperation({ t: 'setEffects', id: 'T-01', effects: [] }, show)).toBe(false)
     expect(allowedInOperation({ t: 'effectDraft', id: null }, show)).toBe(false)
     expect(allowedInOperation({ t: 'editVenue', venue: {} as never }, show)).toBe(false)

@@ -135,6 +135,7 @@ function phoneState(): PhoneState {
     total: engine.show.cuelist.length,
     next: sceneName(engine.show.cuelist[engine.cue + 1]?.scene),
     prev: sceneName(engine.show.cuelist[engine.cue - 1]?.scene),
+    listName: engine.cuelistName(),
     list: engine.show.cuelist.map((c) => ({ name: sceneName(c.scene), fade: c.fade })),
     blackout: engine.blackout,
     master: engine.master,

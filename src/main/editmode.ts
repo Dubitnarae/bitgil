@@ -45,6 +45,7 @@ export function allowedInOperation(c: Command, show: Show): boolean {
     case 'renameScene':
     case 'deleteScene': return isTemp(c.id)
     case 'setCuelist':
+    case 'editCuelists':
     case 'setEffects':
     case 'effectDraft':
     case 'defaultScene':

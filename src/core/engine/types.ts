@@ -88,7 +88,11 @@ export interface Show {
   fixtures: Fixture[]
   groups: { id: string; label: string; members: string[] }[]
   scenes: Scene[]
-  cuelist: CueStep[]
+  cuelist: CueStep[] // 지금 쓰는 순서 목록
+  /** 지금 쓰는 순서 목록 이름(없으면 '기본 순서') */
+  cuelist_name?: string
+  /** 안 쓰고 있는 다른 순서 목록들(예배 종류별). 고르면 cuelist 와 자리를 바꾼다 — 예전 빛길도 그대로 읽게 */
+  other_cuelists?: { name: string; cuelist: CueStep[] }[]
   default_scene?: string
   /** 내 색(색 팔레트에 저장). 기본 색과 같은 이름이면 그 값을 바꾼다 */
   colors?: NamedColor[]

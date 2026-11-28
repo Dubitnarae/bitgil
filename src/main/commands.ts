@@ -24,6 +24,8 @@ export type Command =
   | { t: 'effectDraft'; id: string | null; effects?: Effect[] } // 효과 편집 중 미리보기(null = 끝, 편집 모드)
   | { t: 'cue'; index: number }
   | { t: 'setCuelist'; list: CueStep[] }
+  | { t: 'useCuelist'; index: number } // 다른 순서 목록 쓰기(other_cuelists 번호, 운영 모드에서도 가능)
+  | { t: 'editCuelists'; op: 'new' | 'rename' | 'delete'; name?: string } // 순서 목록 만들기·이름·지우기(편집 모드)
   | { t: 'setColors'; list: NamedColor[] } // 색 팔레트의 내 색(운영 모드에서도 가능)
   | { t: 'nextCue' }
   | { t: 'prevCue' }
@@ -63,6 +65,12 @@ export function runCommand(e: Engine, c: Command, now: number): 'showChanged' | 
       e.show.default_scene = c.id
       return 'showChanged'
     case 'setCuelist': e.setCuelist(c.list); return 'showChanged'
+    case 'useCuelist': e.useCuelist(c.index); return 'showChanged'
+    case 'editCuelists':
+      if (c.op === 'new') e.newCuelist(c.name ?? '')
+      else if (c.op === 'rename') e.renameCuelist(c.name ?? '')
+      else if (c.op === 'delete') e.deleteCuelist()
+      return 'showChanged'
     case 'setColors': {
       const list = cleanColors(c.list)
       if (list.length) e.show.colors = list

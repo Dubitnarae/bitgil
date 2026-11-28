@@ -20,7 +20,7 @@ export function readyChecks(st: State, show: Show): Check[] {
     {
       name: '쇼 파일',
       ...(st.saveError ? { level: 'bad' as Level, text: st.saveError }
-        : { level: 'ok' as Level, text: `저장 문제 없음 · 씬 ${show.scenes.length}개 · 순서 ${show.cuelist.length}줄` })
+        : { level: 'ok' as Level, text: `저장 문제 없음 · 씬 ${show.scenes.length}개 · 순서 '${show.cuelist_name || '기본 순서'}' ${show.cuelist.length}줄` })
     },
     {
       name: '기본 조명',

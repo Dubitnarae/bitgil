@@ -53,7 +53,7 @@ input[type=range]{padding:0;height:44px}
   <button id="bo">블랙아웃</button>
   <div id="sent"></div>
   <div class="box">전체 밝기 <b id="mVal"></b><input id="mRange" type="range" min="0" max="100" step="5"></div>
-  <div class="box">순서 목록 <span class="hint">(보기만, 진행은 위 버튼)</span><ol id="cues"></ol></div>
+  <div class="box">순서 목록 <b id="lname"></b> <span class="hint">(보기만, 진행은 위 버튼)</span><ol id="cues"></ol></div>
   <button id="toSetup">⚙ 설정 모드 (조명 확인·주소·위치)</button>
 </div>
 
@@ -135,6 +135,7 @@ function draw(){
   $('mVal').textContent=Math.round(st.master*100)+'%';
   if(document.activeElement!==$('mRange')&&!mT)$('mRange').value=Math.round(st.master*100); // 끄는 중에는 덮어쓰지 않게
   var cs=st.list.map(function(c,i){return '<li'+(i===st.cue?' class="now"':'')+'>'+esc(c.name)+' <span class="hint">'+c.fade+'초</span></li>'}).join('');
+  $('lname').textContent=st.listName||'';
   $('cues').innerHTML=cs||'<span class="hint">비어 있음 (노트북 편집 모드에서 추가)</span>';
   $('bo').className=st.blackout?'on':'';
   $('bo').textContent=st.blackout?'블랙아웃 끄기':'블랙아웃';
