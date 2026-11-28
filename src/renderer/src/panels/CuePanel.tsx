@@ -65,7 +65,7 @@ export function CuePanel({ show, st, setFade }: Props) {
           <p className="hint">[다음]은 다음 순서를 미리보기에 올립니다. [적용]을 눌러야 실제 조명이 바뀝니다.</p>
           <div className="apply">
             <button disabled={st.cue <= 0} onClick={() => load(st.cue - 1)}>◀ 이전</button>
-            <button className="go" disabled={next >= list.length} onClick={() => load(next)}>
+            <button data-guide="next" className="go" disabled={next >= list.length} onClick={() => load(next)}>
               다음 ▶ {next < list.length ? `${next + 1}. ${name(list[next].scene)}` : '(끝)'}
             </button>
           </div>

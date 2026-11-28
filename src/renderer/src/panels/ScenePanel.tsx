@@ -14,7 +14,7 @@ export function ScenePanel({ show, st, fade, setFade, selected, thumb }: Props) 
     <section className="panel">
       <h3>씬 <button className="close" onClick={() => setManage(!manage)}>{manage ? '관리 닫기' : '씬 관리'}</button></h3>
       <p className="hint">누르면 미리보기에서 그 씬 페이더가 100%, 나머지는 0이 됩니다. [적용]을 눌러야 실제 조명이 바뀝니다.</p>
-      <div className="chips">
+      <div className="chips" data-guide="scenes">
         {show.scenes.map((s) => (
           // 실제로 나가는 씬 = 빨간 점(onair), 미리보기에 올린 씬 = 파란 바탕(cued)
           <button key={s.id} className={[s.temp && 'temp', st.faders[s.id] > 0 && 'onair', st.previewFaders[s.id] > 0 && 'cued'].filter(Boolean).join(' ')}
@@ -26,7 +26,7 @@ export function ScenePanel({ show, st, fade, setFade, selected, thumb }: Props) 
         ))}
       </div>
       <div className="apply">
-        <button className={'go' + (st.pending ? ' pending' : '')} onClick={() => send({ t: 'apply', fade })}>적용</button>
+        <button data-guide="apply" className={'go' + (st.pending ? ' pending' : '')} onClick={() => send({ t: 'apply', fade })}>적용</button>
         <label>
           페이드 <input type="number" min={0} max={60} step={0.5} value={fade} onChange={(e) => setFade(Number(e.target.value))} /> 초
         </label>

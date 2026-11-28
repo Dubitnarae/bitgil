@@ -189,3 +189,10 @@ footer > button { position: absolute; right: 10px; top: 6px; }
 
 .label.mark { color: #ffd23f; font-size: 12px; font-weight: bold; }
 .venue .apply label.on { color: #ffd23f; }
+/* 따라하기: 3D 화면 왼쪽 위에 떠 있고, 지금 누를 버튼은 노랗게 깜빡임 */
+.guide { position: fixed; left: 16px; top: 64px; width: 330px; z-index: 19999999; background: #1d2129; border: 1px solid #ffd23f; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.6); }
+.guide ol { margin: 0; padding-left: 4px; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.guide li { color: #7d8596; } .guide li.now { color: #f0f2f5; } .guide li.done { color: #6ee07a; }
+.guide li p { margin: 4px 0 0; line-height: 1.5; } .guide .ok { color: #6ee07a; line-height: 1.5; }
+.guide-hl { outline: 3px solid #ffd23f !important; outline-offset: 2px; animation: guidehl 1s ease-in-out infinite; }
+@keyframes guidehl { 50% { outline-color: transparent; } }

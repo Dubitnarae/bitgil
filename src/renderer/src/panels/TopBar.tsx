@@ -1,18 +1,18 @@
 import type { State } from '../api'
 import { send } from '../api'
 
-interface Props { st: State; view: 'live' | 'preview'; setView: (v: 'live' | 'preview') => void; onSettings: () => void; onPin: (m: 'unlock' | 'set') => void; onReady: () => void }
+interface Props { st: State; view: 'live' | 'preview'; setView: (v: 'live' | 'preview') => void; onSettings: () => void; onPin: (m: 'unlock' | 'set') => void; onReady: () => void; onGuide: () => void }
 
 /** 상단: 블랙아웃·기본 조명·전체 밝기는 바로 LIVE에 반영(안전 규칙의 예외) */
-export function TopBar({ st, view, setView, onSettings, onPin, onReady }: Props) {
+export function TopBar({ st, view, setView, onSettings, onPin, onReady, onGuide }: Props) {
   return (
     <header className="topbar">
       <strong className="logo">빛길 <small className="dev">v{st.version} · 개발자 KIM YEONGDO</small>
         {st.update.text && <small className="update">{st.update.text}</small>}</strong>
-      <button className={'blackout' + (st.blackout ? ' on' : '')} title="키보드 B" onClick={() => send({ t: 'blackout', on: !st.blackout })}>
+      <button data-guide="blackout" className={'blackout' + (st.blackout ? ' on' : '')} title="키보드 B" onClick={() => send({ t: 'blackout', on: !st.blackout })}>
         {st.blackout ? '블랙아웃 해제' : '블랙아웃'} <small>B</small>
       </button>
-      <button title="키보드 H" onClick={() => send({ t: 'default' })}>기본 조명 <small>H</small></button>
+      <button data-guide="default" title="키보드 H" onClick={() => send({ t: 'default' })}>기본 조명 <small>H</small></button>
       <label className="master">
         전체 밝기
         <input type="range" min={0} max={100} value={Math.round(st.master * 100)}
@@ -22,6 +22,7 @@ export function TopBar({ st, view, setView, onSettings, onPin, onReady }: Props)
       {/* 출력 상태는 앞쪽에: 창이 좁아 줄이 넘어가도 덜 중요한 오른쪽 것들이 아래로 간다 */}
       <OutputStatus o={st.output} />
       <button onClick={onReady} title="출력·쇼 파일·기본 조명·PIN·폰 원격을 한 번에 확인">예배 준비 점검</button>
+      <button onClick={onGuide} title="처음 쓰는 사람용: 출력 켜기 → 기본 조명 → 순서 진행을 차례로 짚어 줌">따라하기</button>
       <div className="spacer" />
       <QualityPicker q={st.quality} />
       <div className="seg">
@@ -66,7 +67,7 @@ function OutputStatus({ o }: { o: State['output'] }) {
     : `DMX 장비 연결이 끊겼습니다. 2초마다 다시 연결 중…${o.error ? ' — ' + o.error : ''}`
   return (
     <span className="outgroup">
-      <button className={o.enabled ? 'on' : ''} onClick={() => send({ t: 'output', on: !o.enabled })}>
+      <button data-guide="output" className={o.enabled ? 'on' : ''} onClick={() => send({ t: 'output', on: !o.enabled })}>
         {o.enabled ? '출력 끄기(대기)' : '출력 켜기'}
       </button>
       <span className={cls} title={tip}>{text}</span>
