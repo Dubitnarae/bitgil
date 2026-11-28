@@ -34,9 +34,10 @@ describe('폰 원격', () => {
       expect((await fetch(base + '/cmd?code=123456&c=blackout&on=1', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/cmd?code=123456&c=prev', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/cmd?code=123456&c=master&v=150', { method: 'POST' })).status).toBe(204) // 100% 넘으면 100%
+      expect((await fetch(base + '/cmd?code=123456&c=autoStop', { method: 'POST' })).status).toBe(204)
       expect((await fetch(base + '/cmd?code=123456&c=master&v=', { method: 'POST' })).status).toBe(400)
       expect((await fetch(base + '/cmd?code=123456&c=이상한', { method: 'POST' })).status).toBe(400)
-      expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }, { c: 'prev' }, { c: 'master', value: 1 }])
+      expect(got).toEqual([{ c: 'next' }, { c: 'blackout', on: true }, { c: 'prev' }, { c: 'master', value: 1 }, { c: 'autoStop' }])
       // 폰 설정 모드: PIN, 명령 JSON(오류 문구는 그대로 돌려줌)
       // 노트북이 편집 모드여도 이 폰에서 PIN을 넣기 전에는 설정 명령 거절
       const early = await fetch(base + '/setup?code=123456', { method: 'POST', body: '{"t":"find","id":"1-1"}' })

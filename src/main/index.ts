@@ -135,6 +135,7 @@ function phoneState(): PhoneState {
     master: engine.master,
     fading: engine.fading,
     output: enttec.enabled && enttec.connected,
+    auto: engine.autoAt === null ? undefined : Math.max(0, Math.ceil((engine.autoAt - Date.now()) / 1000)),
     lost: enttec.enabled && !enttec.connected ? enttec.error || '장비에 연결 중' : undefined,
     edit: edit.isOpen(Date.now()),
     pinOff: !settings.pinEnabled,
@@ -175,9 +176,10 @@ function phoneSetup(c: unknown): string {
 let phoneNote = { text: '', at: 0 }
 function phoneCmd(c: PhoneCmd) {
   const cueName = (d: number) => sceneName(engine.show.cuelist[engine.cue + d]?.scene) || '없음'
-  phoneNote = { text: c.c === 'blackout' ? (c.on ? '블랙아웃' : '블랙아웃 해제') : c.c === 'default' ? '기본 조명' : c.c === 'master' ? `전체 밝기 ${Math.round(c.value * 100)}%` : c.c === 'prev' ? `이전 씬 — ${cueName(-1)}` : `다음 씬 — ${cueName(1)}`, at: Date.now() }
+  phoneNote = { text: c.c === 'blackout' ? (c.on ? '블랙아웃' : '블랙아웃 해제') : c.c === 'default' ? '기본 조명' : c.c === 'master' ? `전체 밝기 ${Math.round(c.value * 100)}%` : c.c === 'prev' ? `이전 씬 — ${cueName(-1)}` : c.c === 'autoStop' ? '자동 진행 멈춤' : `다음 씬 — ${cueName(1)}`, at: Date.now() }
   try {
     if (c.c === 'blackout') engine.blackout = c.on
+    else if (c.c === 'autoStop') runCommand(engine, { t: 'autoCue', on: false }, Date.now())
     else if (c.c === 'master') runCommand(engine, { t: 'master', value: c.value }, Date.now())
     else runCommand(engine, { t: c.c === 'next' ? 'nextCue' : c.c === 'prev' ? 'prevCue' : 'default' }, Date.now())
   } catch (err) { console.error(err) }

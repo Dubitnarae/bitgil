@@ -16,7 +16,7 @@ h1{font-size:18px;margin:0 0 12px}
 .hint{color:#9aa3b5;font-size:14px}
 button{display:block;width:100%;font-size:22px;padding:22px;margin-bottom:14px;border:0;border-radius:12px;color:#fff;background:#2d6cdf}
 button:disabled{opacity:.35}
-#pv{background:#2f3542;font-size:18px;padding:16px}#def{background:#3a7d44}#bo{background:#8a1c1c}#bo.on{background:#ff3b3b}
+#pv{background:#2f3542;font-size:18px;padding:16px}#def{background:#3a7d44}#au{background:#b26a00;font-size:18px;padding:16px}#bo{background:#8a1c1c}#bo.on{background:#ff3b3b}
 input,select{font-size:22px;width:100%;box-sizing:border-box;padding:10px;margin:8px 0;text-align:center;background:#262a33;color:#eee;border:1px solid #3a404c;border-radius:8px}
 #login,#main,#setup{display:none}
 #sent{text-align:center;color:#6ee07a;font-weight:bold;min-height:1.4em}
@@ -45,6 +45,7 @@ input[type=range]{padding:0;height:44px}
     <div>전체 밝기 <span id="master"></span> · <span id="out"></span></div>
     <div id="state"></div>
   </div>
+  <button id="au" style="display:none"></button>
   <button id="nx">다음 씬 ▶</button>
   <button id="pv">◀ 이전 씬</button>
   <button id="def">기본 조명</button>
@@ -123,6 +124,8 @@ function draw(){
   if(st.lost&&!wasLost&&navigator.vibrate)navigator.vibrate([300,150,300]); // 주머니 속 폰도 알게
   wasLost=!!st.lost;
   $('state').innerHTML=st.blackout?'<span class="warn">블랙아웃 켜짐</span>':st.fading?'페이드 중…':'';
+  vis('au',st.auto!=null);
+  $('au').textContent='■ 자동 멈춤 · 다음 씬까지 '+st.auto+'초';
   $('nx').disabled=!st.next;
   $('pv').disabled=!st.prev;
   $('pv').textContent='◀ 이전 씬'+(st.prev?' ('+st.prev+')':'');
@@ -150,6 +153,7 @@ $('pv').onclick=function(){ if(st&&st.prev&&confirm('"'+st.prev+'"(으)로 돌�
 // 전체 밝기: 끄는 동안 0.15초마다 한 번만 보낸다(Wi-Fi 요청 폭주 막기)
 $('mRange').oninput=function(){var v=this.value;$('mVal').textContent=v+'%';if(mT)return;mT=setTimeout(function(){mT=0;cmd('c=master&v='+$('mRange').value)},150)};
 $('def').onclick=function(){cmd('c=default')};
+$('au').onclick=function(){cmd('c=autoStop')};
 $('bo').onclick=function(){cmd('c=blackout&on='+(st&&st.blackout?0:1))};
 
 // ── 설정 모드 ──

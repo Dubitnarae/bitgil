@@ -17,6 +17,7 @@ export interface PhoneState {
   master: number
   fading: boolean
   output: boolean // 실제 장비로 나가는 중
+  auto?: number // 자동 진행 중이면 다음 줄까지 남은 초(노트북 시계로 계산), 아니면 없음
   lost?: string // 출력을 켜 뒀는데 장비와 끊김(이유), 아니면 없음
   edit: boolean // 편집 모드 열림(폰 설정 모드를 쓸 수 있음)
   pinOff?: boolean // 'PIN 사용'이 꺼짐 → 폰도 PIN 없이 설정 모드를 연다
@@ -31,7 +32,7 @@ export interface PhoneSetup {
 }
 
 /** 폰에서 오는 명령 */
-export type PhoneCmd = { c: 'next' } | { c: 'prev' } | { c: 'default' } | { c: 'blackout'; on: boolean } | { c: 'master'; value: number }
+export type PhoneCmd = { c: 'next' } | { c: 'prev' } | { c: 'default' } | { c: 'blackout'; on: boolean } | { c: 'master'; value: number } | { c: 'autoStop' }
 
 export const REMOTE_PORT = 8130
 
@@ -131,7 +132,7 @@ export function startRemote(opts: {
     if (req.method === 'POST' && url.pathname === '/cmd') {
       const c = url.searchParams.get('c')
       const v = Number(url.searchParams.get('v'))
-      if (c === 'next' || c === 'prev' || c === 'default') opts.run({ c })
+      if (c === 'next' || c === 'prev' || c === 'default' || c === 'autoStop') opts.run({ c })
       else if (c === 'blackout') opts.run({ c, on: url.searchParams.get('on') === '1' })
       else if (c === 'master' && url.searchParams.get('v') !== '' && Number.isFinite(v)) opts.run({ c, value: Math.max(0, Math.min(1, v / 100)) })
       else { res.writeHead(400); return res.end() }
