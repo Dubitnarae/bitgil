@@ -135,6 +135,7 @@ function phoneState(): PhoneState {
     master: engine.master,
     fading: engine.fading,
     output: enttec.enabled && enttec.connected,
+    lost: enttec.enabled && !enttec.connected ? enttec.error || '장비에 연결 중' : undefined,
     edit: edit.isOpen(Date.now()),
     pinOff: !settings.pinEnabled,
     setup: edit.isOpen(Date.now()) ? {

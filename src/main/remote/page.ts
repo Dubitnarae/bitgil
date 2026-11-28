@@ -12,6 +12,7 @@ h1{font-size:18px;margin:0 0 12px}
 .box{background:#1c1f27;border-radius:10px;padding:14px;margin-bottom:14px;line-height:1.7}
 .big{font-size:22px;font-weight:bold}
 .warn{color:#ff6b6b;font-weight:bold}
+.alarm{display:none;background:#c62828;color:#fff;font-weight:bold;font-size:18px;border-radius:10px;padding:14px;margin-bottom:14px;line-height:1.5}
 .hint{color:#9aa3b5;font-size:14px}
 button{display:block;width:100%;font-size:22px;padding:22px;margin-bottom:14px;border:0;border-radius:12px;color:#fff;background:#2d6cdf}
 button:disabled{opacity:.35}
@@ -31,6 +32,7 @@ input[type=range]{padding:0;height:44px}
 #cues{margin:6px 0 0;padding-left:28px}#cues li{padding:4px 0;color:#9aa3b5}#cues li.now{color:#ffd54a;font-weight:bold}
 </style></head><body>
 <h1>빛길 원격</h1>
+<div id="lost" class="alarm"></div>
 <div id="login">
   <div class="box">노트북 빛길 → 편집 모드 → 설정에 있는 <b>원격 접속 코드</b>를 넣으세요.
   <input id="code" inputmode="numeric" maxlength="6"><button id="go">연결</button>
@@ -97,12 +99,12 @@ input[type=range]{padding:0;height:44px}
 <p style="text-align:center"><a href="/app/" style="color:#8fb4ff">노트북처럼 전체 화면(3D 포함)으로 열기 →</a></p>
 <p style="color:#7d8596;font-size:12px;text-align:center">빛길 · 개발자 KIM YEONGDO</p>
 <script>
-var $=function(id){return document.getElementById(id)}, st=null, es=null, view='main', tab='ok', form=null, listSig='';
+var $=function(id){return document.getElementById(id)}, st=null, wasLost=false, es=null, view='main', tab='ok', form=null, listSig='';
 var q=new URLSearchParams(location.search).get('code');
 if(q){localStorage.setItem('bitgil-code',q);history.replaceState(null,'','/')} // QR로 들어오면 코드를 기억하고 주소창에서 지움
 var code=localStorage.getItem('bitgil-code')||'';
 var vis=function(id,on){$(id).style.display=on?'block':'none'};
-function show(login,msg){vis('login',login);vis('main',!login&&view==='main');vis('setup',!login&&view==='setup');$('msg').textContent=msg||''}
+function show(login,msg){vis('login',login);if(login)vis('lost',false);vis('main',!login&&view==='main');vis('setup',!login&&view==='setup');$('msg').textContent=msg||''}
 function connect(){
   if(es)es.close();
   es=new EventSource('/events?code='+encodeURIComponent(code));
@@ -115,7 +117,11 @@ function draw(){
   $('pos').textContent=st.total? (st.cue+1)+' / '+st.total : '순서 목록 없음';
   $('next').textContent=st.next||'없음';
   $('master').textContent=Math.round(st.master*100)+'%';
-  $('out').innerHTML=st.output?'장비로 출력 중':'<span class="warn">출력 대기(장비로 안 나감)</span>';
+  $('out').innerHTML=st.output?'장비로 출력 중':st.lost?'<span class="warn">출력 끊김</span>':'<span class="warn">출력 대기(장비로 안 나감)</span>';
+  $('lost').innerHTML=st.lost?'⚠ 조명 출력이 끊겼습니다 — 실제 조명이 안 바뀝니다.<br><span style="font-weight:normal;font-size:15px">'+esc(st.lost)+' · 노트북 USB 선을 확인하세요(다시 꽂으면 2초 안에 저절로 이어짐).</span>':'';
+  vis('lost',!!st.lost);
+  if(st.lost&&!wasLost&&navigator.vibrate)navigator.vibrate([300,150,300]); // 주머니 속 폰도 알게
+  wasLost=!!st.lost;
   $('state').innerHTML=st.blackout?'<span class="warn">블랙아웃 켜짐</span>':st.fading?'페이드 중…':'';
   $('nx').disabled=!st.next;
   $('pv').disabled=!st.prev;
